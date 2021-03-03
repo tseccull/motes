@@ -13,17 +13,17 @@ called within another python script, or within a python session.
 - Scale bars on the figures now allow users to adjust the cut in the plotted 
 images.
 ##### The Dark Ages
-- The vast majority of this package was written by Tom Seccull during his PhD at 
+- The majority of this package was written by Tom Seccull during his PhD at 
 Queen's University Belfast from 2015-2019, under the tutelage of Wes Fraser (at 
-HIA Victoria, BC, at time of writing) and Alan Fitzsimmons (QUB). The process 
-was messy, haphazard, and initially documented only within the fuzzy mind of the 
-lead developer (needless to say better practices have been adopted since then). 
-For much of its development MOTES was known as GME (the Grand Moff Extractor); 
-the current name has been selected to better represent the function of the 
-package and increase its accessibility to new users. Since March 2020 the 
-primary source of documentation for this software has been Chapter 3 of 
-Seccull's PhD Thesis titled ["Revealing Refractory Materials on Trans-Neptunian 
-Objects and Centaurs via Reflectance Spectroscopy"](https://pure.qub.ac.uk/en/studentTheses/revealing-refractory-materials-on-trans-neptunian-objects-and-cen). The thesis text will be 
+HIA Victoria, BC, at time of writing). The process was messy, haphazard, and 
+initially documented only within the fuzzy mind of the lead developer (needless 
+to say better practices have been adopted since then). For much of 
+its development MOTES was known as GME (the Grand Moff Extractor); the current 
+name has been selected to better represent the function of the package and 
+increase its accessibility to new users. Since March 2020 the primary source of 
+documentation for this software has been Chapter 3 of Seccull's PhD Thesis 
+titled ["Revealing Refractory Materials on Trans-Neptunian Objects and Centaurs 
+via Reflectance Spectroscopy"](https://pure.qub.ac.uk/en/studentTheses/revealing-refractory-materials-on-trans-neptunian-objects-and-cen). The thesis text will be 
 released from embargo in the summer of 2022, but better documentation for MOTES 
 is expected to be provided before then. All changes listed here relay 
 developments to MOTES following 2021-03-01.
@@ -67,3 +67,5 @@ Python scripts themselves and within comments.
 - Version number has been dropped from v0.9.0 to v0.1.0, to better reflect 
 reality (I'm also dumb and should have read up on semantic versioning before 
 sticking a number on this, ha!).
+- Output files from MOTES are prepended with 'm' rather than having '_GME_'
+included in the middle of the filename.
