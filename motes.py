@@ -70,7 +70,6 @@ def cr_handling(pars, axdict, lext, hext, fdict, hpars):
     
     if pars['-REPLACE_CRBP']:
         sys.stdout.write(' >>> Cosmic rays and bad pixels replaced.\n')
-        pars['-REPLACE_CRBP'] = 0
 
         # DIAGNOSTICS - Show 2D spectrum with bad pixels and CRs replaced.
         if pars['-DIAG_PLOT_CRREPLACE']:

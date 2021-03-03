@@ -15,7 +15,7 @@ def read_parfile():
     sys.stdout.flush()
 
     # Read in MOTES parameter file line by line and filter out the empty lines.
-    with open(sys.path[0] + '/motesparams.txt') as parfile:
+    with open('motesparams.txt') as parfile:
         parlines = parfile.read().splitlines()
         parlines = filter(None, parlines)
 

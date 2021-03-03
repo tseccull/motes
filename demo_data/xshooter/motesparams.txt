@@ -1,0 +1,97 @@
+## This file contains all configurable parameters for MOTES.
+## 1 = True, 0 = False
+
+
+## GENERAL PARAMETERS  #########################################################
+
+# Save the extracted spectra?
+-SAVE=1
+
+# Plot extracted 1D spectrum?
+-PLOT_EXTRACTED_SPECTRUM=1
+
+# EXTRACTION #------------------------------------------------------------------
+
+# SNR Limit at which the code stops adding pixel columns to the current bin. SNR is
+# calculated as the summed flux divided by the root sum square of the error values
+# associated with that flux.
+-SNR_BIN_LIM=500
+
+# This parameter defines the minimum number of good pixels allowed in each spatial row of a
+# dispersion bin when defining the localisation bins on the dispersion axis with the
+# getbins function. If this threshold is not met getbins will continuing adding dispersion pixel columns
+# to the bin until it is.
+-COL_BIN_LIM=7
+
+# The multiple of the bin's moffat FWHM along the spatial axis. This is used to
+# define the distance from the centre of the moffat profile at which the extraction
+# limits should be set. A value in the range 2-2.5 gives best results.
+# Upper_extraction_limit = moffat_centre + (FWHM_MULTIPLIER * moffat_fwhm)
+# Lower_extraction_limit = moffat_centre - (FWHM_MULTIPLIER * moffat_fwhm)
+-FWHM_MULTIPLIER=2.
+
+# The interpolation method to be used when interpolating the extraction limits of the
+# source across all the pixel columns in the 2D image based on the positions of the
+# extraction limits for each bin.
+-INTERP_KIND=linear
+
+# Diagnostic plotting of the Moffat profile fit to the spatial profile of the 2D spectrum
+# collapsed along the entire dispersion axis. For the FORS2 spectra this fit is used to
+# to localise the spectrum and define the sky regions prior to sky subtraction.
+-DIAG_PLOT_COLLAPSED_2D_SPEC=0
+
+# Diagnostic plotting of the Moffat profile fits to each bin in the spectrum.
+-DIAG_PLOT_MOFFAT=0
+
+# Diagnostic plotting of the locations of bins determined by the get_bins function
+-DIAG_PLOT_BIN_LOC=1
+
+# Diagnostic plotting of the extraction limits on the 2D spectrum
+-DIAG_PLOT_EXTRACTION_LIMITS=1
+
+# SKY SUBTRACTION #-------------------------------------------------------------
+
+# Perform sky subtraction?
+-SUBTRACT_SKY=1
+
+# SNR Limit at which the script stops adding pixel columns to the current bin when localising the spectrum before sky subtraction. SNR is
+# calculated as the summed flux divided by the root sum square of the error values
+# associated with that flux.
+-SKY_SNR_BIN_LIM=500
+
+# Works the same as ‘-FWHM_MULTIPLER’ except this variable is used to define the
+# boundaries between the region of the 2D image containing the spectrum and the background,
+# so that the background can be subtracted. ‘2. is strongly recommended for
+# faint targets. For bright ones a value of >4 will give best results.
+-BG_FWHM_MULTIPLIER=3.0
+
+# Diagnostic plotting of the sky subtraction of the 2D spectrum
+-DIAG_PLOT_SKYSUB=1
+
+
+# CR MASKING/REMOVAL #---------------------------------------------------------
+
+# Mask cosmic rays?
+-MASK_CR=1
+
+# Diagnostic plotting of the sky subtraction of the 2D spectrum
+-DIAG_PLOT_CRMASK=1
+
+# Multiplier for sigma-clipping CRs
+-CR_CLIP_STD_MULT=10
+
+# Number of sigma-clip iterations for masking CRs
+-CR_CLIP_ITER=30
+
+# Works the same as ‘-FWHM_MULTIPLER’ except this variable is used to define the
+# boundaries between the region of the 2D image containing the spectrum and the background,
+# so that cosmic rays can be flagged. Values in the range 1.5-3 are recommended,
+# with brighter targets requiring larger values.
+-CR_FWHM_MULTIPLIER=3.0
+
+# Replace values of bad pixels or those affected by cosmic rays after clipping?
+-REPLACE_CRBP=1
+
+# Diagnostic plotting of the CR replacement of the 2D spectrum
+-DIAG_PLOT_CRREPLACE=1
+
