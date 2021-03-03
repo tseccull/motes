@@ -71,3 +71,6 @@ reality (I'm also dumb and should have read up on semantic versioning before
 sticking a number on this, ha!).
 - Output files from MOTES are prepended with 'm' rather than having '_GME_'
 included in the middle of the filename.
+- MOTES no longer walks through an ESO-like directory tree to find input files.
+All input FITS files are expected to be present in the current working 
+directory, and ordered in the way as their associated regions in reg.txt.
