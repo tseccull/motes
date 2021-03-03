@@ -1,6 +1,7 @@
 ###############################################################################
 # IMPORT MODULES /////////////////////////////////////////////////////////////#
 ###############################################################################
+import copy
 import matplotlib
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
@@ -47,8 +48,8 @@ def extraction_limits(moffparams, width_multiplier, axesdict, highres=False):
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
 def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
-    short_extrap_grad1 = extrap_grad(extlims[0], [   0, 150, 300])
-    short_extrap_grad2 = extrap_grad(extlims[1], [   0, 150, 300])
+    short_extrap_grad1 = extrap_grad(extlims[0], [   0,  150, 300])
+    short_extrap_grad2 = extrap_grad(extlims[1], [   0,  150, 300])
     long_extrap_grad1  = extrap_grad(extlims[0], [-300, -150,  -1])
     long_extrap_grad2  = extrap_grad(extlims[1], [-300, -150,  -1])
 
@@ -466,6 +467,9 @@ def show_img(data2D, axdict, headparams, drawlines, title):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         warnings.warn("partition", UserWarning)
+        
+        power = int(np.floor(np.log10(np.mean(data2D))))
+        data2D = copy.deepcopy(data2D)/10**power
 
         figwidth = 10.
         fig = plt.figure(figsize=(figwidth, figwidth / 1.9))
@@ -488,8 +492,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             ax.plot(drawlines[i*2], drawlines[(i*2)+1], color='white')
         cbar = fig.colorbar(s, cax=colax)
         cbar.ax.yaxis.set_offset_position('left')
-        cbar.ax.set_ylabel('Pixel Flux, ' + headparams['fluxunit'])
-
+        cbar.ax.set_ylabel('Pixel Flux, x10^' + str(power) + ' ' + headparams['fluxunit'])
         ax2 = ax.twiny()
         ax2.plot(axdict['waxis'], data2D[0, :], alpha=0)
         ax2.set_xlim(axdict['waxis'][0], axdict['waxis'][-1])
@@ -504,25 +507,24 @@ def show_img(data2D, axdict, headparams, drawlines, title):
        
         # Add interactive scaling bar to figures if the 2D spectrum isn't flux calibrated. 
         # Again for some reason teeny tiny numbers cause things to break.
-        if headparams['fluxunit'] == 'electrons':
-            fig.subplots_adjust(bottom=0.2)
-            axvmin = plt.axes([0.1, 0.05, 0.8, 0.03])
-            axvmax = plt.axes([0.1, 0.01, 0.8, 0.03])
-            smin = Slider(axvmin, 'LowCut', 0, np.nanmax(masked_data2D)-1, valinit=0., valstep=0.001*np.nanmax(masked_data2D))
-            smax = Slider(axvmax, 'HighCut', 1., np.nanmax(masked_data2D), valinit=np.nanmedian(masked_data2D) + (0.5 * np.nanstd(masked_data2D)), valstep=0.001*np.nanmax(masked_data2D))
-	        
-            def update(val):
-                vmax = smax.val
-                smin.valmax = vmax-1
-                vmin = smin.val
-                smax.valmin = vmin+1
-                
-                s.set_clim(vmin, vmax)
-                cbar.ax.set_ylabel('Pixel Flux, ' + headparams['fluxunit'])
-                fig.canvas.draw_idle()
-                
-            smin.on_changed(update)
-            smax.on_changed(update)
+        fig.subplots_adjust(bottom=0.2)
+        axvmin = plt.axes([0.1, 0.05, 0.8, 0.03])
+        axvmax = plt.axes([0.1, 0.01, 0.8, 0.03])
+        smin = Slider(axvmin, 'LowCut', 0, np.nanmax(masked_data2D)-1, valinit=0., valstep=0.001*np.nanmax(masked_data2D))
+        smax = Slider(axvmax, 'HighCut', 1., np.nanmax(masked_data2D), valinit=np.nanmedian(masked_data2D) + (0.5 * np.nanstd(masked_data2D)), valstep=0.001*np.nanmax(masked_data2D))
+	    
+        def update(val):
+            vmax = smax.val
+            smin.valmax = vmax-1
+            vmin = smin.val
+            smax.valmin = vmin+1
+            
+            s.set_clim(vmin, vmax)
+            cbar.ax.set_ylabel('Pixel Flux, x10^' + str(power) + ' ' + headparams['fluxunit'])
+            fig.canvas.draw_idle()
+            
+        smin.on_changed(update)
+        smax.on_changed(update)
 
         plt.show()
 
