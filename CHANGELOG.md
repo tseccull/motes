@@ -6,7 +6,7 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 ## 0.1.0 - 2021-03-03
 Updates by T. Seccull
 
-## The Dark Ages
+#### The Dark Ages
 - The majority of this package was written by Tom Seccull during his PhD at 
 Queen's University Belfast from 2015-2019, under the tutelage of Wes Fraser (at 
 HIA Victoria, BC, at time of writing). The process was messy, haphazard, and 
