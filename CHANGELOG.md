@@ -5,14 +5,8 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 
 ## 0.1.0 - 2021-03-03
 Updates by T. Seccull
-### Added
-- This changelog
-- if name == main has been introduced to motes.py so the MOTES functions may be 
-called within another python script, or within a python session.
-- Demo data for FORS2, GMOS, and X-Shooter, all bright targets.
-- Scale bars on the figures now allow users to adjust the cut in the plotted 
-images.
-##### The Dark Ages
+
+## The Dark Ages
 - The majority of this package was written by Tom Seccull during his PhD at 
 Queen's University Belfast from 2015-2019, under the tutelage of Wes Fraser (at 
 HIA Victoria, BC, at time of writing). The process was messy, haphazard, and 
@@ -27,6 +21,14 @@ via Reflectance Spectroscopy"](https://pure.qub.ac.uk/en/studentTheses/revealing
 released from embargo in the summer of 2022, but better documentation for MOTES 
 is expected to be provided before then. All changes listed here relay 
 developments to MOTES following 2021-03-01.
+
+### Added
+- This changelog
+- if name == main has been introduced to motes.py so the MOTES functions may be 
+called within another python script, or within a python session.
+- Demo data for FORS2, GMOS, and X-Shooter, all bright targets.
+- Scale bars on the figures now allow users to adjust the cut in the plotted 
+images.
 
 ### Changed
 - The entire package has been made modular and processes all spectra from 
