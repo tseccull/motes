@@ -212,8 +212,8 @@ def harvest_gmos(imgfilehdu, imgheader):
     # kept, and then slice the 2D image on wavelength axis accordingly.
     wavaxis = common.make_wav_axis(scihead['CRVAL1'], scihead['CD1_1'], scihead['NAXIS1'])
 
-    # Sets all values within the GMOS chip gaps to NaN, so they don't get flagged as bad pixels later on during CR masking.
-    # This will be reversed later following cr_handling()
+    # Sets all values and errs within the GMOS chip gaps to 1, so they don't get flagged as bad pixels later on during CR masking
+    # or trip up the bin definition stage.
     loc = np.where(np.where(np.median(imgdata, axis=0)==0)[0]-np.roll(np.where(np.median(imgdata, axis=0)==0)[0], 1)!=1)
     locs = [0, loc[0][1]-1, loc[0][1], -1]
     

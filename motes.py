@@ -49,13 +49,6 @@ def cr_handling(pars, axdict, lext, hext, fdict, hpars):
     if pars['-DIAG_PLOT_CRMASK']:
         common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Post Masking')
 
-    # If this is a GMOS spectrum restore zeros where NaNs were put in in the chip gaps.
-    # Has no effect on spectra from other instruments.
-    nanlocs = np.where(np.isnan(fdict['data'])==True)
-    fdict['data'][nanlocs] == 0
-    fdict['errs'][nanlocs] == 0
-    fdict['qual'][nanlocs] == 0
-
     # Determine the location of boundaries between dispersion bins in the 2D spectrum that will be fitted with Moffat
     # functions to precisely localise the spectrum to allow sky subtraction.
     # If cosmic rays have been masked, and the user wants them to be replaced with appropriate flux values the
@@ -145,12 +138,6 @@ def motes():
         # No cosmic ray masking requested, just get localisation bins
         else:
             sys.stdout.write(' >>> Cosmic ray masking deactivated and not performed.\n')
-
-            # If this is a GMOS spectrum restore zeros where NaNs were put in in the chip gaps.
-            # Has no effect on spectra from other instruments.
-            wherenans = np.where(np.isnan(framedict['data'])==True)
-            framedict['data'][wherenans] == 0
-            framedict['qual'][wherenans] == 0
 
             framedict['cmask'] = np.ones(np.shape(framedict['data']))
             binparams, framedict = common.get_bins(framedict, int(np.floor(lowext)), int(np.ceil(highext)), axesdict['dispaxislen'], params, sky=True)
