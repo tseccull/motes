@@ -1,6 +1,6 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
-version 0.1.0
-Last Updated: 2021-03-03 - T. Seccull
+version 0.1.1
+Last Updated: 2021-03-04 - T. Seccull
 Developers: Tom Seccull & Dominik Kiersz
 
 MOTES is a python package used for tracing and extracting spectra of faint 
@@ -17,8 +17,7 @@ future. Documentation is still to be written, as well as an accompanying article
 that will likely be submitted to one of the AAS journals.
 
 # Installation
-MOTES is compatible with both Python 2.7 and Python 3.7, but is faster when run 
-with Python 3. Python 3 is recommended.
+Python 3 is recommended for running MOTES. It is compatible with Python 2.7, but is also noticably slower.
 
 The rest of this needs to be worked out...
 
