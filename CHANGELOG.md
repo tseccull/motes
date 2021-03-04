@@ -5,9 +5,11 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 ## 0.1.1 - 2021-03-04
 Updates by T. Seccull
 
+### Changed
+- Updated wording of python compatibility in README.md.
+
 ### Removed
 - Unused lines related to marking the chip gaps in GMOS spectra with NaNs.
-- Updated wording of python compatibility in README.md.
 
 
 ## 0.1.0 - 2021-03-03
