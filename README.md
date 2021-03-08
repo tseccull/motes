@@ -11,7 +11,7 @@ astronomical point sources from 2D spectrograms. MOTES is also capable of sky
 subtraction and cosmic ray masking and subsequent rejection. 
 
 Citation: Please cite .... paper to be written .... if you use MOTES in your 
-research. Need a Zenodo DOI?
+research. Need a Zenodo DOI? Any publications relating to the demo-data?
 
 # Project Status
 Currently in final stages of development toward v1.0 and release. Updates and 
@@ -31,9 +31,7 @@ conda env create --name motes --file=motes.yml
 The above needs testing to ensure out-of-the-box compatibility. The rest of this section needs to be worked out.
 
 # Usage
-PDF Manual currently in construction on Overleaf.
-
-https://www.overleaf.com/project/604614a9482e712b1ea2fbbd
+PDF Manual currently in construction on [Overleaf](https://www.overleaf.com/project/604614a9482e712b1ea2fbbd). 
 
 # Contributions
 Procedures for users to supply new functionality, in particular new harvesters 

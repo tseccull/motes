@@ -20,8 +20,6 @@ import sys
 # ////////////////////////////////////////////////////////////////////////////#
 # HANDLE COSMIC RAYS AND BAD PIXELS
 
-# Git comment test
-
 
 def cr_handling(pars, axdict, lext, hext, fdict, hpars):
     sys.stdout.write(' >>> Separating spectrum and background regions for cosmic ray detection.\n')
