@@ -12,7 +12,7 @@ flagged as bad pixels.
 - Overhauled cosmic ray handling so CRs and badpixels can be replaced by the
 input quality frame alone without the need for motes to use its, frankly 
 piss-poor, CR detection routine. If software like astroscrappy is used to 
-create a cosmic ray mask, it needs to be combined with the spectrograms
+create a cosmic ray mask, it needs to be combined with the spectrogram's
 input quality mask for motes to recognise the detected CRs as bad.
 - In motesparams.txt, the -MASK_CR keyword is now -IDENT_CR and is specifically
 used to refer to the motes CR identification routine independently of the
