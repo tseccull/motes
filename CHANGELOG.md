@@ -28,7 +28,7 @@ if the median value turned out to be negative.
 - Fixed outdated method of calling common.get_bins_output() in the case where 
 CR masking is not done. This has now been updated in line with other calls to 
 this function from motes().
-- Fixed a bug where cosmic ray replacement would completeley fail on spatial
+- Fixed a bug where cosmic ray replacement would completely fail on spatial
 pixel columns with no valid data (e.g. all nans or zeros), and would wrongly 
 propagate bad pixel flags to adjacent columns with good data. common.get_bins()
 now simply ignores columns with all bad data, as they are pretty much 
