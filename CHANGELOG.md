@@ -2,6 +2,39 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.2.0 - 2021-03-19
+Updates by T. Seccull
+
+###Changed
+-Simplified the way the GMOS harvester handles incoming qual frame and converts
+it so good pixels=1 and bad pixels=0, while ensuring the chip gaps aren't
+flagged as bad pixels. This will probably also need to be implemented in the
+X-Shooter and FORS2 harvesters and tested.
+-Overhauled cosmic ray handling so CRs and badpixels can be replaced by the
+input quality frame alone without the need for motes to use its, frankly 
+piss-poor CR detection routine. If software like astroscrappy is used to 
+create a cosmic ray mask, it needs to be combined with the spectrograms
+input quality mask for motes to recognise the detected CRs as bad.
+-In motesparams.txt, the -MASK_CR keyword is now -IDENT_CR and is specifically
+used to refer to the motes CR identification routine independently of the
+ -REPLACE_CR keyword. Setting either -IDENT_CR or -REPLACE_CR to True (1)
+results in an updated cr_handlin() function in motes.py being called.
+
+###Fixed
+- Fixed incorrect header parameter dictionary call in save_fits() when 
+recording the wavelength unit to the header of the output file.
+- When determining datascale in motes(), the base 10 log of the absolute value 
+of the median collapsed profile is now calculated. Previously this would fail 
+if the median value turned out to be negative.
+- Fixed outdated method of calling common.get_bins_output() in the case where 
+CR masking is not done. This has now been updated in line with other calls to 
+this function from motes().
+-Fixed a bug where cosmic ray replacement would completeley fail on spatial
+pixel columns with no valid data (e.g. all nans or zeros), and would wrongly 
+propagate bad pixel flags to adjacent columns with good data. common.get_bins()
+now simply ignores columns with all bad data, as they are pretty much 
+unrecoverable. 
+
 ## 0.1.1 - 2021-03-04
 Updates by T. Seccull
 
@@ -41,8 +74,8 @@ images.
 
 ### Changed
 - The entire package has been made modular and processes all spectra from 
-different instruments in the same way. The process generally follows that define 
-for X-Shooter spectra in GME.
+different instruments in the same way. The process generally follows that 
+defined for X-Shooter spectra in GME.
 - harvester.py has been created (modified from the version that handled FORS2 
 spectra) and is capable of unpacking data and relevant FITS header parameters 
 from any FITS formatted spectrogram. data_harvest() calls a more specialised 
@@ -78,15 +111,13 @@ Python scripts themselves and within comments.
 - Version number has been dropped from v0.9.0 to v0.1.0, to better reflect 
 reality (I'm also dumb and should have read up on semantic versioning before 
 sticking a number on this, ha!).
-<<<<<<< HEAD
 - Output frames like skymod, skybins, skyextractionlims and crmask are only 
 added to the frame dictionary if those sections of code are run. This may
 fix a bug where spectrograms that are already skysubtracted are extracted
 but error out during saving.
-=======
 - Output files from MOTES are prepended with 'm' rather than having '_GME_'
 included in the middle of the filename.
 - MOTES no longer walks through an ESO-like directory tree to find input files.
 All input FITS files are expected to be present in the current working 
 directory, and ordered in the same way as their associated regions in reg.txt.
->>>>>>> 4ed83c67b5d527e3f0ea2a907c01bd5a9a5624b7
+

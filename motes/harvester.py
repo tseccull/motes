@@ -76,7 +76,8 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
     frame_dict = {'data': datasliced, 
                   'errs': errssliced, 
                   'qual': qualsliced,
-                'ogqual': ogimgqual}
+                'ogqual': ogimgqual
+                }
 
     axes_dict = {'spataxislen': len(spataxis),
                        'saxis': spataxis, 
@@ -155,14 +156,18 @@ def harvest_gmos(imgfilehdu, imgheader):
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as CRs later on.
     imgqual[np.where(imgdata+imgqual==1)] = 0
-    imgqual[imgqual==0] = 1
+    imgqual = 1-imgqual
+    
+    imgqual[np.isnan(imgdata)==True] = 0
+    imgdata[np.isnan(imgdata)==True] = 1.
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
     IQ_dict = { '20-percentile': 0, 
                 '70-percentile': 1, 
                 '85-percentile': 2, 
-               '100-percentile': 3
+               '100-percentile': 3,
+                          'Any': 3
                }
     
     WavTab = np.array([[0000.,4000.,0],

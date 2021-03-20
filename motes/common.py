@@ -144,8 +144,8 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
             errmeddatacol = []
             for j in range(np.shape(fdict['data'])[0]):
                 bootsamp = np.random.choice(fdict['data'][j, int(x - width):int(x)], size=(int(width), 100), replace=True)
-                meddatacol.append(np.median(bootsamp))
-                meanstddist = np.std(bootsamp, axis=0)
+                meddatacol.append(np.nanmedian(bootsamp))
+                meanstddist = np.nanstd(bootsamp, axis=0)
                 meanstd = np.mean(meanstddist)
                 errmeddatacol.append(meanstd / np.sqrt(width - 1))
 		    
@@ -161,10 +161,12 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
                     # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
                     # same for the pixel column being fixed.
                     datanocr = fdict['data'][:, int(x-i)][nocr]
+                    if len(datanocr) == 0:
+                        continue
                     medcolnocr = meddatacol[nocr]
-                    scale = np.sum(datanocr[slow:shigh])/np.sum(medcolnocr[slow:shigh])
+                    scale = np.nansum(datanocr[slow:shigh])/np.nansum(medcolnocr[slow:shigh])
                     if scale < 0:
-                        scale = np.max(datanocr[slow:shigh])/np.max(medcolnocr[slow:shigh])
+                        scale = np.nanmax(datanocr[slow:shigh])/np.nanmax(medcolnocr[slow:shigh])
                     meddatacol *= scale
                     errmeddatacol *= scale
 		    
@@ -229,12 +231,12 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
             # value of that median spatial pixel. The standard error of each of these distributions becomes the error
             # of the flux.
             for j in range(np.shape(fdict['data'])[0]):
-                bootsamp = np.random.choice(fdict['data'][j, int(x):int(x + width)], size=(int(width), 100), replace=True)
-                meddatacol.append(np.median(bootsamp))
-                meanstddist = np.std(bootsamp, axis=0)
+                bootsamp = np.random.choice(fdict['data'][j, int(x):int(x + width)], size=(int(width), 1), replace=True)
+                meddatacol.append(np.nanmedian(bootsamp))
+                meanstddist = np.nanstd(bootsamp, axis=0)
                 meanstd = np.mean(meanstddist)
                 errmeddatacol.append(meanstd / np.sqrt(width - 1))
-		    
+            
             meddatacol = np.array(meddatacol)
             errmeddatacol = np.array(errmeddatacol)
 		    
@@ -247,10 +249,12 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
                     # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
                     # same for the pixel column being fixed.
                     datanocr = fdict['data'][:, int(x + i)][nocr]
+                    if len(datanocr) == 0:
+                        continue
                     medcolnocr = meddatacol[nocr]
-                    scale = np.sum(datanocr[slow:shigh]) / np.sum(medcolnocr[slow:shigh])
+                    scale = np.nansum(datanocr) / np.nansum(medcolnocr)
                     if scale < 0:
-                        scale = np.max(datanocr[slow:shigh]) / np.max(medcolnocr[slow:shigh])
+                        scale = np.nanmax(datanocr) / np.nanmax(medcolnocr)
                     meddatacol *= scale
                     errmeddatacol *= scale
 		    
@@ -353,8 +357,8 @@ def mask_cosmic_rays(data, lext, hext, multiplier=4.):
     # Sequentially sigma-clip each section, and create a mask marking the locations of pixels to be kept.
     for sect in sections:
 
-        datamed = np.median(sect)
-        datastd = np.std(sect)
+        datamed = np.nanmedian(sect)
+        datastd = np.nanstd(sect)
 
         upperlim = datamed + (multiplier * datastd)
         lowerlim = datamed - (multiplier * datastd)
@@ -468,7 +472,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         warnings.simplefilter("ignore")
         warnings.warn("partition", UserWarning)
         
-        power = int(np.floor(np.log10(np.mean(data2D))))
+        power = int(np.floor(np.log10(np.abs(np.nanmean(data2D)))))
         data2D = copy.deepcopy(data2D)/10**power
 
         figwidth = 10.
@@ -552,8 +556,8 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, crmask_multiplier=1.):
         colrange = range(len(datacol))
         skypix = datacol[np.where(np.logical_or(colrange<bglowext[ii], colrange>bghighext[ii]))]
         bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
-        skysamp = np.median(bootsky, axis=0)
-        skylevel = np.mean(skysamp)
+        skysamp = np.nanmedian(bootsky, axis=0)
+        skylevel = np.nanmean(skysamp)
         medsky.append(skylevel)
         skyerr = np.std(skysamp)/(99**0.5)
         fdict['data'][ii] -= skylevel
@@ -564,7 +568,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, crmask_multiplier=1.):
     fdict['data'] = fdict['data'].T
     fdict['errs'] = fdict['errs'].T
     
-    chipgaps = np.where(np.median(fdict['data'], axis=0)==0)
+    chipgaps = np.where(np.nanmedian(fdict['data'], axis=0)==0)
     fdict['data'][:, chipgaps[0]] += 1
 
     return fdict

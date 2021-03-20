@@ -71,8 +71,8 @@
 
 # CR MASKING/REMOVAL #---------------------------------------------------------
 
-# Mask cosmic rays?
--MASK_CR=1
+# Identify cosmic rays?
+-IDENT_CR=1
 
 # Diagnostic plotting of the sky subtraction of the 2D spectrum
 -DIAG_PLOT_CRMASK=1

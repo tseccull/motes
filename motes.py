@@ -23,31 +23,34 @@ import sys
 def cr_handling(pars, axdict, lext, hext, fdict, hpars):
     sys.stdout.write(' >>> Separating spectrum and background regions for cosmic ray detection.\n')
 
-    # DIAGNOSTICS - Plot limits defined for CR masking process.
-    if pars['-DIAG_PLOT_CRMASK']:
-        daxis = np.linspace(axdict['wavstart'], axdict['wavstart'] + len(axdict['waxis']), num=len(axdict['waxis']))
-        loline = [lext + axdict['imgstart']] * len(axdict['waxis'])
-        hiline = [hext + axdict['imgstart']] * len(axdict['waxis'])
-        dlines = np.array([daxis, loline, daxis, hiline])
-        common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Pre Masking')
+    daxis = np.linspace(axdict['wavstart'], axdict['wavstart'] + len(axdict['waxis']), num=len(axdict['waxis']))
+    loline = [lext + axdict['imgstart']] * len(axdict['waxis'])
+    hiline = [hext + axdict['imgstart']] * len(axdict['waxis'])
+    dlines = np.array([daxis, loline, daxis, hiline])
 
+    if pars['-IDENT_CR']:
+        # DIAGNOSTICS - Plot limits defined for CR masking process.
+        if pars['-DIAG_PLOT_CRMASK']:
+            common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Pre Masking')
+	    
+	    
+        sys.stdout.write(' >>> Masking cosmic rays via sigma-clip:\n')
+        sys.stdout.write('     Sigma multiplier = ' + str(pars['-CR_CLIP_STD_MULT']) + '\n')
+        sys.stdout.write('     Number of sigma-clip iterations = ' + str(pars['-CR_CLIP_ITER']) + '\n')
+        sys.stdout.write(' >>> Masking bad pixels.\n')
+        fdict['cmask'] = np.ones(np.shape(fdict['data']))
+        for it in range(int(pars['-CR_CLIP_ITER'])):
+            crmasque = common.mask_cosmic_rays(fdict['data'], lext, hext, multiplier=pars['-CR_CLIP_STD_MULT'])
+            fdict['qual'] *= crmasque
+            fdict['cmask'] *= crmasque
+        sys.stdout.write(' >>> Cosmic rays and bad pixels masked.\n')
+	    
+        # DIAGNOSTICS - Plot 2D spectrum with CRs masked.
+        if pars['-DIAG_PLOT_CRMASK']:
+            common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Post Masking')
 
-    sys.stdout.write(' >>> Masking cosmic rays via sigma-clip:\n')
-    sys.stdout.write('     Sigma multiplier = ' + str(pars['-CR_CLIP_STD_MULT']) + '\n')
-    sys.stdout.write('     Number of sigma-clip iterations = ' + str(pars['-CR_CLIP_ITER']) + '\n')
-    sys.stdout.write(' >>> Masking bad pixels.\n')
-    fdict['cmask'] = np.ones(np.shape(fdict['data']))
-    for it in range(int(pars['-CR_CLIP_ITER'])):
-        crmasque = common.mask_cosmic_rays(fdict['data'], lext, hext, multiplier=pars['-CR_CLIP_STD_MULT'])
-        fdict['qual'] *= crmasque
-        fdict['data'] *= fdict['qual']
-        fdict['errs'] *= fdict['qual']
-        fdict['cmask'] *= crmasque
-    sys.stdout.write(' >>> Cosmic rays and bad pixels masked.\n')
-
-    # DIAGNOSTICS - Plot 2D spectrum with CRs masked.
-    if pars['-DIAG_PLOT_CRMASK']:
-        common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Post Masking')
+    fdict['data'] *= fdict['qual']
+    fdict['errs'] *= fdict['qual']
 
     # Determine the location of boundaries between dispersion bins in the 2D spectrum that will be fitted with Moffat
     # functions to precisely localise the spectrum to allow sky subtraction.
@@ -102,7 +105,7 @@ def motes():
         sys.stdout.write(' >>> Fitting Moffat profile to median spatial profile of entire spectrum. ')
         sys.stdout.flush()
         datadispcollapse = np.nanmedian(framedict['data'], axis=1)
-        datascale = 10**np.abs(np.floor(np.log10(np.median(datadispcollapse))))
+        datascale = 10**np.abs(np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse)))))
         moffparams = common.moffat_least_squares(axesdict['saxis'], datadispcollapse*datascale, headparams['seeing'], headparams['pixresolution'])
         headparams['seeing'] = 2*moffparams[2]*np.sqrt((2**(1/moffparams[3]))-1)
 
@@ -130,9 +133,8 @@ def motes():
             common.printmoffparams(moffparams, axesdict['imgstart'], datascale)
             common.plot_fitted_spatial_profile(axesdict['saxis'], datadispcollapse, axesdict['hrsaxis'], moffparams, axesdict['imgstart'], headparams)
 
-
         # Mask and remove cosmic rays and bad pixels and, if selected, replace them in the image.
-        if params['-MASK_CR']:
+        if params['-IDENT_CR'] or params['-REPLACE_CRBP']:
             binparams, framedict = cr_handling(params, axesdict, lowext, highext, framedict, headparams)
 
         # No cosmic ray masking requested, just get localisation bins
@@ -142,7 +144,7 @@ def motes():
             framedict['cmask'] = np.ones(np.shape(framedict['data']))
             binparams, framedict = common.get_bins(framedict, int(np.floor(lowext)), int(np.ceil(highext)), axesdict['dispaxislen'], params, sky=True)
                                                                               
-            common.get_bins_output(binparams, params, axesdict['saxis'], lowext, highext, axesdict['wavstart'], axesdict['imgstart'], framedict['data'], axesdict['waxis'], headparams)
+            common.get_bins_output(binparams, params, lowext, highext, framedict['data'], headparams, axesdict)
             sys.stdout.write(' >>> Bad pixels replaced.\n')
 
 
@@ -271,6 +273,7 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
     head['HIERARCH DISPPIXH'] = axdict['wavend'], 'upper limit of dispersion axis, pix'
     head['HIERARCH WAVL'] = np.floor(axdict['waxis'][0]), 'lower limit of wav range, ' + hparams['wavunit']
     head['HIERARCH WAVH'] = np.ceil(axdict['waxis'][-1]), 'upper limit of wav range, ' + hparams['wavunit']
+    head['HIERARCH WAVU'] = hparams['wavunit'], 'Wavelength unit'
 
     head['HIERARCH MOFF A'] = round(moffpars[0], 5), 'moffat profile amplitude'
     head.add_blank('Parameters fit to the median spatial profile of the spectrum',
@@ -299,23 +302,26 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header['EXTNAME'] = 'SKY_EXT_LIMS'
 
-    if pars['-MASK_CR']:
+    if pars['-IDENT_CR']:
         head['HIERARCH CR CLIP ITER'] = int(pars['-CR_CLIP_ITER']), 'cosmic ray sigma-clipping iterations'
         head.add_blank('Cosmic Ray Masking and Bad Pixel Replacement', before='HIERARCH CR CLIP ITER')
         head['HIERARCH CR SIGMA MULT'] = pars['-CR_CLIP_STD_MULT'], 'cosmic ray sigma-clipping multiplier'
         head['HIERARCH CR FWHM MULT'] = pars['-CR_FWHM_MULTIPLIER'], 'FWHM multiplier for defining CR clip regions'
         if pars['-REPLACE_CRBP']:
-            head['HIERARCH CR REPLACED?'] = 'YES'
+            head['HIERARCH CR REPLACED'] = 'YES'
         else:
-            head['HIERARCH CR REPLACED?'] = 'NO'
+            head['HIERARCH CR REPLACED'] = 'NO'
         crmaskhdu = fits.ImageHDU(fdict['cmask'])
-        crmaskhdu.header['EXTNAME'] = '2D_CR_MASK'
+        crmaskhdu.header['EXTNAME'] = 'MOTES_CR_MASK'
     
     head['HIERARCH EXTRACTED HDU ROW 0'] = 'Wavelength Axis, ' + hparams['wavunit']
     head.add_blank('Data Saved in the Extracted Spectrum HDU', before='HIERARCH EXTRACTED HDU ROW 0')
     head['HIERARCH EXTRACTED HDU ROW 1'] = 'Flux, ' + hparams['fluxunit']
     head['HIERARCH EXTRACTED HDU ROW 2'] = 'Flux Uncertainty, ' + hparams['fluxunit']
     head['EXTNAME'] = '1D_SPEC'
+    
+    print(head)
+    exit()
     
     fluxhdu = fits.PrimaryHDU([axdict['waxis'], flux, errs], header=head)
     spec2Dhdu = fits.ImageHDU(fdict['ogdata'])
@@ -334,7 +340,7 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
         hdu_list.append(skymodhdu)
         hdu_list.append(skybinhdu)
         hdu_list.append(skyextractionlims)
-    if pars['-MASK_CR']:
+    if pars['-IDENT_CR']:
         hdu_list.append(crmaskhdu)
 
     hdulist = fits.HDUList(hdu_list)
