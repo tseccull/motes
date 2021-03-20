@@ -8,8 +8,7 @@ Updates by T. Seccull
 ### Changed
 - Simplified the way the GMOS harvester handles incoming qual frame and converts
 it so good pixels=1 and bad pixels=0, while ensuring the chip gaps aren't
-flagged as bad pixels. This will probably also need to be implemented in the
-X-Shooter and FORS2 harvesters and tested.
+flagged as bad pixels.
 - Overhauled cosmic ray handling so CRs and badpixels can be replaced by the
 input quality frame alone without the need for motes to use its, frankly 
 piss-poor CR detection routine. If software like astroscrappy is used to 
