@@ -5,22 +5,22 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 ## 0.2.0 - 2021-03-19
 Updates by T. Seccull
 
-###Changed
--Simplified the way the GMOS harvester handles incoming qual frame and converts
+### Changed
+- Simplified the way the GMOS harvester handles incoming qual frame and converts
 it so good pixels=1 and bad pixels=0, while ensuring the chip gaps aren't
 flagged as bad pixels. This will probably also need to be implemented in the
 X-Shooter and FORS2 harvesters and tested.
--Overhauled cosmic ray handling so CRs and badpixels can be replaced by the
+- Overhauled cosmic ray handling so CRs and badpixels can be replaced by the
 input quality frame alone without the need for motes to use its, frankly 
 piss-poor CR detection routine. If software like astroscrappy is used to 
 create a cosmic ray mask, it needs to be combined with the spectrograms
 input quality mask for motes to recognise the detected CRs as bad.
--In motesparams.txt, the -MASK_CR keyword is now -IDENT_CR and is specifically
+- In motesparams.txt, the -MASK_CR keyword is now -IDENT_CR and is specifically
 used to refer to the motes CR identification routine independently of the
  -REPLACE_CR keyword. Setting either -IDENT_CR or -REPLACE_CR to True (1)
 results in an updated cr_handlin() function in motes.py being called.
 
-###Fixed
+### Fixed
 - Fixed incorrect header parameter dictionary call in save_fits() when 
 recording the wavelength unit to the header of the output file.
 - When determining datascale in motes(), the base 10 log of the absolute value 
@@ -29,7 +29,7 @@ if the median value turned out to be negative.
 - Fixed outdated method of calling common.get_bins_output() in the case where 
 CR masking is not done. This has now been updated in line with other calls to 
 this function from motes().
--Fixed a bug where cosmic ray replacement would completeley fail on spatial
+- Fixed a bug where cosmic ray replacement would completeley fail on spatial
 pixel columns with no valid data (e.g. all nans or zeros), and would wrongly 
 propagate bad pixel flags to adjacent columns with good data. common.get_bins()
 now simply ignores columns with all bad data, as they are pretty much 
