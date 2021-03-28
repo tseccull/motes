@@ -24,7 +24,7 @@ Python 3 is recommended for running MOTES. It is compatible with Python 2.7, but
 
 For dependencies, installing an Anaconda enviroment from a .yml file will suffice in most cases. I've uploaded one as an example and the following terminal command can install the enviroment locally.
 
-conda env create --name motes --file=<PATH to motes.yml>
+conda env create --name motes --file=PATH/to/motes.yml
 
 The above needs testing to ensure out-of-the-box compatibility. The rest of this section needs to be worked out.
 
