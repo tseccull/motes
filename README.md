@@ -10,12 +10,14 @@ MOTES is a Python package used for tracing and extracting spectra of faint
 astronomical point sources from 2D spectrograms. MOTES is also capable of sky 
 subtraction and cosmic ray masking and subsequent rejection. 
 
-Citation: Please cite .... paper to be written .... if you use MOTES in your 
-research. Need a Zenodo DOI? Any publications relating to the demo-data?
+Citation: Please cite *(this paper)* if you use MOTES in your 
+research. 
+
+*Need a Zenodo DOI? Any publications relating to the demo-data?*
 
 # Project Status
 Currently in final stages of development toward v1.0 and release. Documentation is still to be written, as well as an accompanying article 
-that will likely be submitted to one of the AAS journals.
+that will likely be submitted to one of the AAS journals (MNRAS maybe?)
 
 EFOSC2 harvester needs to be developed into the new standard with the test data provided by Dominik (from the P106 observing run).
 
