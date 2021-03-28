@@ -1,4 +1,4 @@
-name: gmeclassic
+name: motes
 channels:
     - conda-forge
     - defaults
