@@ -14,9 +14,7 @@ Citation: Please cite .... paper to be written .... if you use MOTES in your
 research. Need a Zenodo DOI? Any publications relating to the demo-data?
 
 # Project Status
-Currently in final stages of development toward v1.0 and release. Updates and 
-inclusion of optimal extraction capability are to be included in the near 
-future. Documentation is still to be written, as well as an accompanying article 
+Currently in final stages of development toward v1.0 and release. Documentation is still to be written, as well as an accompanying article 
 that will likely be submitted to one of the AAS journals.
 
 This development branch is setup to transfer relevant methods and fixes from Dom's GME (locally called GME Plus) to Tom's MOTES master branch. Primarly to transfer supersampled optimal extraction,improvements to fitting methods where possible and optimilisations where possible. EFOSC2 harvester needs to be developed into the new standard with the test data provided by Dom (from the P106 observing run).
