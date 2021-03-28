@@ -26,8 +26,6 @@ For dependencies, installing an Anaconda enviroment from a .yml file will suffic
 
 conda env create --name motes --file=PATH/to/motes.yml
 
-The above needs testing to ensure out-of-the-box compatibility. The rest of this section needs to be worked out.
-
 # Usage
 PDF Manual currently in construction on [Overleaf](https://www.overleaf.com/project/604614a9482e712b1ea2fbbd). 
 
