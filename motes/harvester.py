@@ -3,15 +3,9 @@
 ###############################################################################
 import astropy.io.fits as fits
 import copy
-import datetime
-import glob
 import motes.common as common
-import os
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
-
-from astropy.table import Table
 
 ###############################################################################
 # FUNCTIONS ///////////////////////////////////////////////////////////////// #
@@ -20,14 +14,14 @@ from astropy.table import Table
 # EXTRACT HEADER DATA AND DATAFRAMES, AND REPACKAGE THEM INTO DICTIONARIES
 
 
-def data_harvest(intreg, filename_2D, chunk, param_dict):
+def data_harvest(intreg, filename_2D, chunk):
     # Create dictionary to tell data_harvest which instrument specific
     # function to call.
     instrument_dict = {'FORS2': harvest_fors2,
                        'GMOS-N': harvest_gmos,
                        'GMOS-S': harvest_gmos,
-                       'XSHOOTER': harvest_xshoo
-                       }
+                       'XSHOOTER': harvest_xshoo,
+                       'EFOSC2': harvest_efosc2_LSS}
 
     # Open file containing the spectral data, open it up and extract the
     # header, image frame, error frame, and quality frame (if it has one).
@@ -123,7 +117,6 @@ def harvest_fors2(imgfilehdu, imgheader):
         sys.stdout.write('FAILED.\n')
         sys.stdout.write('     Non-standard binning used in image.\n'
                          '     Spatial pixel resolution could not be determined.\n')
-        sys.stdout.write('     Extraction of ' + direc + ' could not be completed.\n')
         sys.stdout.write('     Terminating MOTES.\n\n')
         exit()
 
@@ -150,9 +143,41 @@ def harvest_fors2(imgfilehdu, imgheader):
 
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
+# ////////////////////////////////////////////////////////////////////////////#
+# HARVEST THE HEADER AND DATA FROM A EFOSC2 SPECTRUM
+# 28/06/2021 - Should be analogous to FORS2, given the spectrographs architecture.
+# 30/06/2021 - Spend 2 days trying to get sample data from the ESO
+# Pipelines via ESOReflex and Gasgano to no avail. Leave the placeholder
+# here.
+
+
+def harvest_efosc2_LSS(imgfilehdu, imgheader):
+    # Retrieve the data. Errors not known.
+    imgdata = imgfilehdu[0].data
+    imgerrs = np.ones(np.shape(imgdata))
+    imgqual = np.ones(np.shape(imgdata))
+    ogimgqual = copy.deepcopy(imgqual) - 1
+
+    # Put header information into a dictionary (Not complete)
+    sys.stdout.write(' >>> Gathering required information from FITS header. ')
+    sys.stdout.flush()
+    headerdict = {'object': imgheader['OBJECT'].replace(' ', '_'),
+                  'exptime': imgheader['EXPTIME'],
+                  'seeing': np.average(float(imgheader['HIERARCH ESO TEL AMBI FWHM START']), float(imgheader['HIERARCH ESO TEL AMBI FWHM END']))}
+
+    # If seeing is negative (i.e. not availiable), use seeing of 1 to be safe.
+    if headerdict['seeing'] <= 0.0:
+        headerdict['seeing'] = 1.0
+
+    # Create the wavelength axis of the spectrum, define the region of the spectrum in dispersion space to be
+    # kept, and then slice the 2D image on wavelength axis accordingly.
+    wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CD1_1'], imgheader['NAXIS1'])
+    return NotImplemented
+
 
 # ////////////////////////////////////////////////////////////////////////////#
 # HARVEST THE HEADER AND DATA FROM A GMOS SPECTRUM
+
 def harvest_gmos(imgfilehdu, imgheader):
     # Retrieve the data frame, error frame, and qual frame.
     scihead = imgfilehdu['SCI'].header
@@ -189,12 +214,10 @@ def harvest_gmos(imgfilehdu, imgheader):
                       [0.4, 0.70, 0.95, 1.65]])
 
     iq = imgheader['RAWIQ']
-    wav_min = scihead['CRVAL1']
 
-    for i in WavTab:
-        if scihead['CRVAL1'] > i[0] and scihead['CRVAL1'] < i[1]:
-            seeing = IQTab[int(i[2])][int(IQ_dict[iq])]
-            break
+    seeing = float([IQTab[int(i[2])][int(IQ_dict[iq])]
+                    for i in WavTab if (scihead['CRVAL1'] > i[0] and scihead['CRVAL1'] < i[1])][0])
+    print('Seeing: {} arcseconds'.format(seeing))
 
     # Put header information into a dictionary
     sys.stdout.write(' >>> Gathering required information from FITS header. ')

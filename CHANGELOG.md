@@ -1,6 +1,43 @@
-# Change Log
-All notable changes to this package will be documented here. 
-This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 0.3.1_dev - 2021-11-01
+Updates by D. Kiersz
+
+Minor optimilisations and a EFOSC2 template addition prior a major pull request.
+
+### Added
+* **harvest_efosc2_LSS(imgfilehdu, imgheader)**:** - A draft of EFOSC2 harvester for Long Slit Spectroscopy (LSS). This is still **WIP**, therefore marked as `NotImplemented`. There is currently a lack of suitable test data. 
+* * Added **EFOSC2** to `instrument_dict` in **data_harvest()**.
+* Added a **default** directory for two parameter files which are set for VIS arm of the X-Shooter.
+* Added a .gitignore file to repo to ignore `.pyc` cache files.
+
+### Changed
+
+* Spell checking/additions to in-code comments. Most importantly, I've reaffirmed that the input errors for the harvester function is *variance* of the pixel. The output of a harvester function contains one (Gaussian) sigma errors that is used throughout **motes()**. At **common.optimal_extraction()** these errors are converted to variance for the calculations and back to sigma.
+* Optimised **cr_handling()** loop in **motes.py** by using `itertools`. A range in Python 3 returns an iterator which is constly whereas tis implementation does not. Also saved memory on a not having a iterator var.
+* Optimised a loop in **harvest_gmos()** by making it a list compherension.
+* Set the parameter `-DIAG_PLOT_BIN_LOC=0` as default in **motesparams.txt**.
+* Set the default wavelength range as 560-1005nm in **reg.txt**
+* Updated the header for the Changelog.
+
+### Removed
+
+* Around line 324, removed unused `fwhm_optimal` output of **common.extraction_limits()** that forms part the final extraction limits.
+* Around line 186, removed two unused outputs of **common.extraction_limits()** that determines the median spatial profile limits that bound the region of the spectrum used by the **common.get_bins()**.
+* Around line 465, removed unused `ax` axis object output from **fig.add_subplot(111)**.
+* Around line 225, removed unused `wav_min` variable declaration in **harvester.harvest_gmos()**.
+* Around line 126, removed undefined `direc` variable in **harvester.harvest_fors2()** that should display if an error occurs.
+* Removed the deprecated `param_dict` argument of **harvester.data_harvest()** function.
+* Removed unused imported (sub)modules From **harvester.py** and **common.py**.
+
+### Known bugs
+
+* Parameter `-ABBA` is not present in the GMOS demo dataset. Running motesparams.txt from there causes a crash.
 
 ## 0.3.0_dev - 2021-03-28
 Updates by D. Kiersz

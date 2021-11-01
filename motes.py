@@ -10,6 +10,7 @@ import motes.startup as startup
 import numpy as np
 import os
 import sys
+import itertools
 
 # Force TkAgg backend plots
 import matplotlib
@@ -41,7 +42,8 @@ def cr_handling(pars, axdict, lext, hext, fdict, hpars):
     sys.stdout.write('     Number of sigma-clip iterations = ' + str(pars['-CR_CLIP_ITER']) + '\n')
     sys.stdout.write(' >>> Masking bad pixels.\n')
     fdict['cmask'] = np.ones(np.shape(fdict['data']))
-    for it in range(int(pars['-CR_CLIP_ITER'])):
+    # for it in range(int(pars['-CR_CLIP_ITER'])):
+    for _ in itertools.repeat(None, int(pars['-CR_CLIP_ITER'])):
         crmasque = common.mask_cosmic_rays(
             fdict['data'], lext, hext, multiplier=pars['-CR_CLIP_STD_MULT'])
         fdict['qual'] *= crmasque
@@ -104,7 +106,7 @@ def motes():
         # GATHER HEADER INFO AND DATA FROM THE 2D IMAGE FILE
         sys.stdout.write(' >>> Gathering image frames and header data from input file.\n')
         headparams, framedict, axesdict, imghead = harvester.data_harvest(
-            i, file_2D, intreg, params)
+            i, file_2D, intreg)
 
         # Save the original data
         framedict['ogdata'] = framedict['data']
@@ -181,7 +183,7 @@ def motes():
 
         # These spatial limits may also be used during the process of masking,
         # removing, and replacing cosmic rays and bad pixels.
-        lowext, highext, fwhm, cent = common.extraction_limits(
+        lowext, highext, _, _ = common.extraction_limits(
             moffparams, params['-CR_FWHM_MULTIPLIER'], axesdict)
         sys.stdout.write(' >>> Spectrum localised to aperture in range of spatial pixel rows ' + str(
             int(lowext + axesdict['imgstart'])) + '-' + str(int(highext + axesdict['imgstart'])) + '\n')
@@ -285,7 +287,7 @@ def motes():
             # return its parameters. Determine the median absolute deviation as a measure of spread.
             bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
             binerrs = np.empty((0))
-            for row in range(bindata.shape[0]):
+            for row in range(bindata.shape[0]):  # 01/11/2021 Can probably be vectorised.
                 mad = np.nanmedian(np.abs(binimg[row, chipgap[0]] -
                                           np.nanmedian(binimg[row, chipgap[0]])))
                 binerrs = np.append(binerrs, mad)
@@ -319,7 +321,7 @@ def motes():
 
             # Define the extraction limits of the current dispersion bin based on the parameters of the Moffat profile
             # previously fitted to it. NOTE that highres=True
-            lowext_optimal, highext_optimal, fwhm_optimal, centre_optimal = common.extraction_limits(
+            lowext_optimal, highext_optimal, _, centre_optimal = common.extraction_limits(
                 binmoffparams, params['-FWHM_MULTIPLIER'], axesdict, highres=True)
             extractionlimits_optimal.append(
                 [(bin[0] + bin[1]) * 0.5, lowext_optimal, highext_optimal, centre_optimal])
@@ -460,7 +462,7 @@ def motes():
                              zorder=1)
 
             fig = plt.figure(figsize=(20, 10))
-            ax = fig.add_subplot(111)
+            fig.add_subplot(111)
             plot_step_spec(axesdict['waxis'], optdata1D, opterrs1D, 'Optimal', 'blue')
             plot_step_spec(axesdict['waxis'], stddata1D, stderrs1D, 'Standard', 'green')
             plt.grid(alpha=0.5, linestyle='dotted')
@@ -590,6 +592,7 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars,
         hdu_list.append(skymodhdu)
         hdu_list.append(skybinhdu)
         hdu_list.append(skyextractionlims)
+
     if pars['-MASK_CR']:
         hdu_list.append(crmaskhdu)
 

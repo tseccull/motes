@@ -10,11 +10,11 @@ import numpy as np
 import scipy.interpolate as interp
 import sys
 import warnings
-from scipy.optimize import least_squares
+#from scipy.optimize import least_squares
 from scipy.optimize import curve_fit
-from scipy.ndimage import gaussian_filter
-from scipy.stats import power_divergence, pearsonr, ks_2samp
-
+#from scipy.ndimage import gaussian_filter
+from scipy.stats import pearsonr
+#from scipy.stats import power_divergence, ks_2samp
 
 ###############################################################################
 # FUNCTIONS //////////////////////////////////////////////////////////////////#
@@ -853,14 +853,16 @@ def optimal_extraction(data2D, errs2D, extractionlimits,
         spectra_slice_err = errs2D[lower_limit:upper_limit, bin[0]:bin[1]]
 
         # Collapse the data in the bin in dispersion direction by taking a sum
+        # (and errors in quadrature, assuming they are 1st standard dev as in the
+        # harvester functions)
         spectra_slice_data_sum = np.nansum(spectra_slice_data, axis=1)
         spectra_slice_errs_sum = np.sqrt(np.nansum(np.power(spectra_slice_err, 2), axis=1))
 
         # The profile needs to be refittted to satisfy both normality and positivity.
-        # Firsly, the spatial axis for the profile
+        # Firstly, the spatial axis for the profile
         spatial_axis = np.arange(0, len(spectra_slice_data_sum))
 
-        # For simplicity, assume a moffat profile with some small residual background level and without background gradient at this stage or reduction. (ie. abba=True)
+        # For simplicity, assume a Moffat profile with some small residual background level and without background gradient at this stage or reduction. (ie. abba=True)
         # Tests have shown that in NIR spectra of XShooter this works better for
         # now and its more robust against peaks that may occur beside the main
         # outliers in faint targets that may show as secondary peaks.
@@ -908,11 +910,11 @@ def optimal_extraction(data2D, errs2D, extractionlimits,
             y_err[np.where(y_err == 0.0)[0]] = np.nanmedian(y_err)
             y_err[np.where(y_err is None)[0]] = np.nanmedian(y_err)
 
-            # CONVERT THE ERROR TO VARIANCE. VARIANCE IS SIGMA SQUARED
+            # Convert the input error (one gaussian sigma) to variance. The variance is sigma**2.
             y_err = np.power(y_err, 2)
 
-            # Perform standard extraction in the single column. The error is one standard
-            # deviation (1 sigma)
+            # Perform standard extraction in the single column. The result error is one standard
+            # deviation (1 sigma).
             standard_extraction_flux = np.sum(y)
             standard_extraction_err = np.sqrt(np.sum(y_err))
 
@@ -920,7 +922,7 @@ def optimal_extraction(data2D, errs2D, extractionlimits,
             stddata1D = np.append(stddata1D, standard_extraction_flux)
             stderrs1D = np.append(stderrs1D, standard_extraction_err)
 
-            # Step 5 of Horne 1986 - Cosmic ray masking with a conservative 5 sigmas
+            # Step 5 of Horne 1986 - Cosmic ray masking with a conservative 5 sigmas.
             value_term = np.power(y - np.multiply(normalised_profile, standard_extraction_flux), 2)
             sigma_term = np.multiply(y_err, 25)
             cosmic_mask = np.invert([value_term > sigma_term])[0]
@@ -951,7 +953,7 @@ def optimal_extraction(data2D, errs2D, extractionlimits,
                         2),
                     y_err)[cosmic_mask])
 
-            # Finally, get the optimal values for flux and error. The error is
+            # Finally, get the optimal values for flux and error. The resultant error is
             # one standard deviation (1 Gaussian sigma, again). If it fails
             # nontheless, use the std_extraction flux and errors.
             with warnings.catch_warnings():
@@ -988,7 +990,7 @@ def GME_Moffat1D_profile(x, amp, c, alpha, beta, bglevel):
 def moffat_weighted_curvefit(r, col, seeing, col_err, abba, maxfev=10000):
 
     # Non-linear weighted fitting using scipy's curve_fit. The data and errors
-    # should be already scaled.
+    # should be already scaled. Important: the input errors are scaled one sigma errors as output from the harvester.
 
     # Input = r (spatial axis), col (data column), seeing and col_err (err column), abba flag for double pass sky subtraction profile
     # Output = A list of moffat parameters ie. [A, c, alpha, beta, B, m]
