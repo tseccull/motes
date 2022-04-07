@@ -16,7 +16,7 @@ are too large. Return of the FORS2 and X-Shooter demo data frames to the reposit
 should be fine in the near future.
 
 ## Deprecated
-- All cosmic ray handiling functions and regions of the script have been commented 
+- All cosmic ray handling functions and lines have been commented 
 out pending removal. This is because there are much better software tools, (e.g. 
 Astroscrappy) that can be used for removing and replacing cosmic rays. Testing of 
 the software on the demo data shows that it is fully functional without the cosmic 
