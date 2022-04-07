@@ -22,7 +22,9 @@ from astropy.table import Table
 def data_harvest(intreg, filename_2D, chunk, param_dict):
     # Create dictionary to tell data_harvest which instrument specific
     # function to call.
-    instrument_dict = {   'FORS2': harvest_fors2, 
+    instrument_dict = {    'en06': harvest_floyds,
+                           'en12': harvest_floyds,
+                          'FORS2': harvest_fors2, 
                          'GMOS-N': harvest_gmos,
                          'GMOS-S': harvest_gmos, 
                        'XSHOOTER': harvest_xshoo
@@ -35,7 +37,7 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
         inst = imghead['INSTRUME']
         # Based on the value of inst, this calls one of the harvest_instrument functions.
         imgdata, imgerrs, imgqual, ogimgqual, head_dict, wavaxis = instrument_dict[inst](imgfile, imghead)
-
+    
     # SLICE ALL DATAFRAMES BASED ON THE INPUT FROM reg.txt
     imgshape = np.shape(imgdata)
     imgstart = int(0 + chunk[intreg][0])
@@ -93,6 +95,39 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
     return head_dict, frame_dict, axes_dict, imghead
 
 
+#/////////////////////////////////////////////////////////////////////////////#
+# HARVEST THE HEADER FROM A FLOYDS SPECTRUM
+# SPECTRUM MUST NOT BE FLUX CALIBRATED TO ENSURE THAT A RELIABLE ERR FRAME IS MADE
+def harvest_floyds(imgfilehdu, imgheader):
+	# Retrieve the data frame
+	imgdata = imgfilehdu[0].data
+	imgerrs = np.sqrt(imgdata+(imgheader['RDNOISE']*imgheader['RDNOISE'])+(imgheader['DARKCURR']*imgheader['DARKCURR']))
+	imgqual = np.ones(np.shape(imgdata))
+	ogimgqual = copy.deepcopy(imgqual)-1
+	
+	# Determine the spatial pixel resolution of the image in arcsec.
+	pixres = imgheader['PIXSCALE']
+	sys.stdout.write(' >>> Spatial pixel resolution determined: ' + str(pixres).strip('0') + '"\n')
+	
+	# Put header information into a dictionary
+	sys.stdout.write(' >>> Gathering required information from FITS header. ')
+	sys.stdout.flush()
+	headerdict = {       'object': imgheader['OBJECT'].replace(' ', '_'), 
+                  'pixresolution': pixres,
+                        'exptime': imgheader['EXPTIME'], 
+                           'inst': imgheader['INSTRUME'],
+                         'seeing': imgheader['AGFWHM'], # Grabs estimated FWHM from autoguider.
+                       'fluxunit': 'electrons', 
+                        'wavunit': imgheader['WAT2_001'].split(' ')[2].split('=')[1]
+                   }
+	sys.stdout.write('DONE.\n')
+	
+	# SLICE IMAGE ON WAVELENGTH AXIS #
+    # Create the wavelength axis of the spectrum.
+	wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CD1_1'], imgheader['NAXIS1'])
+
+	return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+
 # ////////////////////////////////////////////////////////////////////////////#
 # HARVEST THE HEADER AND DATA FROM A FORS2 SPECTRUM
 def harvest_fors2(imgfilehdu, imgheader):
@@ -130,14 +165,13 @@ def harvest_fors2(imgfilehdu, imgheader):
                            'inst': imgheader['INSTRUME'],
                          'seeing': 0.5 * (imgheader['HIERARCH ESO TEL AMBI FWHM START'] + imgheader['HIERARCH ESO TEL AMBI FWHM END']),
                        'fluxunit': imgheader['BUNIT'], 
-                        'wavunit': 'Angstrom'
+                        'wavunit': 'Angstroms'
                    }
     
     sys.stdout.write('DONE.\n')
 
     # SLICE IMAGE ON WAVELENGTH AXIS #
-    # Create the wavelength axis of the spectrum, define the region of the spectrum in dispersion space to be
-    # kept, and then slice the 2D image on wavelength axis accordingly.
+    # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CD1_1'], imgheader['NAXIS1'])
 
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
@@ -167,7 +201,8 @@ def harvest_gmos(imgfilehdu, imgheader):
                 '70-percentile': 1, 
                 '85-percentile': 2, 
                '100-percentile': 3,
-                          'Any': 3
+                          'Any': 3,
+                      'UNKNOWN': 3
                }
     
     WavTab = np.array([[0000.,4000.,0],
@@ -213,26 +248,21 @@ def harvest_gmos(imgfilehdu, imgheader):
     sys.stdout.write(' >>> Spatial pixel resolution determined: ' + str(headerdict['pixresolution']) + '"\n')
 
     # SLICE IMAGE ON WAVELENGTH AXIS #
-    # Create the wavelength axis of the spectrum, define the region of the spectrum in dispersion space to be
-    # kept, and then slice the 2D image on wavelength axis accordingly.
+    # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(scihead['CRVAL1'], scihead['CD1_1'], scihead['NAXIS1'])
 
     # Sets all values and errs within the GMOS chip gaps to 1, so they don't get flagged as bad pixels later on during CR masking
-    # or trip up the bin definition stage.
-    loc = np.where(np.where(np.median(imgdata, axis=0)==0)[0]-np.roll(np.where(np.median(imgdata, axis=0)==0)[0], 1)!=1)
-    locs = [0, loc[0][1]-1, loc[0][1], -1]
-    
-    vals = np.array([np.where(np.median(imgdata, axis=0)==0)[0][locs[0]]-2,
-                     np.where(np.median(imgdata, axis=0)==0)[0][locs[1]]+2,
-                     np.where(np.median(imgdata, axis=0)==0)[0][locs[2]]-2,
-                     np.where(np.median(imgdata, axis=0)==0)[0][locs[3]]+2]
-                     )
-    imgdata[:,vals[0]:vals[1]] = 1
-    imgdata[:,vals[2]:vals[3]] = 1
-    
-    # Set errors in the chip gaps to 1.0 so they don't trip up the Moffat fitting.
-    imgerrs[:,vals[0]:vals[1]] = 1.
-    imgerrs[:,vals[2]:vals[3]] = 1.
+    # or trip up the bin definition stage. Chip gaps are identified as pixel columns which are all zeros, and then two columns 
+    # either side of the chip gaps are also flagged just to be safe.
+    zerorows = [1 if all(x==0) else 0 for x in imgdata.T]
+    zerorows = [2 if x==0 and zerorows[y+1]==1 else x for y, x in enumerate(zerorows[:-1])]
+    zerorows = [2 if x==0 and zerorows[y-1]==1 else x for y, x in enumerate(zerorows[1:])]
+    zerorows = [1 if x>0 else x for x in zerorows]
+    zerorows = np.append(zerorows, 0)
+    zerorows = np.insert(zerorows, 0, 0)
+    chipgapmap = np.tile(zerorows, (np.shape(imgdata)[0], 1))
+    imgdata[chipgapmap==1] = 1
+    imgerrs[chipgapmap==1] = 1.
     
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
@@ -265,8 +295,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
     sys.stdout.write(' >>> Spatial pixel resolution determined: ' + str(headerdict['pixresolution']) + '"\n')
 
     # SLICE IMAGE ON WAVELENGTH AXIS #
-    # Create the wavelength axis of the spectrum, define the region of the spectrum in dispersion space to be
-    # kept, and then slice the 2D image on wavelength axis accordingly.
+    # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CDELT1'], imgheader['NAXIS1'])
 
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis

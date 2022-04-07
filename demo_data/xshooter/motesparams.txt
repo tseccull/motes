@@ -65,6 +65,12 @@
 # faint targets. For bright ones a value of >4 will give best results.
 -BG_FWHM_MULTIPLIER=3.0
 
+# Defines method of sky subtraction. Accepts "MEDIAN", "LINEAR",  and "POLY2". 
+# MEDIAN takes a straight column by column median of the background regions to subtract the sky. 
+# Linear will fit a line with a gradient to the background pixels in a column that will be subtracted to remove the sky. 
+# POLY2 does the same as LINEAR, but instead fits a quadratic polynomial.
+-SKYSUB_MODE=MEDIAN
+
 # Diagnostic plotting of the sky subtraction of the 2D spectrum
 -DIAG_PLOT_SKYSUB=1
 
@@ -72,22 +78,22 @@
 # CR MASKING/REMOVAL #---------------------------------------------------------
 
 # Identify cosmic rays?
--IDENT_CR=1
+#-IDENT_CR=1
 
 # Diagnostic plotting of the sky subtraction of the 2D spectrum
--DIAG_PLOT_CRMASK=1
+#-DIAG_PLOT_CRMASK=1
 
 # Multiplier for sigma-clipping CRs
--CR_CLIP_STD_MULT=10
+#-CR_CLIP_STD_MULT=10
 
 # Number of sigma-clip iterations for masking CRs
--CR_CLIP_ITER=30
+#-CR_CLIP_ITER=30
 
 # Works the same as ‘-FWHM_MULTIPLER’ except this variable is used to define the
 # boundaries between the region of the 2D image containing the spectrum and the background,
 # so that cosmic rays can be flagged. Values in the range 1.5-3 are recommended,
 # with brighter targets requiring larger values.
--CR_FWHM_MULTIPLIER=3.0
+#-CR_FWHM_MULTIPLIER=3.0
 
 # Replace values of bad pixels or those affected by cosmic rays after clipping?
 -REPLACE_CRBP=1

@@ -2,6 +2,13 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.2.1 2021-03-26
+
+### Changed
+-Colormap for plots updated to inferno. Using a perceptually uniform sequential
+colormap really makes a difference in clearly defining structure in the 
+spectrum.
+
 ## 0.2.0 - 2021-03-19
 Updates by T. Seccull
 

@@ -65,6 +65,12 @@
 # faint targets. For bright ones a value of >4 will give best results.
 -BG_FWHM_MULTIPLIER=3.0
 
+# Defines method of sky subtraction. Accepts "MEDIAN", "LINEAR",  and "POLY2". 
+# MEDIAN takes a straight column by column median of the background regions to subtract the sky. 
+# Linear will fit a line with a gradient to the background pixels in a column that will be subtracted to remove the sky. 
+# POLY2 does the same as LINEAR, but instead fits a quadratic polynomial.
+-SKYSUB_MODE=MEDIAN
+
 # Diagnostic plotting of the sky subtraction of the 2D spectrum
 -DIAG_PLOT_SKYSUB=1
 

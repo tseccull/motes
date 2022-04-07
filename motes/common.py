@@ -20,7 +20,7 @@ from scipy.optimize import least_squares
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Calculate the FWHM and hence the extraction limits from a Moffat profile based on the distance from the central peak
 # as a multiple of FWHM. A high resolution profile can also be produced if necessary by setting highres=True.
-def extraction_limits(moffparams, width_multiplier, axesdict, highres=False):
+def extraction_limits(moffparams, axesdict, width_multiplier=3.0, highres=False):
 
     # If requested create a Moffat profile based on the input parameters that has 50 times the resolution of the
     # original data. Else, use the native resolution of the data
@@ -130,54 +130,58 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
             #Estimate the S/N
             snrestimate = signal / rssnoise
 
-        if params['-REPLACE_CRBP']:
-            # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
-            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
-            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-		    
-            # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
-            # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
-            # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
-            # value of that median spatial pixel. The standard error of each of these distributions becomes the error
-            # of the flux.
-            meddatacol = []
-            errmeddatacol = []
-            for j in range(np.shape(fdict['data'])[0]):
-                bootsamp = np.random.choice(fdict['data'][j, int(x - width):int(x)], size=(int(width), 100), replace=True)
-                meddatacol.append(np.nanmedian(bootsamp))
-                meanstddist = np.nanstd(bootsamp, axis=0)
-                meanstd = np.mean(meanstddist)
-                errmeddatacol.append(meanstd / np.sqrt(width - 1))
-		    
-            meddatacol = np.array(meddatacol)
-            errmeddatacol = np.array(errmeddatacol)
-		    
-            # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
-            # the value at the corresponding spatial coordinate in the median spatial profile.
-            for i in range(int(width)):
-                if 0. in fdict['data'][:, int(x-i)]:
-                    nocr = np.where(fdict['data'][:, int(x-i)] != 0.)
-		    
-                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
-                    # same for the pixel column being fixed.
-                    datanocr = fdict['data'][:, int(x-i)][nocr]
-                    if len(datanocr) == 0:
-                        continue
-                    medcolnocr = meddatacol[nocr]
-                    scale = np.nansum(datanocr[slow:shigh])/np.nansum(medcolnocr[slow:shigh])
-                    if scale < 0:
-                        scale = np.nanmax(datanocr[slow:shigh])/np.nanmax(medcolnocr[slow:shigh])
-                    meddatacol *= scale
-                    errmeddatacol *= scale
-		    
-                    # Substittue scaled median spatial profile values into the pixels where CRs or bad pixels have been
-                    # identified.
-                    multiplier = np.ones(len(meddatacol))
-                    multiplier[nocr] *= 0
-                    crsubstitute = multiplier * meddatacol
-                    fdict['data'][:, int(x-i)] += crsubstitute
-                    crerrsubstitute = multiplier * errmeddatacol
-                    fdict['errs'][:, int(x - i)] += crerrsubstitute
+# CR REPLACEMENT IS DEPRECATED
+
+#        if params['-REPLACE_CRBP']:
+#            # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
+#            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
+#            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+#		    
+#            # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
+#            # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
+#            # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
+#            # value of that median spatial pixel. The standard error of each of these distributions becomes the error
+#            # of the flux.
+#            meddatacol = []
+#            errmeddatacol = []
+#            for j in range(np.shape(fdict['data'])[0]):
+#                bootsamp = np.random.choice(fdict['data'][j, int(x - width):int(x)], size=(int(width), 100), replace=True)
+#                meddatacol.append(np.nanmedian(bootsamp))
+#                meanstddist = np.nanstd(bootsamp, axis=0)
+#                meanstd = np.mean(meanstddist)
+#                errmeddatacol.append(meanstd / np.sqrt(width - 1))
+#		    
+#            meddatacol = np.array(meddatacol)
+#            errmeddatacol = np.array(errmeddatacol)
+#		    
+#            # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
+#            # the value at the corresponding spatial coordinate in the median spatial profile.
+#            for i in range(int(width)):
+#                if 0. in fdict['data'][:, int(x-i)]:
+#                    nocr = np.where(fdict['data'][:, int(x-i)] != 0)
+#		    
+#                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
+#                    # same for the pixel column being fixed.
+#                    datanocr = fdict['data'][:, int(x-i)][nocr]
+#                    if len(datanocr) == 0 or all(datanocr) == True:
+#                        continue
+#                    medcolnocr = meddatacol[nocr]
+#                    
+#                    scale = np.nansum(datanocr[slow:shigh])/np.nansum(medcolnocr[slow:shigh])
+#
+#                    if scale < 0:
+#                        scale = np.nanmax(datanocr[slow:shigh])/np.nanmax(medcolnocr[slow:shigh])
+#                    meddatacol *= scale
+#                    errmeddatacol *= scale
+#		    
+#                    # Substittue scaled median spatial profile values into the pixels where CRs or bad pixels have been
+#                    # identified.
+#                    multiplier = np.ones(len(meddatacol))
+#                    multiplier[nocr] *= 0
+#                    crsubstitute = multiplier * meddatacol
+#                    fdict['data'][:, int(x-i)] += crsubstitute
+#                    crerrsubstitute = multiplier * errmeddatacol
+#                    fdict['errs'][:, int(x - i)] += crerrsubstitute
 
         binlocations.append([int(x - width), int(x), snrestimate])
 
@@ -218,54 +222,56 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
             # Estimate the S/N
             snrestimate = signal / rssnoise
 
-        if params['-REPLACE_CRBP']:
-            # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
-            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
-            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-            meddatacol = []
-            errmeddatacol = []
-		    
-            # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
-            # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
-            # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
-            # value of that median spatial pixel. The standard error of each of these distributions becomes the error
-            # of the flux.
-            for j in range(np.shape(fdict['data'])[0]):
-                bootsamp = np.random.choice(fdict['data'][j, int(x):int(x + width)], size=(int(width), 1), replace=True)
-                meddatacol.append(np.nanmedian(bootsamp))
-                meanstddist = np.nanstd(bootsamp, axis=0)
-                meanstd = np.mean(meanstddist)
-                errmeddatacol.append(meanstd / np.sqrt(width - 1))
-            
-            meddatacol = np.array(meddatacol)
-            errmeddatacol = np.array(errmeddatacol)
-		    
-            # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
-            # the value at the corresponding spatial coordinate in the median spatial profile.
-            for i in range(int(width)):
-                if 0. in fdict['data'][:, int(x + i)]:
-                    nocr = np.where(fdict['data'][:, int(x + i)] != 0.)
-		    
-                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
-                    # same for the pixel column being fixed.
-                    datanocr = fdict['data'][:, int(x + i)][nocr]
-                    if len(datanocr) == 0:
-                        continue
-                    medcolnocr = meddatacol[nocr]
-                    scale = np.nansum(datanocr) / np.nansum(medcolnocr)
-                    if scale < 0:
-                        scale = np.nanmax(datanocr) / np.nanmax(medcolnocr)
-                    meddatacol *= scale
-                    errmeddatacol *= scale
-		    
-                    # Substitue scaled median spatial profile values into the pixels where CRs or bad pixels have been
-                    # identified.
-                    multiplier = np.ones(len(meddatacol))
-                    multiplier[nocr] *= 0
-                    crsubstitute = multiplier * meddatacol
-                    fdict['data'][:, int(x + i)] += crsubstitute
-                    crerrsubstitute = multiplier * errmeddatacol
-                    fdict['errs'][:, int(x + i)] += crerrsubstitute
+##CR HANDLING DEPRECATED
+
+ #       if params['-REPLACE_CRBP']:
+ #           # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
+ #           # is the same as that used by ESO in their X-Shooter data reduction pipeline.
+ #           # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+ #           meddatacol = []
+ #           errmeddatacol = []
+#		    
+ #           # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
+ #           # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
+ #           # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
+ #           # value of that median spatial pixel. The standard error of each of these distributions becomes the error
+ #           # of the flux.
+ #           for j in range(np.shape(fdict['data'])[0]):
+ #               bootsamp = np.random.choice(fdict['data'][j, int(x):int(x + width)], size=(int(width), 1), replace=True)
+ #               meddatacol.append(np.nanmedian(bootsamp))
+ #               meanstddist = np.nanstd(bootsamp, axis=0)
+ #               meanstd = np.mean(meanstddist)
+ #               errmeddatacol.append(meanstd / np.sqrt(width - 1))
+ #           
+ #           meddatacol = np.array(meddatacol)
+ #           errmeddatacol = np.array(errmeddatacol)
+#		    
+ #           # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
+ #           # the value at the corresponding spatial coordinate in the median spatial profile.
+ #           for i in range(int(width)):
+ #               if 0. in fdict['data'][:, int(x + i)]:
+ #                   nocr = np.where(fdict['data'][:, int(x + i)] != 0)
+#		    
+ #                   # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
+ #                   # same for the pixel column being fixed.
+ #                   datanocr = fdict['data'][:, int(x + i)][nocr]
+ #                   if len(datanocr) == 0:
+ #                       continue
+ #                   medcolnocr = meddatacol[nocr]
+ #                   scale = np.nansum(datanocr) / np.nansum(medcolnocr)
+ #                   if scale < 0:
+ #                       scale = np.nanmax(datanocr) / np.nanmax(medcolnocr)
+ #                   meddatacol *= scale
+ #                   errmeddatacol *= scale
+#		    
+ #                   # Substitue scaled median spatial profile values into the pixels where CRs or bad pixels have been
+ #                   # identified.
+ #                   multiplier = np.ones(len(meddatacol))
+ #                   multiplier[nocr] *= 0
+ #                   crsubstitute = multiplier * meddatacol
+ #                   fdict['data'][:, int(x + i)] += crsubstitute
+ #                   crerrsubstitute = multiplier * errmeddatacol
+ #                   fdict['errs'][:, int(x + i)] += crerrsubstitute
 
         binlocations.append([int(x), int(x + width), snrestimate])
 
@@ -339,6 +345,31 @@ def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
+# Levenberg-Marquardt least squares method. Returns the best fit parameters of the Moffat function
+def linear_least_squares(r, col):
+    # Set up initial conditions for the least squares fit.
+    x0 = [0., np.median(col)]
+
+    # Run the least squares fit.
+    res_lsq = least_squares(linear_resid, 
+                            x0, 
+                            args=(r, col), 
+                            method='trf'
+                            )
+
+    return [res_lsq.x[0], res_lsq.x[1]]
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+# m = x[0]
+# c = x[1]
+def linear_resid(x, datarange, data):
+    return (x[0]*datarange) + x[1] - data
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the
 # axis required.
 def make_wav_axis(start, increment, length):
@@ -389,7 +420,7 @@ def moffat_least_squares(r, col, seeing, pixres):
     # alpha value calculated by substituting seeing (FWHM) converted to pixels and beta = 4.765 into the equation:
     #               alpha = FWHM / (2 * ((2 ^ (1 / beta)) - 1) ^ 0.5)
     # Initial beta value comes from optimal value from atmospheric turbulence theory as described in
-    # Trujillo I. et al. (2001), MNRAS, 328, 977-985
+    # Trujillo, I. et al. (2001), MNRAS, 328, 977-985
     # See https://ui.adsabs.harvard.edu/abs/2001MNRAS.328..977T/abstract
     x0 = [np.nanmedian(np.sort(col)[-3:]), np.argmax(col), seeing / 0.7914, 4.765, 0.,
           np.median(np.concatenate((col[:5], col[-5:])))]
@@ -445,6 +476,56 @@ def plot_fitted_spatial_profile(spataxis, bindata, hiresspataxis, binmoffparams,
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
+# Levenberg-Marquardt least squares method.
+def poly2_least_squares(r, col):
+    # Set up initial conditions for the least squares fit.
+    x0 = [0., 0., np.median(col)]
+
+    # Run the least squares fit.
+    res_lsq = least_squares(poly2_resid, 
+                            x0, 
+                            args=(r, col), 
+                            method='trf'
+                            )
+
+    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2]]
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+# m = x[0]
+# c = x[1]
+def poly2_resid(x, datarange, data):
+    return (x[0]*datarange*datarange) + (x[1]*datarange) + x[2] - data
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
+# Levenberg-Marquardt least squares method.
+def poly3_least_squares(r, col):
+    # Set up initial conditions for the least squares fit.
+    x0 = [0., 0., 0., np.median(col)]
+
+    # Run the least squares fit.
+    res_lsq = least_squares(poly3_resid, 
+                            x0, 
+                            args=(r, col), 
+                            method='trf'
+                            )
+
+    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3]]
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+# m = x[0]
+# c = x[1]
+def poly3_resid(x, datarange, data):
+    return (x[0]*datarange*datarange*datarange) + (x[1]*datarange*datarange) + (x[2]*datarange) + x[3] - data
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # This function prints, to the terminal, a set parameters describing a fitted Moffat function.
 def printmoffparams(moffparams, imgstart, datascale):
     sys.stdout.write(' >>> Fitted Moffat function parameters:\n')
@@ -481,7 +562,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         ax = plt.subplot(gs[:, :32])
         colax = plt.subplot(gs[1:, 32])
         masked_data2D = np.ma.masked_where(data2D == 0, data2D)
-        cmap = matplotlib.cm.afmhot
+        cmap = matplotlib.cm.inferno
         cmap.set_bad(color='red')
         s = ax.imshow(masked_data2D, 
                       aspect='auto', 
@@ -515,7 +596,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         axvmin = plt.axes([0.1, 0.05, 0.8, 0.03])
         axvmax = plt.axes([0.1, 0.01, 0.8, 0.03])
         smin = Slider(axvmin, 'LowCut', 0, np.nanmax(masked_data2D)-1, valinit=0., valstep=0.001*np.nanmax(masked_data2D))
-        smax = Slider(axvmax, 'HighCut', 1., np.nanmax(masked_data2D), valinit=np.nanmedian(masked_data2D) + (0.5 * np.nanstd(masked_data2D)), valstep=0.001*np.nanmax(masked_data2D))
+        smax = Slider(axvmax, 'HighCut', 1., np.nanmax(masked_data2D), valinit=np.nanmedian(masked_data2D) + (3. * np.nanstd(masked_data2D)), valstep=0.001*np.nanmax(masked_data2D))
 	    
         def update(val):
             vmax = smax.val
@@ -539,32 +620,132 @@ def show_img(data2D, axdict, headparams, drawlines, title):
 # Subtracts the sky background from the 2D image by defining bg regions using limits input to the function and then
 # fitting a profile to the background column by column while masking cosmic rays. The fitted linear for
 # each column is subtracted from the full column to produce a background subtracted 2D image.
-def subtract_sky(bglowext, bghighext, fdict, axdict, crmask_multiplier=1.):
+def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
 
     fdict['data'] = fdict['data'].T
     fdict['errs'] = fdict['errs'].T
 
     medsky = []
+    colnum  = len(bglowext)
 
-    for ii in range(len(bglowext)):
+    for ii in range(colnum):
+		
         if bglowext[ii] < 0:
             bglowext[ii] = 0
         if bghighext[ii] > axdict['saxis'][-1]:
             bghighext[ii] = axdict['saxis'][-1]
 
         datacol = fdict['data'][ii]
-        colrange = range(len(datacol))
+        colrange = np.array(range(len(datacol)))
         skypix = datacol[np.where(np.logical_or(colrange<bglowext[ii], colrange>bghighext[ii]))]
-        bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
-        skysamp = np.nanmedian(bootsky, axis=0)
-        skylevel = np.nanmean(skysamp)
-        medsky.append(skylevel)
-        skyerr = np.std(skysamp)/(99**0.5)
+        
+        # Kill MOTES if there isn't enough background sky to perform sky subtraction. Should probably be made more nuanced later.
+        if len(skypix)==0:
+            sys.stdout.write(' >>> No pixels contained inside sky region.\n')
+            sys.stdout.write('     -BG_FWHM_MULTIPLIER in motesparams.txt is probably too large.\n')
+            sys.stdout.write('     Please reduce -BG_FWHM_MULTIPLIER and try again.\n')
+            sys.stdout.write('     -BG_FWHM_MULTIPLIER < ' + str(round(np.min([np.shape(fdict['data'])[0], np.shape(fdict['data'])[1]])/(2*hpars['seeing']), 1)) + ' recommended in this case.\n')
+            sys.stdout.write('     Enlarging the 2D spectrum region in reg.txt is also a viable solution.\n')
+            sys.stdout.write('     Terminating MOTES.\n')
+            exit()
+			
+        skyrange = colrange[np.where(np.logical_or(colrange<bglowext[ii], colrange>bghighext[ii]))]
+        if len(set(skypix))==1:
+            continue
+        else:
+            medpix = np.nanmedian(skypix)
+            stdpix = np.nanstd(skypix)
+            loc = np.where(np.logical_and(skypix>medpix-(10*stdpix), skypix<medpix+(10*stdpix)))
+            skypix = skypix[loc]
+            skyrange = skyrange[loc]
+        
+        if pars['-SKYSUB_MODE'] == 'MEDIAN':
+            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            skysamp = np.nanmedian(bootsky, axis=0)
+            skylevel = np.nanmean(skysamp)
+            medsky.append(skylevel)
+            skyerr = np.std(skysamp)/(99**0.5)
+         
+        if pars['-SKYSUB_MODE'] == 'LINEAR':
+            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            grads = []
+            intercepts = []
+            for jj in bootsky.T:
+                linpars = linear_least_squares(skyrange, jj)
+                grads.append(linpars[0])
+                intercepts.append(linpars[1])
+            intercepts = np.array(intercepts)
+            grads = np.array(grads)
+            skygrad = np.mean(grads)
+            skygraderr = np.std(grads)/(99**0.5)
+            skyint = np.mean(intercepts)
+            skyinterr = np.std(intercepts)/(99**0.5)
+            skylevel = (skygrad*colrange)+skyint
+            medsky.append(skylevel)
+            skyerr = ((skygraderr*colrange*skygraderr*colrange)+(skyinterr*skyinterr))**0.5
+        
+        if pars['-SKYSUB_MODE'] == 'POLY2':
+            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            grads = []
+            intercepts = []
+            quads = []
+            for jj in bootsky.T:
+                linpars = poly2_least_squares(skyrange, jj)
+                quads.append(linpars[0])
+                grads.append(linpars[1])
+                intercepts.append(linpars[2])
+            quads = np.array(quads)
+            intercepts = np.array(intercepts)
+            grads = np.array(grads)
+            skyquad = np.mean(quads)
+            skyquaderr = np.std(quads)/(99**0.5)
+            skygrad = np.mean(grads)
+            skygraderr = np.std(grads)/(99**0.5)
+            skyint = np.mean(intercepts)
+            skyinterr = np.std(intercepts)/(99**0.5)
+            skylevel = (skyquad*colrange*colrange)+(skygrad*colrange)+skyint
+            medsky.append(skylevel)
+            skyerr = ((skyquaderr*skyquaderr*colrange*colrange*colrange*colrange) + (skygraderr*colrange*skygraderr*colrange)+(skyinterr*skyinterr))**0.5
+    
+        if pars['-SKYSUB_MODE'] == 'POLY3':
+            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            grads = []
+            intercepts = []
+            quads = []
+            trips=[]
+            for jj in bootsky.T:
+                linpars = poly3_least_squares(skyrange, jj)
+                trips.append(linpars[0])
+                quads.append(linpars[1])
+                grads.append(linpars[2])
+                intercepts.append(linpars[3])
+            trips = np.array(trips)
+            quads = np.array(quads)
+            intercepts = np.array(intercepts)
+            grads = np.array(grads)
+            skytrip = np.mean(trips)
+            skytriperr = np.std(trips)/(99**0.5)
+            skyquad = np.mean(quads)
+            skyquaderr = np.std(quads)/(99**0.5)
+            skygrad = np.mean(grads)
+            skygraderr = np.std(grads)/(99**0.5)
+            skyint = np.mean(intercepts)
+            skyinterr = np.std(intercepts)/(99**0.5)
+            skylevel = (skytrip*colrange*colrange*colrange)+(skyquad*colrange*colrange)+(skygrad*colrange)+skyint
+            medsky.append(skylevel)
+            skyerr = ((skytriperr*skytriperr*colrange*colrange*colrange*colrange*colrange*colrange)+(skyquaderr*skyquaderr*colrange*colrange*colrange*colrange) + (skygraderr*colrange*skygraderr*colrange)+(skyinterr*skyinterr))**0.5
+    
         fdict['data'][ii] -= skylevel
         fdict['errs'][ii] = ((fdict['errs'][ii]**2)+(skyerr**2))**0.5
 
+        sys.stdout.write('     ' + str(ii+1) + '/' + str(colnum) + ' columns completed.\r')
+
     medsky = np.array(medsky)
-    fdict['skymod'] = np.tile(medsky, (np.shape(fdict['data'])[1], 1))
+    if pars['-SKYSUB_MODE'] == 'MEDIAN':
+        fdict['skymod'] = np.tile(medsky, (np.shape(fdict['data'])[1], 1))
+    else:
+        fdict['skymod'] = medsky
+    
     fdict['data'] = fdict['data'].T
     fdict['errs'] = fdict['errs'].T
     
