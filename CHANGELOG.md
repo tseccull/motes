@@ -2,6 +2,27 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.3.0 2022-04-06
+Updates by T. Seccull
+
+## Added
+- Harvester function has been added for the FLOYDS spectrographs on the Las Cumbres 
+Observatory 2 m telescopes.
+
+## Changed
+- Astroscrappy has been run on the GMOS demo data to remove cosmic rays.
+- Demo data has been removed from the github repository for now as the GMOS frames 
+are too large. Return of the FORS2 and X-Shooter demo data frames to the repository 
+should be fine in the near future.
+
+## Deprecated
+- All cosmic ray handiling functions and regions of the script have been commented 
+out pending removal. This is because there are much better software tools, (e.g. 
+Astroscrappy) that can be used for removing and replacing cosmic rays. Testing of 
+the software on the demo data shows that it is fully functional without the cosmic 
+ray handling sections. These regions will need to be tidied up, however.
+
+
 ## 0.2.1 2021-03-26
 
 ### Changed
