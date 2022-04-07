@@ -26,7 +26,7 @@ ray handling sections. These regions will need to be tidied up, however.
 ## 0.2.1 2021-03-26
 
 ### Changed
--Colormap for plots updated to inferno. Using a perceptually uniform sequential
+- Colormap for plots updated to inferno. Using a perceptually uniform sequential
 colormap really makes a difference in clearly defining structure in the 
 spectrum.
 
