@@ -11,7 +11,9 @@ import sys
 import warnings
 
 from matplotlib.widgets import Slider
+from scipy.optimize import curve_fit
 from scipy.optimize import least_squares
+from scipy.stats import pearsonr
 
 ###############################################################################
 # FUNCTIONS //////////////////////////////////////////////////////////////////#
@@ -19,28 +21,24 @@ from scipy.optimize import least_squares
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Calculate the FWHM and hence the extraction limits from a Moffat profile based on the distance from the central peak
-# as a multiple of FWHM. A high resolution profile can also be produced if necessary by setting highres=True.
-def extraction_limits(moffparams, axesdict, width_multiplier=3.0, highres=False):
+# as a multiple of FWHM.
+# INPUTS:  moffparams             - parameters of the Moffat profile to be created and measured.
+#          axesdict               - dictionary containing axis data for the data frame. Here only the length of the spatial axis is retrieved.
+#          width_multiplier       - defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM
+# OUTPUTS: lower_extraction_limit - the lower bound of the region to be extracted.
+#          upper_extraction_limit - the upper bound of the region to be extracted.
+#          fwhm                   - the Full Width at Half Maximum of the Moffat profile.
+#          moffparams[1]          - location of the center of the Moffat profile.
+def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
 
-    # If requested create a Moffat profile based on the input parameters that has 50 times the resolution of the
-    # original data. Else, use the native resolution of the data
-    if highres:
-        r = np.linspace(0, axesdict['spataxislen'] - 0.02, num=axesdict['spataxislen'] * 50)
-        moffprof = moffat(moffparams[0], moffparams[1], moffparams[2], moffparams[3], moffparams[4], moffparams[5], r)
-        fwhm = (2 * moffparams[2] * (((2**(1/moffparams[3]))-1)**0.5))*50
-
-    else:
-        r = np.linspace(0, axesdict['spataxislen'] - 1, num=axesdict['spataxislen'])
-        moffprof = moffat(moffparams[0], moffparams[1], moffparams[2], moffparams[3], 0, 0, r)
-        fwhm = 2 * moffparams[2] * (((2**(1/moffparams[3]))-1)**0.5)
-
-    # Locate the peak of the Moffat profile
-    indexmax = np.argmax(moffprof)
+    # Create a Moffat profile based on the input parameters.
+    r = np.linspace(0, axesdict['spataxislen'] - 1, num=axesdict['spataxislen'])
+    fwhm = 2 * moffparams[2] * (((2**(1/moffparams[3]))-1)**0.5)
 
     # Respectively define the upper and lower extraction limits at a distance above and below the peak of the Moffat
     # profile that equals the FWHM of the Moffat profile times a multiplying factor.
-    lower_extraction_limit = indexmax - (width_multiplier * fwhm)
-    upper_extraction_limit = indexmax + (width_multiplier * fwhm)
+    lower_extraction_limit = moffparams[1] - (width_multiplier * fwhm)
+    upper_extraction_limit = moffparams[1] + (width_multiplier * fwhm)
 
     return lower_extraction_limit, upper_extraction_limit, fwhm, moffparams[1]
 
@@ -73,12 +71,42 @@ def extrap_grad(intextlims, median_lims):
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+def filter_data(data2D, errs2D):
+    # This function takes in the data2D and errs2D and outputs frames where any
+    # NaN or Inf values are 0.0 (this can be later filtered to a median of the column)
+
+    # This is used before the extraction procedures to ensure the S/N in
+    # the bin is numerical (required for optimal extraction).
+    # Input = Original data2D, errs2D
+    # Output = Filtered data2D, errs2D
+
+    # Zero out any NaNs and Infs from the error frame and corresponding data.
+    errs2D[np.isfinite(errs2D) == False] = 0.0
+    data2D[np.isfinite(errs2D) == False] = 0.0
+    # Likewise, ensure that data is numerical and  corresponding errors.
+    data2D[np.isfinite(data2D) == False] = 0.0
+    errs2D[np.isfinite(data2D) == False] = 0.0
+
+    return data2D, errs2D
+	
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such that when summed it will
 # have a given signal to noise. So lower signal to noise regions will have larger bins. This function works from the
 # centre of the input 2D spectrum outward to the ends in order to ensure a good start for the binning process.
 # Flagged bad pixels will be replaced with appropriate values using a method described by the ESO X-Shooter
 # pipeline. Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
+# INPUTS:  fdict - dictionary containing all the data, error, and quality frames
+#           slow - lower spatial limit of the region where the S/N will be measured when defining the extent of a bin
+#          shigh - upper spatial limit of the region where the S/N will be measured when defining the extent of a bin
+#    dispaxislen - length of th dispersion axis
+#         params - dictionary of parameters ready in from the motesparams.txt configuration file
+#            sky - optional kwarg used to tell get_bins whether the sky has been subtracted yet or not, and to set the minSNR threshold accordingly
+#   replace_crbp - optional kwarg; when True, get_bins will try to replace bad pixels with values estimated using the median spatial profile of the current bin
+# OUTPUTS: binlocations - a list containing the details for each bin determined by get_bins. The boundaries and S/N of each bin are recorded here.
+#          fdict - returns fdict with bad pixels replaced if replace_crbp=True. If replace_crbp=False, fdict is returned unchanged.
+def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=False):
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
     if params['-SUBTRACT_SKY'] and sky==True:
         minSNR = params['-SKY_SNR_BIN_LIM']
@@ -87,6 +115,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
     else:
         minSNR = params['-SNR_BIN_LIM']
 
+    # Minimum columns for a bin
     mincols = params['-COL_BIN_LIM']
 
     # Start x at the central pixel column of the dispersion axis
@@ -129,66 +158,47 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
 
             #Estimate the S/N
             snrestimate = signal / rssnoise
-
-# CR REPLACEMENT IS DEPRECATED
-
-#        if params['-REPLACE_CRBP']:
-#            # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
-#            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
-#            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-#		    
-#            # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
-#            # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
-#            # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
-#            # value of that median spatial pixel. The standard error of each of these distributions becomes the error
-#            # of the flux.
-#            meddatacol = []
-#            errmeddatacol = []
-#            for j in range(np.shape(fdict['data'])[0]):
-#                bootsamp = np.random.choice(fdict['data'][j, int(x - width):int(x)], size=(int(width), 100), replace=True)
-#                meddatacol.append(np.nanmedian(bootsamp))
-#                meanstddist = np.nanstd(bootsamp, axis=0)
-#                meanstd = np.mean(meanstddist)
-#                errmeddatacol.append(meanstd / np.sqrt(width - 1))
-#		    
-#            meddatacol = np.array(meddatacol)
-#            errmeddatacol = np.array(errmeddatacol)
-#		    
-#            # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
-#            # the value at the corresponding spatial coordinate in the median spatial profile.
-#            for i in range(int(width)):
-#                if 0. in fdict['data'][:, int(x-i)]:
-#                    nocr = np.where(fdict['data'][:, int(x-i)] != 0)
-#		    
-#                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
-#                    # same for the pixel column being fixed.
-#                    datanocr = fdict['data'][:, int(x-i)][nocr]
-#                    if len(datanocr) == 0 or all(datanocr) == True:
-#                        continue
-#                    medcolnocr = meddatacol[nocr]
-#                    
-#                    scale = np.nansum(datanocr[slow:shigh])/np.nansum(medcolnocr[slow:shigh])
-#
-#                    if scale < 0:
-#                        scale = np.nanmax(datanocr[slow:shigh])/np.nanmax(medcolnocr[slow:shigh])
-#                    meddatacol *= scale
-#                    errmeddatacol *= scale
-#		    
-#                    # Substittue scaled median spatial profile values into the pixels where CRs or bad pixels have been
-#                    # identified.
-#                    multiplier = np.ones(len(meddatacol))
-#                    multiplier[nocr] *= 0
-#                    crsubstitute = multiplier * meddatacol
-#                    fdict['data'][:, int(x-i)] += crsubstitute
-#                    crerrsubstitute = multiplier * errmeddatacol
-#                    fdict['errs'][:, int(x - i)] += crerrsubstitute
+        
+        if replace_crbp:
+            # Replace bad pixels and cosmic rays if requested by the user. The method employed here
+            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
+            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+		    
+            # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
+            # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
+            # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
+            # value of that median spatial pixel. The standard error of each of these distributions becomes the error
+            # of the flux.
+            
+            meddatacol = np.nanmedian(fdict['data'][:, int(x - width):int(x)], axis=1)            
+            medtile = np.tile(meddatacol, (width, 1)).T
+            madtile = np.abs(fdict['data'][:, int(x - width):int(x)]-medtile)
+            errmeddatacol = np.nanmedian(madtile, axis=1)
+            
+            nmeddatacol = meddatacol/np.sum(meddatacol)
+                        
+            for i in range(int(width)):
+				# If there are both good and bad pixels in the current column (i.e. not all pixels are bad), repair the bad ones.
+				# Leave columns of all bad pixels as they are.
+                if 0. in fdict['qual'][:, int(x-i)] and all(x==0 for x in fdict['qual'][:, int(x-i)])==False:
+                    #print(fdict[fdict['qual'][:, int(x-i)])
+                    #print(np.isfinite(fdict['data'][:, int(x - i)]))
+                    cr = np.where(fdict['qual'][:, int(x-i)] == 0)
+                    nocr =  np.where(fdict['qual'][:, int(x-i)] == 1)
+                    proportion_nocr = np.sum(nmeddatacol[nocr])
+                    total_nocr = np.sum(meddatacol[nocr])
+		    
+                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
+                    # same for the pixel column being fixed.
+                    fdict['data'][:, int(x - i)][cr] = total_nocr*(nmeddatacol[cr]/proportion_nocr)
+                    fdict['errs'][:, int(x - i)][cr] = np.median(fdict['errs'][:, int(x - i)][nocr])
 
         binlocations.append([int(x - width), int(x), snrestimate])
 
         x -= width
         width = 0
 
-    x = int(dispaxislen / 2) + 1
+    x = int(dispaxislen / 2)
 
     # Repeat the same process as above, starting at the centre of the dispersion axis, but moving outward toward the
     # longer wavelength end of the 2D spectrum.
@@ -221,57 +231,29 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
 
             # Estimate the S/N
             snrestimate = signal / rssnoise
-
-##CR HANDLING DEPRECATED
-
- #       if params['-REPLACE_CRBP']:
- #           # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
- #           # is the same as that used by ESO in their X-Shooter data reduction pipeline.
- #           # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
- #           meddatacol = []
- #           errmeddatacol = []
-#		    
- #           # Here a median spatial profile for the current bin is determined by bootstrapping the good pixels
- #           # in each spatial pixel row with repeats to estimate a distribution of median values for each value in the
- #           # median spatial distribution for the bin. The mean of each of these distributions is then taken to be the
- #           # value of that median spatial pixel. The standard error of each of these distributions becomes the error
- #           # of the flux.
- #           for j in range(np.shape(fdict['data'])[0]):
- #               bootsamp = np.random.choice(fdict['data'][j, int(x):int(x + width)], size=(int(width), 1), replace=True)
- #               meddatacol.append(np.nanmedian(bootsamp))
- #               meanstddist = np.nanstd(bootsamp, axis=0)
- #               meanstd = np.mean(meanstddist)
- #               errmeddatacol.append(meanstd / np.sqrt(width - 1))
- #           
- #           meddatacol = np.array(meddatacol)
- #           errmeddatacol = np.array(errmeddatacol)
-#		    
- #           # Each pixel in the bin that was flagged to have be bad pixels or be contaminated by CRs are replaced by
- #           # the value at the corresponding spatial coordinate in the median spatial profile.
- #           for i in range(int(width)):
- #               if 0. in fdict['data'][:, int(x + i)]:
- #                   nocr = np.where(fdict['data'][:, int(x + i)] != 0)
-#		    
- #                   # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
- #                   # same for the pixel column being fixed.
- #                   datanocr = fdict['data'][:, int(x + i)][nocr]
- #                   if len(datanocr) == 0:
- #                       continue
- #                   medcolnocr = meddatacol[nocr]
- #                   scale = np.nansum(datanocr) / np.nansum(medcolnocr)
- #                   if scale < 0:
- #                       scale = np.nanmax(datanocr) / np.nanmax(medcolnocr)
- #                   meddatacol *= scale
- #                   errmeddatacol *= scale
-#		    
- #                   # Substitue scaled median spatial profile values into the pixels where CRs or bad pixels have been
- #                   # identified.
- #                   multiplier = np.ones(len(meddatacol))
- #                   multiplier[nocr] *= 0
- #                   crsubstitute = multiplier * meddatacol
- #                   fdict['data'][:, int(x + i)] += crsubstitute
- #                   crerrsubstitute = multiplier * errmeddatacol
- #                   fdict['errs'][:, int(x + i)] += crerrsubstitute
+        
+        if replace_crbp:
+           # Replace bad pixels, and cosmic rays if requested by the user. The method employed here
+           # is the same as that used by ESO in their X-Shooter data reduction pipeline.
+           # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+           
+           meddatacol = np.nanmedian(fdict['data'][:, int(x - width):int(x)], axis=1)
+           medtile = np.tile(meddatacol, (width, 1)).T
+           madtile = np.abs(fdict['data'][:, int(x - width):int(x)]-medtile)
+           errmeddatacol = np.nanmedian(madtile, axis=1)
+           
+           nmeddatacol = meddatacol/np.sum(meddatacol)
+           
+           for i in range(int(width)):
+               if 0. in fdict['qual'][:, int(x + i)]:
+                    cr = np.where(fdict['qual'][:, int(x+i)] == 0)
+                    proportion_nocr = np.sum(nmeddatacol[nocr])
+                    total_nocr = np.sum(meddatacol[nocr])
+		
+                    # Scale the median spatial profile so its summed flux within the spectrum aperture is equal to the
+                    # same for the pixel column being fixed.
+                    fdict['data'][:, int(x - i)][cr] = total_nocr*(nmeddatacol[cr]/proportion_nocr)
+                    fdict['errs'][:, int(x - i)][cr] = np.median(fdict['errs'][:, int(x - i)][nocr])		    
 
         binlocations.append([int(x), int(x + width), snrestimate])
 
@@ -286,17 +268,25 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False):
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Print and plot the output of get_bins
+# INPUTS:  binparams - list containing the locations and S/N of each bin
+#             params - dictionary of parameters read in from the motesparams.txt confifuration file.
+#             lowext - lower limit of the spatial region measured for S/N in get_bins()
+#            highext - upper limit of the spatial region measured for S/N in get_bins()
+#             data2D - 2D spectroscopic data
+#         headparams - dictionary of parameters full from the datafile header.
+#             axdict - dictionary containing axes and axis metadata for the current extraction
+# OUTPUTS: None 
 def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
     sys.stdout.write(' >>> ' + str(len(binparams)) + ' spectrum localisation bins determined on dispersion axis.\n')
 
     # DIAGNOSTICS - Plot boundary locations of localisation bins on the dispersion axis.
     if params['-DIAG_PLOT_BIN_LOC']:
         drawlines = []
-        for bin in binparams:
+        for b in binparams:
             binlineloc = np.where(np.logical_and(axdict['saxis'] > lowext - ((highext - lowext) * 0.2), axdict['saxis'] < highext + ((highext - lowext) * 0.2)))
-            drawlines.append(np.ones(len(axdict['saxis'][binlineloc])) * bin[0] + axdict['wavstart'])
+            drawlines.append(np.ones(len(axdict['saxis'][binlineloc])) * b[0] + axdict['wavstart'])
             drawlines.append(axdict['saxis'][binlineloc] + axdict['imgstart'])
-            drawlines.append(np.ones(len(axdict['saxis'][binlineloc])) * bin[1] + axdict['wavstart'])
+            drawlines.append(np.ones(len(axdict['saxis'][binlineloc])) * b[1] + axdict['wavstart'])
             drawlines.append(axdict['saxis'][binlineloc] + axdict['imgstart'])
 
         show_img(data2D, axdict, headparams, drawlines, '2D Spectrum with Boundaries of Localisation Bins')
@@ -318,11 +308,11 @@ def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
     # extrapolate the extraction limits in a linear fashion at the ends of the wavelength axis of the 2D spectrum
     # so that the full wavelength axis is covered.
     else:
-        interpextract_1 = interp.interp1d(extractionlims[0], extractionlims[1], kind=interpkind)
-        interpextract_2 = interp.interp1d(extractionlims[0], extractionlims[2], kind=interpkind)
+        interpextract_1 = interp.interp1d(extractionlims[0], extractionlims[1], kind='linear')
+        interpextract_2 = interp.interp1d(extractionlims[0], extractionlims[2], kind='linear')
 
-        intermextlims = [interpextract_1(np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))).astype(int),
-                         interpextract_2(np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))).astype(int)]
+        intermextlims = [interpextract_1(np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))),
+                         interpextract_2(np.array(np.arange(extractionlims[0][0], extractionlims[0][-1])))]
 
         shortextraplim1, shortextraplim2, longextraplim1, longextraplim2 = extrap_extraction_lims(intermextlims, dispaxislen, extractionlims[0][0], extractionlims[0][-1])
 
@@ -373,38 +363,47 @@ def linear_resid(x, datarange, data):
 # Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the
 # axis required.
 def make_wav_axis(start, increment, length):
-    return (increment * np.array(range(length))) + start
+    return np.arange(start=start, step=increment, stop=(length * increment) + start)
 
 
+## DEPRECATED
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # This function detects cosmic rays in the 2D image and masks the pixels that contain them, by separating the spectrum
 # region from the two background regions. Each region is sigma-clipped separately due to the different distribution of
 # fluxes present in the background and the vicinity of the 2D spectrum.
-def mask_cosmic_rays(data, lext, hext, multiplier=4.):
-    # Divide 2D spectrum into spectrum and background sections
-    sections = [data[:int(lext), :], data[int(lext):int(hext), :], data[int(hext):, :]]
-    masks = []
-
-    # Sequentially sigma-clip each section, and create a mask marking the locations of pixels to be kept.
-    for sect in sections:
-
-        datamed = np.nanmedian(sect)
-        datastd = np.nanstd(sect)
-
-        upperlim = datamed + (multiplier * datastd)
-        lowerlim = datamed - (multiplier * datastd)
-
-        sectmask2D = (sect < upperlim) & (sect > lowerlim)
-        masks.append(sectmask2D)
-
-    # Assemble masks for each section into a full mask for the input 2D spectrum.
-    mask2D = np.vstack((masks[0], masks[1], masks[2]))
-
-    return mask2D
+#def mask_cosmic_rays(data, lext, hext, multiplier=4.):
+#    # Divide 2D spectrum into spectrum and background sections
+#    sections = [data[:int(lext), :], data[int(lext):int(hext), :], data[int(hext):, :]]
+#    masks = []
+#
+#    # Sequentially sigma-clip each section, and create a mask marking the locations of pixels to be kept.
+#    for sect in sections:
+#
+#        datamed = np.nanmedian(sect)
+#        datastd = np.nanstd(sect)
+#
+#        upperlim = datamed + (multiplier * datastd)
+#        lowerlim = datamed - (multiplier * datastd)
+#
+#        sectmask2D = (sect < upperlim) & (sect > lowerlim)
+#        masks.append(sectmask2D)
+#
+#    # Assemble masks for each section into a full mask for the input 2D spectrum.
+#    mask2D = np.vstack((masks[0], masks[1], masks[2]))
+#
+#    return mask2D
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Creates moffat profile added a linear sloped background based on input parameters
+# INPUTS:   amp - amplitude of the Moffat profile
+#             c - location of the center/peak of the Moffat profile on the spatial axis.
+#         alpha - the main parameter that defines the width of the Moffat profile.
+#          beta - plays a role in defining the width of the Moffat profile in the outer wings far from the profile's peak.
+#       bglevel - height of the linearly varying background
+#        bggrad - gradient of the linearly varying background
+#     datarange - x axis of the Moffat profile.
+# OUTPUTS: a moffat profile defined on the datarange axis using the parameters input to the function.
 def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
     moff = amp * ((1 + (((datarange - c) * (datarange - c)) / (alpha * alpha))) ** -beta)
 
@@ -413,22 +412,25 @@ def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
-# Levenberg-Marquardt least squares method. Returns the best fit parameters of the Moffat function
+# least squares method. Returns the best fit parameters of the Moffat function
+# INPUTS:  r   - spatial axis of the data being fit
+#          col - data being fit
+#          seeing - estimated FWHM of the spatial profile
+#          pixres - spatial resolution of each pixel in arcsec/pixel
+# OUTPUTS: list of best fit output parameters returned by the least squares routine.
 def moffat_least_squares(r, col, seeing, pixres):
     # Set up initial conditions for the least squares fit.
-    # amplitude, centre, alpha, beta, background gradient, background level
-    # alpha value calculated by substituting seeing (FWHM) converted to pixels and beta = 4.765 into the equation:
-    #               alpha = FWHM / (2 * ((2 ^ (1 / beta)) - 1) ^ 0.5)
-    # Initial beta value comes from optimal value from atmospheric turbulence theory as described in
+    # x0 = [amplitude, centre, alpha, beta, background gradient, background level]
+    # Initial beta estimate comes from optimal value from atmospheric turbulence theory as described in
     # Trujillo, I. et al. (2001), MNRAS, 328, 977-985
     # See https://ui.adsabs.harvard.edu/abs/2001MNRAS.328..977T/abstract
-    x0 = [np.nanmedian(np.sort(col)[-3:]), np.argmax(col), seeing / 0.7914, 4.765, 0.,
+    x0 = [np.nanmedian(np.sort(col)[-3:]), np.argmax(col), seeing/pixres, 4.765, 0.,
           np.median(np.concatenate((col[:5], col[-5:])))]
 
     # Run the least squares fit.
     res_lsq = least_squares(moffat_resid, 
                             x0, 
-                            bounds=([0., np.argmax(col)-1., 0., 0., 0., -np.inf], [np.inf, np.argmax(col)+1, (5*seeing/0.7914), 5., np.inf, np.inf]), 
+                            bounds=([0., np.argmax(col)-1., 0., 0., 0., -np.inf], [np.inf, np.argmax(col)+1, (5*seeing/pixres), 5., np.inf, np.inf]), 
                             args=(r, col), 
                             method='trf', 
                             ftol=1E-12
@@ -438,14 +440,17 @@ def moffat_least_squares(r, col, seeing, pixres):
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculates residuals of fitted moffat profile and the data for the Levenberg Marquardt least squares method.
+# Calculates residuals of fitted moffat profile and the data for the least squares fitting.
 # A = x[0]
 # c = x[1]
 # alpha = x[2]
 # beta = x[3]
 # B = x[4]
 # m = x[5]
-#@jit
+# INPUTS:  x         - list of parameters defining the shape of the model moffat profile
+#          datarange - spatial axis of the data
+#          data      - the data 
+# OUTPUTS: the residual of the model moffat profile and the data
 def moffat_resid(x, datarange, data):
     moff = x[0] * ((1 + ((datarange - x[1]) * (datarange - x[1])) / (x[2] * x[2])) ** -x[3])
 
@@ -453,8 +458,119 @@ def moffat_resid(x, datarange, data):
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
+# Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors are not 'revised' 
+# since we already have the 'variance frame' (and we are not working with counts). Ideally, this extraction reduces 
+# errors with the weighting and conserves the flux (when compared to the standard extraction). This subroutine uses an 
+# analytic Moffat profile (post sky-subtraction), instead of polynominals as in Horne (1986). Furthermore, profiling 
+# takes place bin by bin, accounting for spatial profile variations across the dispersion axis; extraction takes place
+# column by column within the bin limits and within the extraction limits previously calculated.
+
+# Input = data2D, errs2D
+# Input = binparameters (contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis)
+# Input = finalextractionlimits (contains limits at each dispersion pixel)
+# Input = axdict (dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame)
+# Outputs = optidata1D, optierrs1D, aperdata1D, apererrs1D
+def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
+
+    # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
+    data2D, errs2D = filter_data(data2D, np.abs(errs2D))
+    
+    # Set up output arrays for the optimally and aperture extracted spectra and their respective uncertainties
+    optidata1D = np.zeros(np.shape(data2D)[0])
+    optierrs1D = np.zeros(np.shape(data2D)[0])
+    aperdata1D = np.zeros(np.shape(data2D)[0])
+    apererrs1D = np.zeros(np.shape(data2D)[0])
+    
+    # Set up bin identification parameters for the following loop.
+    bin_number = -1
+    b = np.zeros(8)
+    
+    # Loop through each dispersion element of the spectrum.
+    for i, col in enumerate(data2D):
+		# Identify the location of the current element in the original 2D spectrum
+        dpix = i + axdict['wavstart']
+        
+        # If the current element belongs in the next bin as defined by getbins, use the new bin's parameters and increment the bin number.
+        if bin_number < len(binparameters)-1 and dpix == binparameters[bin_number+1][-2]:
+            bin_number += 1
+            b = binparameters[bin_number]
+        
+        # Get the extraction limits for the current dispersion element and define the spatial axis. Where the extraction limits include partial pixels on the edge of the aperture, those pixels are included in their entirety.
+        loextlim = extractionlimits[0][i]
+        hiextlim = extractionlimits[1][i]
+        ax = axdict['saxis'][int(np.floor(loextlim)):int(np.ceil(hiextlim+1))]
+        
+        # Use the extraction limits to define the data column for this wavelength element. 
+        col = col[int(np.floor(loextlim)):int(np.ceil(hiextlim+1))]
+        
+        # Use the extraction limits to define the errs column for this wavelength element.
+        # Where errs have a value of 0, set them to the median err value for the entire column.
+        err = errs2D[i]
+        err[np.where(err==0)] = np.median(err)
+        err = err[int(np.floor(loextlim)):int(np.ceil(hiextlim+1))]
+        
+        # Use the err column to get the variance column
+        var = err*err
+        
+        # Perform the standard aperture extraction on the data in the column, and add this value to the aperture 1D output array.
+        # Get the root sum square of the err column and add this value to the uncertainty array for the 1D aperture extraction.
+        f = np.sum(col)        
+        aperdata1D[i] += f
+        apererrs1D[i] += np.sqrt(np.sum(var))
+        
+        # Step 5 of the Horne 1986 algorithm - Defining the spatial profile.
+        # Use the average value of the extraction limits in the current column to estimate the location of the centre of the peak of the spatial profile.
+        profcent = (hiextlim + loextlim) * 0.5
+        
+        # Use the Moffat profile parameters for the current bin to make a moffat profile that approximates the shape of the spectrum's spatial profile in the current column.
+        # The estimated centre of the extraction limits is used to shift the profile to the correct location along the spatial axis. 
+        # The background is assumed to have been subtracted by now, so the background level and gradient are set to 0.
+        profile = moffat(b[0], profcent, b[2], b[3], 0., 0., ax)
+        # Enforce positivity of the data and normalise the spatial profile.
+        nprof = profile/np.sum(profile)
+        col[np.where(col<0.)] = 0.
+        
+        # Step 7 of Horne 1986 - Cosmic ray masking with a conservative 5 sigmas.
+        value = np.abs((col - (f*nprof))**2)
+        sigma = 5
+        condition = var*sigma**2
+        # With invert, it gives False (ie. 0) if the above condition is satisfied which
+        # means to mask the rays
+        cosmic_mask = np.invert([value > condition])[0]
+
+        # Add an exception to handle scenarios where the mask is all False If that happens, ignore the
+        # cosmic ray correction.
+        if not np.any(cosmic_mask):
+            cosmic_mask = np.full(shape=cosmic_mask.shape, fill_value=True)
+            
+        # Extract the optimal spectrum (Step 8 of the algorithm)
+        # Page 4 of Horne 1986: These formulae are equivalent to determining the
+        # OPT spectrum by scaling a known spatial profile P, to fit the sky
+        # subtracted data, whose variances are V.
+        
+        # If column is in a GMOS chip gap set the optimal flux and uncertainty to 0.
+        if all(x==0. for x in col) or all(x==1. for x in col): 
+            fopt = 0.
+            vopt = 0.
+        else:
+            fopt = np.sum(((nprof*col)/var)[cosmic_mask]) / np.sum(((nprof*nprof)/var)[cosmic_mask])
+            vopt = np.sum(nprof[cosmic_mask]) / np.sum(((nprof*nprof)/var)[cosmic_mask])        
+        optidata1D[i] += fopt
+        optierrs1D[i] += np.sqrt(vopt)
+
+    return optidata1D, optierrs1D, aperdata1D, apererrs1D
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the Moffat function fitted to
 # the data on top.
+# INPUTS:       spataxis - the spatial, or x, axis of the profile.
+#                bindata - the binned data that has been fitted with a Moffat profile.
+#          hiresspataxis - A supersampled spatial axis used only for plotting purposes.
+#          binmoffparams - Parameters defining the Moffat profiel that was fitted to bindata.
+#               imgstart - Lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
+#             headparams - dictionary of parameters pulled from the header of the current datafile
+# OUTPUTS: None
 def plot_fitted_spatial_profile(spataxis, bindata, hiresspataxis, binmoffparams, imgstart, headparams):
     plt.figure(figsize=(7,4.5))
     plt.plot(hiresspataxis + imgstart, 
@@ -527,6 +643,10 @@ def poly3_resid(x, datarange, data):
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # This function prints, to the terminal, a set parameters describing a fitted Moffat function.
+# INPUTS:  moffparams - list of Moffat profile parameters.
+#            imgstart - Lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
+#           datascale - multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares
+# OUTPUTS: None
 def printmoffparams(moffparams, imgstart, datascale):
     sys.stdout.write(' >>> Fitted Moffat function parameters:\n')
     sys.stdout.write('         A = ' + str(moffparams[0]) + '\n')
@@ -628,8 +748,8 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     medsky = []
     colnum  = len(bglowext)
 
+    # Makes sure the limits are within the image.
     for ii in range(colnum):
-		
         if bglowext[ii] < 0:
             bglowext[ii] = 0
         if bghighext[ii] > axdict['saxis'][-1]:

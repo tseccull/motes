@@ -3,23 +3,24 @@
 ###############################################################################
 import astropy.io.fits as fits
 import copy
-import datetime
-import glob
 import motes.common as common
-import os
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
-
-from astropy.table import Table
 
 ###############################################################################
 # FUNCTIONS ///////////////////////////////////////////////////////////////// #
 ###############################################################################
 # ////////////////////////////////////////////////////////////////////////////#
-# EXTRACT HEADER DATA AND DATAFRAMES, AND REPACKAGE THEM INTO DICTIONARIES
-
-def data_harvest(intreg, filename_2D, chunk, param_dict):
+# Extract header metadata and data frames, and repackage them into dictionaries.
+# INPUTS:  reg_counter - integer noting which line in region is being called to define the boundaries of the 2D data.
+#          filename_2D - name of the data file.
+#          region      - list of regions read in from reg.txt in startup.read_regions()
+#          param_dict  - dictionary of parameters for MOTES read in frommotesparams.txt by startup.read_parfile()
+# OUTPUTS: head_dict   - dictionary containing parameters and metadata read from the header of the image file.
+#          frame_dict  - dictionary containing the 2D data frames read from the image file.
+#          axes_dict   - dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
+#          imghead     - a copy of the image file header; this is also a dictionary.           
+def data_harvest(reg_counter, filename_2D, region, param_dict):
     # Create dictionary to tell data_harvest which instrument specific
     # function to call.
     instrument_dict = {    'en06': harvest_floyds,
@@ -30,8 +31,8 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
                        'XSHOOTER': harvest_xshoo
                        }
 
-    # Open file containing the spectral data, open it up and extract the
-    # header, image frame, error frame, and quality frame (if it has one).
+    # Open file containing the spectral data, then extract the header, 
+    # image frame, error frame, and quality frame (if the file has one).
     with fits.open(filename_2D) as imgfile:
         imghead = imgfile[0].header
         inst = imghead['INSTRUME']
@@ -40,8 +41,8 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
     
     # SLICE ALL DATAFRAMES BASED ON THE INPUT FROM reg.txt
     imgshape = np.shape(imgdata)
-    imgstart = int(0 + chunk[intreg][0])
-    imgend = int(imgshape[0] - chunk[intreg][1])
+    imgstart = int(0 + region[reg_counter][0])
+    imgend = int(imgshape[0] - region[reg_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
     datasliced = imgdata[imgstart:imgend + 1, :]
@@ -55,14 +56,14 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
     spataxis = np.linspace(0., float(dataslicedshape[0] - 1), num=dataslicedshape[0])
     hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
-    if chunk[intreg][2]<wavaxis[0] or chunk[intreg][3]>wavaxis[-1]:
+    if region[reg_counter][2]<wavaxis[0] or region[reg_counter][3]>wavaxis[-1]:
         sys.stdout.write(' >>> User defined wavelength limit(s) are outside native wavelength range\n'
                          '     Make sure "-LOW_WAV_SLICE" > lower limit of wavelength axis\n'
                          '     Make sure "-HIGH_WAV_SLICE" < upper limit of wavelength axis\n'
                          '     Terminating MOTES.\n\n')
         exit()
 
-    wavslice = np.where(np.logical_and(wavaxis >= chunk[intreg][2], wavaxis <= chunk[intreg][3]))
+    wavslice = np.where(np.logical_and(wavaxis >= region[reg_counter][2], wavaxis <= region[reg_counter][3]))
     wavstart = wavslice[0][0]
     wavend = wavslice[0][-1]
     wavaxis = wavaxis[wavslice]
@@ -72,7 +73,7 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
     qualsliced = np.squeeze(qualsliced[:, wavslice])
 
     sys.stdout.write(' >>> 2D spectrum sliced on dispersion axis based on user defined limits:\n'
-                     '     New Wavelength range is ' + str(chunk[intreg][2]) + '-' + str(chunk[intreg][3]) + ' ' + head_dict['wavunit'] + '.\n'
+                     '     New Wavelength range is ' + str(region[reg_counter][2]) + '-' + str(region[reg_counter][3]) + ' ' + head_dict['wavunit'] + '.\n'
                      '     This range is equivalent to pixel columns ' + str(wavstart) + '-' + str(wavstart + len(wavaxis)) + '\n')
 
     frame_dict = {'data': datasliced, 
@@ -96,10 +97,19 @@ def data_harvest(intreg, filename_2D, chunk, param_dict):
 
 
 #/////////////////////////////////////////////////////////////////////////////#
-# HARVEST THE HEADER FROM A FLOYDS SPECTRUM
-# SPECTRUM MUST NOT BE FLUX CALIBRATED TO ENSURE THAT A RELIABLE ERR FRAME IS MADE
+# Harvest the header and data from a FLOYDS spectrum.
+# SPECTRUM MUST NOT BE FLUX CALIBRATED, TO ENSURE THAT A RELIABLE ERR FRAME IS MADE.
+# INPUTS:  imgfilehdu - the Header Data Unit (HDU) read in from the data file.
+#          imgheader  - the header read in from the data file.
+# OUTPUTS: imgdata    - the 2D data frame
+#          imgerrs    - the 2D error/uncertainty frame (variance_frame^0.5). In the case of FLOYDS, no variance or uncertainty frame is provided, so one is constructed using the data along with read noise and dark 
+#                       current metadata contained in the file header. This is why flux calibrated 2D FLOYDS spectra should not be extracted with MOTES, as the flux calibration spoils the 
+#                       construction of the error frame. Flux calibration should be applied after the spectrum is extracted if MOTES is used.
+#          imgqual    - the 2D quality frame noting the locations of bad pixels etc. Since FLOYDS spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) 
+#                       is created to ensure compatibility with MOTES.
+#          ogimgqual  - the original 2D quality frame prior to manipulation by MOTES. In the case of FLOYDS this frame is set to all zeros (see imgqual above).
 def harvest_floyds(imgfilehdu, imgheader):
-	# Retrieve the data frame
+	# Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
 	imgdata = imgfilehdu[0].data
 	imgerrs = np.sqrt(imgdata+(imgheader['RDNOISE']*imgheader['RDNOISE'])+(imgheader['DARKCURR']*imgheader['DARKCURR']))
 	imgqual = np.ones(np.shape(imgdata))
@@ -122,14 +132,20 @@ def harvest_floyds(imgfilehdu, imgheader):
                    }
 	sys.stdout.write('DONE.\n')
 	
-	# SLICE IMAGE ON WAVELENGTH AXIS #
     # Create the wavelength axis of the spectrum.
 	wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CD1_1'], imgheader['NAXIS1'])
 
 	return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 # ////////////////////////////////////////////////////////////////////////////#
-# HARVEST THE HEADER AND DATA FROM A FORS2 SPECTRUM
+# Harvest the header and data from a FORS2 spectrum.
+# INPUTS:  imgfilehdu - the Header Data Unit (HDU) read in from the data file.
+#          imgheader  - the header read in from the data file.
+# OUTPUTS: imgdata    - the 2D data frame
+#          imgerrs    - the 2D error/uncertainty frame (variance_frame^0.5).
+#          imgqual    - the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) 
+#                       is created to ensure compatibility with MOTES.
+#          ogimgqual  - the original 2D quality frame prior to manipulation by MOTES. In the case of FORS2 this frame is set to all zeros (see imgqual above).
 def harvest_fors2(imgfilehdu, imgheader):
     # Retrieve the data frame and error frame.
     imgdata = imgfilehdu[0].data
@@ -137,7 +153,7 @@ def harvest_fors2(imgfilehdu, imgheader):
     imgqual = np.ones(np.shape(imgdata))
     ogimgqual = copy.deepcopy(imgqual)-1
 
-    # Determine the spatial pixel resolution of the image in arcsec.
+    # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the detector and the configuration of the collimator (high resolution or standard resolution).
     if imgheader['HIERARCH ESO DET WIN1 BINY'] == 1 and imgheader['HIERARCH ESO INS COLL NAME'] == 'COLL_SR':
         pixres = 0.125
     elif imgheader['HIERARCH ESO DET WIN1 BINY'] == 1 and imgheader['HIERARCH ESO INS COLL NAME'] == 'COLL_HR':
@@ -146,6 +162,7 @@ def harvest_fors2(imgfilehdu, imgheader):
         pixres = 0.25
     elif imgheader['HIERARCH ESO DET WIN1 BINY'] == 2 and imgheader['HIERARCH ESO INS COLL NAME'] == 'COLL_HR':
         pixres = 0.125
+    # If the pixel resolution can't be determined, complain and quit MOTES.
     else:
         sys.stdout.write('FAILED.\n')
         sys.stdout.write('     Non-standard binning used in image.\n'
@@ -170,7 +187,6 @@ def harvest_fors2(imgfilehdu, imgheader):
     
     sys.stdout.write('DONE.\n')
 
-    # SLICE IMAGE ON WAVELENGTH AXIS #
     # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CD1_1'], imgheader['NAXIS1'])
 
@@ -178,9 +194,15 @@ def harvest_fors2(imgfilehdu, imgheader):
 
 
 # ////////////////////////////////////////////////////////////////////////////#
-# HARVEST THE HEADER AND DATA FROM A GMOS SPECTRUM
+# Harvest the header and data from a GMOS spectrum.
+# INPUTS:  imgfilehdu - the Header Data Unit (HDU) read in from the data file.
+#          imgheader  - the header read in from the data file.
+# OUTPUTS: imgdata    - the 2D data frame
+#          imgerrs    - the 2D error/uncertainty frame (variance_frame^0.5).
+#          imgqual    - the 2D quality frame noting the locations of bad pixels etc.
+#          ogimgqual  - the original 2D quality frame prior to manipulation by MOTES.
 def harvest_gmos(imgfilehdu, imgheader):
-    # Retrieve the data frame, error frame, and qual frame.
+    # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science image frame, as some metadata is stored there instead of the primary header.
     scihead = imgfilehdu['SCI'].header
     imgdata = imgfilehdu['SCI'].data
     imgerrs = imgfilehdu['VAR'].data**0.5
@@ -188,12 +210,13 @@ def harvest_gmos(imgfilehdu, imgheader):
     ogimgqual = copy.deepcopy(imgqual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
-    # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as CRs later on.
+    # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as bad.
     imgqual[np.where(imgdata+imgqual==1)] = 0
     imgqual = 1-imgqual
     
-    imgqual[np.isnan(imgdata)==True] = 0
-    imgdata[np.isnan(imgdata)==True] = 1.
+    # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual frame.
+    imgqual[np.where(np.isfinite(imgdata)==False)] = 0
+    imgdata[np.where(np.isfinite(imgdata)==False)] = 1.
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
@@ -205,12 +228,12 @@ def harvest_gmos(imgfilehdu, imgheader):
                       'UNKNOWN': 3
                }
     
-    WavTab = np.array([[0000.,4000.,0],
-                       [4000.,5500.,1],
-                       [5500.,7000.,2],
-                       [7000.,8500.,3],
-                       [8500.,9750.,4],
-                       [9750.,11000.,5]])
+    WavTab = np.array([[0000.,  4000., 0],
+                       [4000.,  5500., 1],
+                       [5500.,  7000., 2],
+                       [7000.,  8500., 3],
+                       [8500.,  9750., 4],
+                       [9750., 11000., 5]])
     
     IQTab = np.array([[0.6, 0.90, 1.20, 2.00],
                       [0.6, 0.85, 1.10, 1.90],
@@ -224,14 +247,14 @@ def harvest_gmos(imgfilehdu, imgheader):
 
     for i in WavTab:
         if scihead['CRVAL1'] > i[0] and scihead['CRVAL1'] < i[1]:
-            seeing = IQTab[int(i[2])][int(IQ_dict[iq])]
+            seeing = float(IQTab[int(i[2])][int(IQ_dict[iq])])
             break
 
     # Put header information into a dictionary
     sys.stdout.write(' >>> Gathering required information from FITS header. ')
     sys.stdout.flush()
     headerdict = {       'object': imgheader['OBJECT'].replace(' ', '_'), 
-                  'pixresolution': imgheader['PIXSCALE'],
+                  'pixresolution': float(imgheader['PIXSCALE']),
                         'exptime': imgheader['EXPTIME'], 
                          'seeing': seeing,
                            'inst': imgheader['INSTRUME'], 
@@ -247,28 +270,34 @@ def harvest_gmos(imgfilehdu, imgheader):
     sys.stdout.write('DONE.\n')
     sys.stdout.write(' >>> Spatial pixel resolution determined: ' + str(headerdict['pixresolution']) + '"\n')
 
-    # SLICE IMAGE ON WAVELENGTH AXIS #
     # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(scihead['CRVAL1'], scihead['CD1_1'], scihead['NAXIS1'])
 
-    # Sets all values and errs within the GMOS chip gaps to 1, so they don't get flagged as bad pixels later on during CR masking
-    # or trip up the bin definition stage. Chip gaps are identified as pixel columns which are all zeros, and then two columns 
+    # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad pixels or trip up the bin definition stage. 
+    # Chip gaps are identified as pixel columns which are all zeros, and then three columns 
     # either side of the chip gaps are also flagged just to be safe.
     zerorows = [1 if all(x==0) else 0 for x in imgdata.T]
-    zerorows = [2 if x==0 and zerorows[y+1]==1 else x for y, x in enumerate(zerorows[:-1])]
-    zerorows = [2 if x==0 and zerorows[y-1]==1 else x for y, x in enumerate(zerorows[1:])]
+    boundary_cols = 3
+    zerorows = np.concatenate([np.zeros(boundary_cols), zerorows, np.zeros(boundary_cols)])
+    for n in reversed(range(boundary_cols)):
+        zerorows = [1 if x==0 and zerorows[y+1]==1 else x for y, x in enumerate(zerorows[:-1])]
+        zerorows = [1 if x==0 and zerorows[y-1]==1 else x for y, x in enumerate(zerorows[1:])]
     zerorows = [1 if x>0 else x for x in zerorows]
-    zerorows = np.append(zerorows, 0)
-    zerorows = np.insert(zerorows, 0, 0)
     chipgapmap = np.tile(zerorows, (np.shape(imgdata)[0], 1))
-    imgdata[chipgapmap==1] = 1
+    imgdata[chipgapmap==1] = 1.
     imgerrs[chipgapmap==1] = 1.
     
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 # ////////////////////////////////////////////////////////////////////////////#
-# HARVEST THE HEADER AND DATA FROM A X-SHOOTER SPECTRUM
+# Harvest the header and data from an X-Shooter spectrum.
+# INPUTS:  imgfilehdu - the Header Data Unit (HDU) read in from the data file.
+#          imgheader  - the header read in from the data file.
+# OUTPUTS: imgdata    - the 2D data frame
+#          imgerrs    - the 2D error/uncertainty frame (variance_frame^0.5).
+#          imgqual    - the 2D quality frame noting the locations of bad pixels etc.
+#          ogimgqual  - the original 2D quality frame prior to manipulation by MOTES.
 def harvest_xshoo(imgfilehdu, imgheader):
     # Retrieve the data frame, error frame, and qual frame.
     imgdata = imgfilehdu[0].data
@@ -277,9 +306,16 @@ def harvest_xshoo(imgfilehdu, imgheader):
     ogimgqual = copy.deepcopy(imgqual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
+    # Values flagged by the X-Shooter data reduction pipeline as interpolated are considered good.
+    imgqual[imgqual==4194304] = 0
+    # If the bspline sky subtraction method has been used in the X-Shooter data reduction pipeline,
+    # pixels flagged as outliers or inaccurate are considered good.
+    imgqual[imgqual==8388608] = 0
+    imgqual[imgqual==16777216] = 0
     imgqual[imgqual>0] *= -1
     imgqual[imgqual==0] = 1
     imgqual[imgqual<0] = 0
+    imgqual[np.where(np.isfinite(imgdata)==False)] = 0
 
     # Put header information into a dictionary
     sys.stdout.write(' >>> Gathering required information from FITS header. ')
@@ -294,7 +330,6 @@ def harvest_xshoo(imgfilehdu, imgheader):
     sys.stdout.write('DONE.\n')
     sys.stdout.write(' >>> Spatial pixel resolution determined: ' + str(headerdict['pixresolution']) + '"\n')
 
-    # SLICE IMAGE ON WAVELENGTH AXIS #
     # Create the wavelength axis of the spectrum.
     wavaxis = common.make_wav_axis(imgheader['CRVAL1'], imgheader['CDELT1'], imgheader['NAXIS1'])
 

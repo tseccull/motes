@@ -2,6 +2,33 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.4.0 2022-07-27
+Updates by T. Seccull
+
+## Added
+- An optimal extraction routine developed by Dominik Kiersz has 
+now been fully integrated into MOTES. Some changes have been made to the
+original design by TS to increase the efficiency of the process, and ensure that
+is compatible with data from multiple instruments. It still operates on the 
+original fundamental principles developed by DAK, however. MOTES now produces
+both aperture, and optimally extracted spectra by default.
+
+## Changed
+- The comments related to many functions have been updated to more clearly 
+describe their inputs, outputs, and purpose. This work is ongoing along with 
+removing deprecated sections of code.
+- The GMOS harvester function has been updated to handle the detector chip gaps 
+more efficiently.
+- There have been multiple changes to how the extraction limits are defined to 
+account for the new optimal extraction routine. The main one being that the data 
+is no longer supersampled prior to being extracted in the aperture method.  
+
+## Changed
+- Astroscrappy has been run on the GMOS demo data to remove cosmic rays.
+- Demo data has been removed from the github repository for now as the GMOS frames 
+are too large. Return of the FORS2 and X-Shooter demo data frames to the repository 
+should be fine in the near future.
+
 ## 0.3.0 2022-04-06
 Updates by T. Seccull
 

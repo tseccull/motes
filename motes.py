@@ -4,6 +4,7 @@
 # IMPORT MODULES /////////////////////////////////////////////////////////////#
 ###############################################################################
 import astropy.io.fits as fits
+import copy
 import datetime
 import glob
 import motes.common as common
@@ -18,104 +19,44 @@ import sys
 # FUNCTIONS //////////////////////////////////////////////////////////////////#
 ###############################################################################
 # ////////////////////////////////////////////////////////////////////////////#
-# HANDLE COSMIC RAYS AND BAD PIXELS
-
-# CR HANDLING IS DEPRECATED
-
-#def cr_handling(pars, axdict, lext, hext, fdict, hpars):
-#    sys.stdout.write(' >>> Separating spectrum and background regions for cosmic ray detection.\n')
-#
-#    daxis = np.linspace(axdict['wavstart'], axdict['wavstart'] + len(axdict['waxis']), num=len(axdict['waxis']))
-#    loline = [lext + axdict['imgstart']] * len(axdict['waxis'])
-#    hiline = [hext + axdict['imgstart']] * len(axdict['waxis'])
-#    dlines = np.array([daxis, loline, daxis, hiline])
-#
-#    if pars['-IDENT_CR']:
-#        # DIAGNOSTICS - Plot limits defined for CR masking process.
-#        if pars['-DIAG_PLOT_CRMASK']:
-#            common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Pre Masking')
-#	    
-#	    
-#        sys.stdout.write(' >>> Masking cosmic rays via sigma-clip:\n')
-#        sys.stdout.write('     Sigma multiplier = ' + str(pars['-CR_CLIP_STD_MULT']) + '\n')
-#        sys.stdout.write('     Number of sigma-clip iterations = ' + str(pars['-CR_CLIP_ITER']) + '\n')
-#        sys.stdout.write(' >>> Masking bad pixels.\n')
-#        fdict['cmask'] = np.ones(np.shape(fdict['data']))
-#        for it in range(int(pars['-CR_CLIP_ITER'])):
-#            crmasque = common.mask_cosmic_rays(fdict['data'], lext, hext, multiplier=pars['-CR_CLIP_STD_MULT'])
-#            fdict['qual'] *= crmasque
-#            fdict['cmask'] *= crmasque
-#        sys.stdout.write(' >>> Cosmic rays and bad pixels masked.\n')
-#
-#    fdict['data'] *= fdict['qual']
-#    fdict['errs'] *= fdict['qual']
-#    
-#    # DIAGNOSTICS - Plot 2D spectrum with CRs masked.
-#    if pars['-DIAG_PLOT_CRMASK'] and pars['-IDENT_CR']:
-#        common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum Mask Regions - Post Masking')
-#
-#    # Determine the location of boundaries between dispersion bins in the 2D spectrum that will be fitted with Moffat
-#    # functions to precisely localise the spectrum to allow sky subtraction.
-#    # If cosmic rays have been masked, and the user wants them to be replaced with appropriate flux values the
-#    # process is performed while determining the location of the dispersion bins. See the docs or comments in the
-#    # common.get_bins function for more information.
-#    # Replacement is mostly, but not entirely effective. It may cause particular problems when used on fainter
-#    # spectra, or those with very bright sky lines. Some fiddling with the CR sigma-clipping multipliers may be
-#    # required in the sky subtraction and CR masking functions. Use with care.
-#    
-#    # Determine the boundaries of the localisation bins on the dispersion axis
-#    binpars, fdict = common.get_bins(fdict, int(np.floor(lext)), int(np.ceil(hext)), axdict['dispaxislen'], pars, sky=True)
-#    
-#    if pars['-REPLACE_CRBP']:
-#        sys.stdout.write(' >>> Cosmic rays and bad pixels replaced.\n')
-#
-#        # DIAGNOSTICS - Show 2D spectrum with bad pixels and CRs replaced.
-#        if pars['-DIAG_PLOT_CRREPLACE']:
-#            common.show_img(fdict['data'], axdict, hpars, dlines, '2D Spectrum with Cosmic Rays and Bad Pixels Replaced')
-#
-#    # If replacement of cosmic rays is not requested, just get the spectrum localisation bins from the 2D spectrum
-#    # that has had it's CRs masked.
-#    else:
-#        sys.stdout.write(' >>> Cosmic ray and bad pixel replacement not performed.\n')
-#
-#    common.get_bins_output(binpars, pars, lext, hext, fdict['data'], hpars, axdict)
-#
-#    return binpars, fdict
-
-
-# ////////////////////////////////////////////////////////////////////////////#
-# RUN MOTES
+# Run MOTES
+# INPUTS:  None
+# OUTPUTS: None
 def motes():
-    # RUN STARTUP FUNCTIONS
+    # Run startup functions
     params = startup.read_parfile()    # Import parameters from file to dict
     intreg = startup.read_regions()    # Search for, and read in, reg.txt
 
-    # OPEN AND PROCESS EACH 2D SPECTRUM IN TURN
+    # Open and process each spectrum contained in the current directory.
     for i, file_2D in enumerate(sorted(glob.glob('*.fits'))):
 
         sys.stdout.write(('/' * (70-len(file_2D[:70]))) + ' ' + file_2D[:70] + '\n')
         sys.stdout.write(' >>> Beginning MOTES Processing\n')
 
-        # GATHER HEADER INFO AND DATA FROM THE 2D IMAGE FILE
+        # Gather header metadata and the image data from the 2D image file.
         sys.stdout.write(' >>> Gathering image frames and header data from input file.\n')
         headparams, framedict, axesdict, imghead = harvester.data_harvest(i, file_2D, intreg, params)
-        framedict['ogdata'] = framedict['data']
-        framedict['ogerrs'] = framedict['errs']
+        # Make backup copies of the original data and error frames.
+        framedict['ogdata'] = copy.deepcopy(framedict['data'])
+        framedict['ogerrs'] = copy.deepcopy(framedict['errs'])
         sys.stdout.write(' >>> Gathering image frames and header data from input file completed.\n')
 
-        # Perform initial least-squares Moffat fitting over the entire 2D image collapsed along the dispersion axis with a median.
+        # Perform initial least-squares Moffat fitting over the entire 2D spectrum collapsed along the dispersion axis with a median.
         sys.stdout.write(' >>> Fitting Moffat profile to median spatial profile of entire spectrum. ')
         sys.stdout.flush()
+        # Calculate median spatial profile of the spectrum.
         datadispcollapse = np.nanmedian(framedict['data'], axis=1)
-        datascale = 10**np.abs(np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse)))))
-        moffparams = common.moffat_least_squares(axesdict['saxis'], datadispcollapse*datascale, headparams['seeing'], headparams['pixresolution'])
-        headparams['seeing'] = 2*moffparams[2]*np.sqrt((2**(1/moffparams[3]))-1)
-
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
         # The shape of the profile fitted to the scaled spatial profile is the same as the unscaled,
         # but to to get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after the fitting.
+        datascale = 10**np.abs(np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse)))))
+        # Fit the median spatial profile with a Moffat function.
+        moffparams = common.moffat_least_squares(axesdict['saxis'], datadispcollapse*datascale, headparams['seeing'], headparams['pixresolution'])
+        # Get an improved estimate of the FWHM of the spectrum from the best fit Moffat profile.
+        headparams['seeing'] = 2*moffparams[2]*np.sqrt((2**(1/moffparams[3]))-1)
+        # Scale the amplitude, background gradient, and background level of the model Moffat profile down.
         moffparams[0] /= datascale
         moffparams[4] /= datascale
         moffparams[5] /= datascale
@@ -125,8 +66,7 @@ def motes():
 
         # Use the parameters of the Moffat profile fitted to the median spatial profile of the entire spectrum to determine
         # spatial limits that are used to bound the region of the spectrum used by the common.get_bins function to
-        # to bin the 2D spectrum while taking account of its S/N. These spatial limits may also be used during the
-        # process of masking, removing, and replacing cosmic rays and bad pixels.
+        # to bin the 2D spectrum while taking account of its S/N.
         lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
         sys.stdout.write(' >>> Spectrum localised to aperture in range of spatial pixel rows ' + str(int(lowext+axesdict['imgstart'])) + '-' + str(int(highext+axesdict['imgstart'])) + '\n')
 
@@ -135,26 +75,19 @@ def motes():
             common.printmoffparams(moffparams, axesdict['imgstart'], datascale)
             common.plot_fitted_spatial_profile(axesdict['saxis'], datadispcollapse, axesdict['hrsaxis'], moffparams, axesdict['imgstart'], headparams)
 
-## CR MASKING DEPRECATED
-#        # Mask and remove cosmic rays and bad pixels and, if selected, replace them in the image.
-#        if params['-IDENT_CR'] or params['-REPLACE_CRBP']:
-#            binparams, framedict = cr_handling(params, axesdict, lowext, highext, framedict, headparams)
-#
-#        # No cosmic ray masking requested, just get localisation bins
-#        else:
-#            sys.stdout.write(' >>> Cosmic ray masking deactivated and not performed.\n')
-#
-#            framedict['cmask'] = np.ones(np.shape(framedict['data']))
+        # Determine the location of bins on the dispersion axis within which to measure the spatial profile.
         binparams, framedict = common.get_bins(framedict, int(np.floor(lowext)), int(np.ceil(highext)), axesdict['dispaxislen'], params, sky=True)
-                                                                          
+        
+        # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in motesparams.txt                                                                  
         common.get_bins_output(binparams, params, lowext, highext, framedict['data'], headparams, axesdict)
         sys.stdout.write(' >>> Bad pixels replaced.\n')
 
-        #SUBTRACT THE SKY SPECTRUM IF REQUESTED BY THE USER.
+##################################################################################################################################################################################################################################################
+        #Subtract the sky spectrum if requested by the user.
         if params['-SUBTRACT_SKY']:
             framedict, skybinpars, skyextlims = skyloc(framedict, axesdict, datascale, headparams, binparams, params)
 
-        binparams, framedict = common.get_bins(framedict, int(np.floor(lowext)), int(np.ceil(highext)), axesdict['dispaxislen'], params)
+        binparams, framedict = common.get_bins(framedict, int(np.floor(lowext)), int(np.ceil(highext)), axesdict['dispaxislen'], params, replace_crbp=bool(params['-REPLACE_CRBP']))
 
         common.get_bins_output(binparams, params, lowext, highext, framedict['data'], headparams, axesdict)
 
@@ -182,7 +115,7 @@ def motes():
 
             # Define the extraction limits of the current dispersion bin based on the parameters of the Moffat profile
             # previously fitted to it.
-            LowExt, HighExt, fwhm, centre = common.extraction_limits(binmoffparams, axesdict, width_multiplier=params['-FWHM_MULTIPLIER'], highres=True)
+            LowExt, HighExt, fwhm, centre = common.extraction_limits(binmoffparams, axesdict, width_multiplier=params['-FWHM_MULTIPLIER'])
 
             extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
@@ -203,10 +136,10 @@ def motes():
         sys.stdout.flush()
         extractionlimits = np.array(extractionlimits).T
 
-        # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
+        # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels fully within the aperture are extracted.
         if params['-DIAG_PLOT_EXTRACTION_LIMITS']:
-            drawlines = [extractionlimits[0] + axesdict['wavstart'], (extractionlimits[1] * 0.02) + axesdict['imgstart'],
-                         extractionlimits[0] + axesdict['wavstart'], (extractionlimits[2] * 0.02) + axesdict['imgstart']]
+            drawlines = [extractionlimits[0] + axesdict['wavstart'], extractionlimits[1] + axesdict['imgstart'] - 1,
+                         extractionlimits[0] + axesdict['wavstart'], extractionlimits[2] + axesdict['imgstart'] + 1]
             
             common.show_img(framedict['data'], axesdict, headparams, drawlines, '2D Spectrum Overplotted with Extraction Limits')
 
@@ -215,45 +148,54 @@ def motes():
         finalextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'], params['-INTERP_KIND'])
         sys.stdout.write('DONE.\n')
 
-        # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis.
+        # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if params['-DIAG_PLOT_EXTRACTION_LIMITS']:
-            drawlines = [np.array(range(axesdict['dispaxislen'])) + axesdict['wavstart'], (finalextractionlims[0]*0.02) + axesdict['imgstart'],
-                         np.array(range(axesdict['dispaxislen'])) + axesdict['wavstart'], (finalextractionlims[1]*0.02) + axesdict['imgstart']]
+            drawlines = [np.array(range(axesdict['dispaxislen'])) + axesdict['wavstart'], finalextractionlims[0] + axesdict['imgstart'] - 1,
+                         np.array(range(axesdict['dispaxislen'])) + axesdict['wavstart'], finalextractionlims[1] + axesdict['imgstart'] + 1]
             
             common.show_img(framedict['data'], axesdict, headparams, drawlines, '2D Spectrum Overplotted with Full Extraction Limits')
 
         # Extract the spectrum from a supersampled version of the 2D image using the extraction limits.
         sys.stdout.write(' >>> Extracting 1D spectrum. ')
         sys.stdout.flush()
-        supersampdata2D = (np.repeat(framedict['data'], 50, axis=0) * 0.02).T
-        supersamperrs2D = (np.repeat(framedict['errs'], 50, axis=0) * 0.02).T
-        supersampqual2D = (np.repeat(framedict['qual'], 50, axis=0) * 0.02).T
-        data1D = []
-        errs1D = []
-
-        for k in range(axesdict['dispaxislen']):
-            data1D.append(np.sum(supersampdata2D[k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])]))
-            errs1D.append(np.sqrt(np.sum(np.power(supersamperrs2D[k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])], 2))))
-        data1D = np.array(data1D)
-        errs1D = np.array(errs1D)
-        finalextractionlims = np.array(finalextractionlims) * 0.02
+        #supersampdata2D = (np.repeat(framedict['data'], 50, axis=0) * 0.02).T
+        #supersamperrs2D = (np.repeat(framedict['errs'], 50, axis=0) * 0.02).T
+        #supersampqual2D = (np.repeat(framedict['qual'], 50, axis=0) * 0.02).T
+        framedict['data'] = framedict['data'].T
+        framedict['errs'] = framedict['errs'].T
+        framedict['qual'] = framedict['qual'].T
+        
+        opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(framedict['data'], framedict['errs'], finalextractionlims, binpars, axesdict)
+        
+        #data1D = []
+        #errs1D = []
+		#
+        #for k in range(axesdict['dispaxislen']):
+        #    data1D.append(np.sum(framedict['data'][k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])]))
+        #    errs1D.append(np.sqrt(np.sum(np.power(framedict['errs'][k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])], 2))))
+        #data1D = np.array(data1D)
+        #errs1D = np.array(errs1D)
+        finalextractionlims = np.array(finalextractionlims)
         sys.stdout.write('DONE.\n')
 
         # DIAGNOSTICS - Plot extracted spectrum.
         if params['-PLOT_EXTRACTED_SPECTRUM']:
             # DIAGNOSTICS, EXTRACTED SPECTRUM
-            plt.errorbar(axesdict['waxis'], data1D, yerr=errs1D, color='k', marker='.', label='Spectrum')
+            plt.figure(figsize=(9,6))
+            plt.errorbar(axesdict['waxis'], apdata1D, yerr=aperrs1D, color='k', marker='.', label='Aperture Spectrum')
+            plt.errorbar(axesdict['waxis'], opdata1D, yerr=operrs1D, color='r', marker='.', label='Optimal Spectrum')
             plt.grid(alpha=0.5, linestyle='dotted')
             plt.title('Extracted 1D Spectrum')
             plt.ylabel('Flux, ' + headparams['fluxunit'])
             plt.xlabel('Wavelength, ' + headparams['wavunit'])
+            plt.legend()
             plt.show()
 
         # Save the extracted spectrum to a new .fits file.
         if params['-SAVE']:
             sys.stdout.write(' >>> Saving 1D spectrum and metadata.\n')
             sys.stdout.flush()
-            save_fits(axesdict, headparams, data1D, errs1D, imghead, params, file_2D, moffparams, framedict, binpars, finalextractionlims, skybinpars, skyextlims)
+            save_fits(axesdict, headparams, opdata1D, operrs1D, apdata1D, aperrs1D, imghead, params, file_2D, moffparams, framedict, binpars, finalextractionlims, skybinpars, skyextlims)
 
         sys.stdout.write(' >>> Extraction of ' + file_2D + ' completed.\n')
     sys.stdout.write(' >>> MOTES Processing Complete.\n\n')
@@ -263,7 +205,7 @@ def motes():
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # This function saves the extracted spectrum and intermediate products in a single FITS file.
-def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict, bpars, extractionlims, sbpars, skyextractionlims):
+def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filename, moffpars, fdict, bpars, extractionlims, sbpars, skyextractionlims):
 
     head['MOTES']='######## Extracted 1D Spectrum Metadata ########'
     head.add_blank('', before='MOTES')
@@ -323,9 +265,11 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
     head.add_blank('Data Saved in the Extracted Spectrum HDU', before='HIERARCH EXTRACTED HDU ROW 0')
     head['HIERARCH EXTRACTED HDU ROW 1'] = 'Flux, ' + hparams['fluxunit']
     head['HIERARCH EXTRACTED HDU ROW 2'] = 'Flux Uncertainty, ' + hparams['fluxunit']
-    head['EXTNAME'] = '1D_SPEC'
+    head['EXTNAME'] = 'OPTI_1D_SPEC'
     
-    fluxhdu = fits.PrimaryHDU([axdict['waxis'], flux, errs], header=head)
+    opfluxhdu = fits.PrimaryHDU([axdict['waxis'], opflux, operrs], header=head)
+    apfluxhdu = fits.ImageHDU([axdict['waxis'], apflux, aperrs], header=head)
+    apfluxhdu.header['EXTNAME'] = 'APER_1D_SPEC'
     spec2Dhdu = fits.ImageHDU(fdict['ogdata'])
     spec2Dhdu.header['EXTNAME'] = 'ORIG_2D_SPEC'
     errs2Dhdu = fits.ImageHDU(fdict['ogerrs'])
@@ -336,7 +280,7 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
     binhdu.header['EXTNAME'] = 'EXT_BIN_PARS'
     extractionlims = fits.ImageHDU(extractionlims)
     extractionlims.header['EXTNAME'] = 'EXT_LIMS'
-    hdu_list = [fluxhdu, spec2Dhdu, errs2Dhdu, qual2Dhdu, binhdu, extractionlims]
+    hdu_list = [opfluxhdu, apfluxhdu, spec2Dhdu, errs2Dhdu, qual2Dhdu, binhdu, extractionlims]
     
     if pars['-SUBTRACT_SKY']:
         hdu_list.append(skymodhdu)
@@ -352,7 +296,7 @@ def save_fits(axdict, hparams, flux, errs, head, pars, filename, moffpars, fdict
     hdulist.close()
 
     sys.stdout.write(' >>> Spectrum extracted and saved:\n')
-    sys.stdout.write('     ' + os.getcwd() + '/' + 'm' + '_'.join(filenamelist[0:-1]) + '_' + filenamelist[-1] +'\n')
+    sys.stdout.write('     m' + '_'.join(filenamelist[0:-1]) + '_' + filenamelist[-1] +'\n')
     return None
     
     
@@ -387,7 +331,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the Moffat profile
         # previously fitted to it.
-        LowExt, HighExt, fwhm, centre = common.extraction_limits(binmoffparams, axesdict, width_multiplier=params['-BG_FWHM_MULTIPLIER'], highres=True)
+        LowExt, HighExt, fwhm, centre = common.extraction_limits(binmoffparams, axesdict, width_multiplier=params['-BG_FWHM_MULTIPLIER'])
 
         extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
@@ -411,8 +355,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
     if params['-DIAG_PLOT_EXTRACTION_LIMITS']:
-        drawlines = [extractionlimits[0] + axesdict['wavstart'], (extractionlimits[1] * 0.02) + axesdict['imgstart'],
-                     extractionlimits[0] + axesdict['wavstart'], (extractionlimits[2] * 0.02) + axesdict['imgstart']]
+        drawlines = [extractionlimits[0] + axesdict['wavstart'], (extractionlimits[1]) + axesdict['imgstart'],
+                     extractionlimits[0] + axesdict['wavstart'], (extractionlimits[2]) + axesdict['imgstart']]
         
         common.show_img(framedict['data'], axesdict, headparams, drawlines, '2D Spectrum Overplotted with Target/Sky Boundaries')
 
@@ -420,8 +364,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
     skyextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'], params['-INTERP_KIND'])
 
-    skyextractionlims[0] *= 0.02
-    skyextractionlims[1] *= 0.02
+    #skyextractionlims[0] *= 0.02
+    #skyextractionlims[1] *= 0.02
 
     sys.stdout.write('DONE.\n')
 
