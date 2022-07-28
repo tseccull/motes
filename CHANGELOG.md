@@ -23,12 +23,6 @@ more efficiently.
 account for the new optimal extraction routine. The main one being that the data 
 is no longer supersampled prior to being extracted in the aperture method.  
 
-## Changed
-- Astroscrappy has been run on the GMOS demo data to remove cosmic rays.
-- Demo data has been removed from the github repository for now as the GMOS frames 
-are too large. Return of the FORS2 and X-Shooter demo data frames to the repository 
-should be fine in the near future.
-
 ## 0.3.0 2022-04-06
 Updates by T. Seccull
 
