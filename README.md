@@ -1,7 +1,7 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
-version 0.2.0
+version 0.4.0
 
-Last Updated: 2021-03-19 - T. Seccull
+Last Updated: 2022-07-27 - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 
@@ -13,10 +13,10 @@ Citation: Please cite .... paper to be written .... if you use MOTES in your
 research. Need a Zenodo DOI?
 
 # Project Status
-Currently in final stages of development toward v1.0 and release. Updates and 
-inclusion of optimal extraction capability are to be included in the near 
-future. Documentation is still to be written, as well as an accompanying article 
-that will likely be submitted to one of the AAS journals.
+Currently in final stages of development toward v1.0 and release. Dominik's 
+optimal extraction rotuine is now formally included in MOTES. Documentation is 
+still to be written, as well as an accompanying article that will likely be 
+submitted to one of the AAS journals.
 
 # Installation
 Python 3 is recommended for running MOTES. It is compatible with Python 2.7, but is also noticably slower.
