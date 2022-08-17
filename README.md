@@ -7,7 +7,7 @@ Developers: Tom Seccull & Dominik Kiersz
 
 MOTES is a python package used for tracing and extracting spectra of faint 
 astronomical point sources from 2D spectrograms. MOTES is also capable of sky 
-subtraction and cosmic ray rejection/masking. 
+subtraction and , to a limited degree, cosmic ray rejection/masking. 
 
 Citation: Please cite .... paper to be written .... if you use MOTES in your 
 research. Need a Zenodo DOI?
