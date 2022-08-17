@@ -1,7 +1,7 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
 version 0.4.0
 
-Last Updated: 2022-07-27 - T. Seccull
+Last Updated: 2022-08-16 - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 
