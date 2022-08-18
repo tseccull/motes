@@ -5,7 +5,7 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
 
-## Added
+### Added
 - An optimal extraction routine developed by Dominik Kiersz has 
 now been fully integrated into MOTES. Some changes have been made to the
 original design by TS to increase the efficiency of the process, and ensure that
@@ -13,7 +13,7 @@ is compatible with data from multiple instruments. It still operates on the
 original fundamental principles developed by DAK, however. MOTES now produces
 both aperture, and optimally extracted spectra by default.
 
-## Changed
+### Changed
 - The comments related to many functions have been updated to more clearly 
 describe their inputs, outputs, and purpose. This work is ongoing along with 
 removing deprecated sections of code.
@@ -26,17 +26,17 @@ is no longer supersampled prior to being extracted in the aperture method.
 ## 0.3.0 2022-04-06
 Updates by T. Seccull
 
-## Added
+### Added
 - Harvester function has been added for the FLOYDS spectrographs on the Las Cumbres 
 Observatory 2 m telescopes.
 
-## Changed
+### Changed
 - Astroscrappy has been run on the GMOS demo data to remove cosmic rays.
 - Demo data has been removed from the github repository for now as the GMOS frames 
 are too large. Return of the FORS2 and X-Shooter demo data frames to the repository 
 should be fine in the near future.
 
-## Deprecated
+### Deprecated
 - All cosmic ray handling functions and lines have been commented 
 out pending removal. This is because there are much better software tools, (e.g. 
 Astroscrappy) that can be used for removing and replacing cosmic rays. Testing of 
