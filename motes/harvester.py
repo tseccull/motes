@@ -167,7 +167,6 @@ def harvest_fors2(imgfilehdu, imgheader):
         sys.stdout.write('FAILED.\n')
         sys.stdout.write('     Non-standard binning used in image.\n'
                          '     Spatial pixel resolution could not be determined.\n')
-        sys.stdout.write('     Extraction of ' + direc + ' could not be completed.\n')
         sys.stdout.write('     Terminating MOTES.\n\n')
         exit()
 

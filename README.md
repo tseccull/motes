@@ -1,7 +1,7 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
-version 0.4.0
+version 0.4.1-dev
 
-Last Updated: 2022-08-16 - T. Seccull
+Last Updated: 2023-02-05 - D. Kiersz
 
 Developers: Tom Seccull & Dominik Kiersz
 
@@ -14,19 +14,31 @@ research. Need a Zenodo DOI?
 
 # Project Status
 Currently in final stages of development toward v1.0 and release. Dominik's 
-optimal extraction rotuine is now formally included in MOTES. Documentation is 
+optimal extraction routine is now formally included in MOTES. Documentation is 
 still to be written, as well as an accompanying article that will likely be 
 submitted to one of the AAS journals.
 
 # Installation
 Python 3 is recommended for running MOTES. It is compatible with Python 2.7, but is also noticably slower.
 
-The rest of this needs to be worked out...
+## Anaconda
 
-Dependencies: etc.
+Installing an Anaconda enviroment from a `.yml` and running MOTES from the environment file will suffice in most cases. 
+
+You can install the Anaconda pseudo-distribution for Python from [here](https://www.anaconda.com/).
+
+Provided you are in the root directory of this repository, execute the first command to create the environment and install dependencies automatically. The second command will activate the environment.
+
+```shell
+conda env create --name motes --file=./conda/motes.yml
+conda activate motes
+```
+
+MOTES can then be executed from `motes.py` in the root directory.
 
 # Usage
-This is where the link to the readthedocs or pdf manual will go.
+
+PDF Manual currently in construction on [Overleaf](https://www.overleaf.com/project/604614a9482e712b1ea2fbbd). 
 
 # Contributions
 Procedures for users to supply new functionality, in particular new harvesters 

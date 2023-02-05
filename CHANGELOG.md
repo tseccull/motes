@@ -2,6 +2,17 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.4.1 2023-02-05
+Updated by D. Kiersz
+
+### Added
+* Installation environment for Anaconda and dependencies with instructions. This is the first step for contenarising the application.
+
+### Changed
+* Updated README.md, including a spelling mistake.
+* In Removed the following line `sys.stdout.write('     Extraction of ' + direc + ' could not be completed.\n')`.
+* In `startup.py` use a list-comprehension instead of a loop.
+
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
 

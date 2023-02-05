@@ -60,10 +60,7 @@ def read_regions():
 
         with open('reg.txt') as reg:
             reg = reg.read().splitlines()
-            intregion = []
-            for x in reg:
-                lims = x.split(',')
-                intregion.append([int(lims[0]), int(lims[1]), int(lims[2]), int(lims[3])])
+            intregion = [[int(lim) for lim in x.split(',')] for x in reg]
 
         sys.stdout.write('DONE.\n')
 
