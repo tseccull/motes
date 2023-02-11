@@ -1,32 +1,23 @@
-###############################################################################
-# IMPORT MODULES /////////////////////////////////////////////////////////////#
-###############################################################################
 import astropy.io.fits as fits
 import copy
 import motes.common as common
 import numpy as np
 import sys
 
-###############################################################################
-# FUNCTIONS ///////////////////////////////////////////////////////////////// #
-###############################################################################
-# ////////////////////////////////////////////////////////////////////////////#
 
-
-def data_harvest(reg_counter, filename_2D, region, param_dict):
+def data_harvest(reg_counter, filename_2D, region):
     """Extract header metadata and data frames, and repackage them into dictionaries.
 
     Args:
-        reg_counter () - integer noting which line in region is being called to define the boundaries of the 2D data.
-        filename_2D () - name of the data file.
-        region ()      - list of regions read in from reg.txt in startup.read_regions()
-        param_dict ()  - dictionary of parameters for MOTES read in frommotesparams.txt by startup.read_parfile()
+        reg_counter (int): integer noting which line in region is being called to define the boundaries of the 2D data.
+        filename_2D (str): name of the data file.
+        region (list): list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
-        head_dict ()  - dictionary containing parameters and metadata read from the header of the image file.
-        frame_dict ()  - dictionary containing the 2D data frames read from the image file.
-        axes_dict ()  - dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
-        imghead ()   - a copy of the image file header; this is also a dictionary.
+        head_dict (dict): dictionary containing parameters and metadata read from the header of the image file.
+        frame_dict (dict): dictionary containing the 2D data frames read from the image file.
+        axes_dict (dict): dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
+        imghead (dict): a copy of the image file header; this is also a dictionary.
     """
 
     # Create dictionary to tell data_harvest which instrument specific
@@ -228,6 +219,7 @@ def harvest_fors2(imgfilehdu, imgheader):
     ogimgqual = copy.deepcopy(imgqual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the detector and the configuration of the collimator (high resolution or standard resolution).
+    # If the pixel resolution can't be determined, complain and quit MOTES.
     if (
         imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
         and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
@@ -248,7 +240,6 @@ def harvest_fors2(imgfilehdu, imgheader):
         and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
         pixres = 0.125
-    # If the pixel resolution can't be determined, complain and quit MOTES.
     else:
         sys.stdout.write("FAILED.\n")
         sys.stdout.write(
