@@ -8,6 +8,7 @@ Updates by D.Kiersz
 ### Changed
 * `input` folder to store fits files
 * Start conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
+* Fully refactored startup.py.
 
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
