@@ -19,17 +19,20 @@ from scipy.stats import pearsonr
 # FUNCTIONS //////////////////////////////////////////////////////////////////#
 ###############################################################################
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculate the FWHM and hence the extraction limits from a Moffat profile based on the distance from the central peak
-# as a multiple of FWHM.
-# INPUTS:  moffparams             - parameters of the Moffat profile to be created and measured.
-#          axesdict               - dictionary containing axis data for the data frame. Here only the length of the spatial axis is retrieved.
-#          width_multiplier       - defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM
-# OUTPUTS: lower_extraction_limit - the lower bound of the region to be extracted.
-#          upper_extraction_limit - the upper bound of the region to be extracted.
-#          fwhm                   - the Full Width at Half Maximum of the Moffat profile.
-#          moffparams[1]          - location of the center of the Moffat profile.
 def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
+    """Calculate the FWHM (i.e., the extraction limits) from a Moffat profile based on the distance from the central peak as a multiple of FWHM.
+
+    Args:
+        moffparams (_type_): parameters of the Moffat profile to be created and measured.
+        axesdict (_type_): dictionary containing axis data for the data frame. Here only the length of the spatial axis is retrieved.
+        width_multiplier (float, optional): defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM. Defaults to 3.0.
+
+    Returns:
+        lower_extraction_limit - the lower bound of the region to be extracted.
+        upper_extraction_limit - the upper bound of the region to be extracted.
+        fwhm                   - the Full Width at Half Maximum of the Moffat profile.
+        moffparams[1]          - location of the center of the Moffat profile.
+    """
 
     # Create a Moffat profile based on the input parameters.
     r = np.linspace(0, axesdict['spataxislen'] - 1, num=axesdict['spataxislen'])
@@ -295,9 +298,23 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Takes an input of extraction limits from the fitting of the binned data and interpolates the limits over the unbinned
-# data. Limits are also linearly extrapolated towards the ends of the spectral range.
+
 def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
+    """_summary_
+
+    Description:
+    Takes an input of extraction limits from the fitting of the binned data and interpolates the limits over the unbinned data. 
+    imits are also linearly extrapolated towards the ends of the spectral range.
+
+    Args:
+        extractionlims (_type_): _description_
+        dispaxislen (_type_): _description_
+        interpkind (_type_): _description_
+
+    Returns:
+        finalextlims (_type_): _description_
+    """
+
     # If the 2D spectrum was so faint that only 1 dispersion bin could be determined, set the extraction limits
     # across the unbinned spectrum to be a simple linear aperture that has the same extraction limits as was
     # determined for that one bin.
@@ -333,8 +350,6 @@ def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
 
     return finalextlims
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
 # Levenberg-Marquardt least squares method. Returns the best fit parameters of the Moffat function
 def linear_least_squares(r, col):
@@ -351,62 +366,52 @@ def linear_least_squares(r, col):
     return [res_lsq.x[0], res_lsq.x[1]]
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
-# m = x[0]
-# c = x[1]
 def linear_resid(x, datarange, data):
-    return (x[0]*datarange) + x[1] - data
+    """Calculate residuals of fitted linear profile and the data for the Levenberg-Marquardt least squares method.
+    Args:
+        x (_type_): _description_
+        datarange (_type_): _description_
+        data (_type_): _description_
+
+    Returns:
+        residual (_type_): _description_
+    """
+    residual = (x[0]*datarange) + x[1] - data
+    return residual
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the
-# axis required.
+
 def make_wav_axis(start, increment, length):
-    return np.arange(start=start, step=increment, stop=(length * increment) + start)
+    """# Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the axis required.
 
+    Args:
+        start (_type_): _description_
+        increment (_type_): _description_
+        length (_type_): _description_
 
-## DEPRECATED
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# This function detects cosmic rays in the 2D image and masks the pixels that contain them, by separating the spectrum
-# region from the two background regions. Each region is sigma-clipped separately due to the different distribution of
-# fluxes present in the background and the vicinity of the 2D spectrum.
-#def mask_cosmic_rays(data, lext, hext, multiplier=4.):
-#    # Divide 2D spectrum into spectrum and background sections
-#    sections = [data[:int(lext), :], data[int(lext):int(hext), :], data[int(hext):, :]]
-#    masks = []
-#
-#    # Sequentially sigma-clip each section, and create a mask marking the locations of pixels to be kept.
-#    for sect in sections:
-#
-#        datamed = np.nanmedian(sect)
-#        datastd = np.nanstd(sect)
-#
-#        upperlim = datamed + (multiplier * datastd)
-#        lowerlim = datamed - (multiplier * datastd)
-#
-#        sectmask2D = (sect < upperlim) & (sect > lowerlim)
-#        masks.append(sectmask2D)
-#
-#    # Assemble masks for each section into a full mask for the input 2D spectrum.
-#    mask2D = np.vstack((masks[0], masks[1], masks[2]))
-#
-#    return mask2D
+    Returns:
+        wavaxis (_type_): _description_
+    """
+    wavaxis = np.arange(start=start, step=increment, stop=(length * increment) + start)
+    return wavaxis
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Creates moffat profile added a linear sloped background based on input parameters
-# INPUTS:   amp - amplitude of the Moffat profile
-#             c - location of the center/peak of the Moffat profile on the spatial axis.
-#         alpha - the main parameter that defines the width of the Moffat profile.
-#          beta - plays a role in defining the width of the Moffat profile in the outer wings far from the profile's peak.
-#       bglevel - height of the linearly varying background
-#        bggrad - gradient of the linearly varying background
-#     datarange - x axis of the Moffat profile.
-# OUTPUTS: a moffat profile defined on the datarange axis using the parameters input to the function.
 def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
-    moff = amp * ((1 + (((datarange - c) * (datarange - c)) / (alpha * alpha))) ** -beta)
+    """Creates moffat profile added a linear sloped background based on input parameters
 
+    Args:
+        amp (_type_): amplitude of the Moffat profile
+        c (_type_): location of the center/peak of the Moffat profile on the spatial axis.
+        alpha (_type_): he main parameter that defines the width of the Moffat profile.
+        beta (_type_): plays a role in defining the width of the Moffat profile in the outer wings far from the profile's peak.
+        bglevel (_type_): height of the linearly varying background
+        bggrad (_type_): gradient of the linearly varying background
+        datarange (_type_): x axis of the Moffat profile.
+
+    Returns:
+        moff (_type_): a moffat profile defined on the datarange axis using the parameters input to the function.
+    """
+    moff = amp * ((1 + (((datarange - c) * (datarange - c)) / (alpha * alpha))) ** -beta)
     return moff + bglevel + (datarange * bggrad)
 
 

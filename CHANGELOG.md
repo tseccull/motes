@@ -2,6 +2,13 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.4.1-dev 2023-02-11
+Updates by D.Kiersz
+
+### Changed
+* `input` folder to store fits files
+* Start conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
+
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
 

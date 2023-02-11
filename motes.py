@@ -1,8 +1,9 @@
-#! /home/tseccull/anaconda2/envs/anaconda3/bin/python
+# motes.py
+# Description: Modular and Optimal Tracer and EExtractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
+# Version: 0.4.1-dev
+# Date: 2023-02-11
+# Authors: Tom Seccull, Dominik Kiersz
 
-###############################################################################
-# IMPORT MODULES /////////////////////////////////////////////////////////////#
-###############################################################################
 import astropy.io.fits as fits
 import copy
 import datetime
@@ -12,23 +13,25 @@ import motes.harvester as harvester
 import motes.startup as startup
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import sys
 
-###############################################################################
-# FUNCTIONS //////////////////////////////////////////////////////////////////#
-###############################################################################
-# ////////////////////////////////////////////////////////////////////////////#
-# Run MOTES
-# INPUTS:  None
-# OUTPUTS: None
 def motes():
+    """Run MOTES.
+
+    Description:
+        This function is the entrypoint for the MOTES. 
+        It loads .fit files from the input subdirectory and harvest the data.
+        Estimates bins for the spectrum.
+        It then performs optional sky extraction and optimal extraction. 
+
+    """
+
     # Run startup functions
     params = startup.read_parfile()    # Import parameters from file to dict
     intreg = startup.read_regions()    # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
-    for i, file_2D in enumerate(sorted(glob.glob('*.fits'))):
+    for i, file_2D in enumerate(sorted(glob.glob('./inputs/*.fits'))):
 
         sys.stdout.write(('/' * (70-len(file_2D[:70]))) + ' ' + file_2D[:70] + '\n')
         sys.stdout.write(' >>> Beginning MOTES Processing\n')
@@ -36,6 +39,7 @@ def motes():
         # Gather header metadata and the image data from the 2D image file.
         sys.stdout.write(' >>> Gathering image frames and header data from input file.\n')
         headparams, framedict, axesdict, imghead = harvester.data_harvest(i, file_2D, intreg, params)
+        
         # Make backup copies of the original data and error frames.
         framedict['ogdata'] = copy.deepcopy(framedict['data'])
         framedict['ogerrs'] = copy.deepcopy(framedict['errs'])
@@ -44,13 +48,16 @@ def motes():
         # Perform initial least-squares Moffat fitting over the entire 2D spectrum collapsed along the dispersion axis with a median.
         sys.stdout.write(' >>> Fitting Moffat profile to median spatial profile of entire spectrum. ')
         sys.stdout.flush()
+
         # Calculate median spatial profile of the spectrum.
         datadispcollapse = np.nanmedian(framedict['data'], axis=1)
+
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
         # The shape of the profile fitted to the scaled spatial profile is the same as the unscaled,
         # but to to get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after the fitting.
+
         datascale = 10**np.abs(np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse)))))
         # Fit the median spatial profile with a Moffat function.
         moffparams = common.moffat_least_squares(axesdict['saxis'], datadispcollapse*datascale, headparams['seeing'], headparams['pixresolution'])
@@ -82,7 +89,6 @@ def motes():
         common.get_bins_output(binparams, params, lowext, highext, framedict['data'], headparams, axesdict)
         sys.stdout.write(' >>> Bad pixels replaced.\n')
 
-##################################################################################################################################################################################################################################################
         #Subtract the sky spectrum if requested by the user.
         if params['-SUBTRACT_SKY']:
             framedict, skybinpars, skyextlims = skyloc(framedict, axesdict, datascale, headparams, binparams, params)
@@ -98,7 +104,9 @@ def motes():
 
         extbin = []
         extractionlimits = []
+
         for bin in binparams:
+
 			# Take the median spatial profile of the dispersion 
 		    # bin, and leave out pixel columns in the chip gaps if this is a GMOS spectrum.
             binimg = framedict['data'][:, bin[0]:bin[1]]
@@ -158,29 +166,18 @@ def motes():
         # Extract the spectrum from a supersampled version of the 2D image using the extraction limits.
         sys.stdout.write(' >>> Extracting 1D spectrum. ')
         sys.stdout.flush()
-        #supersampdata2D = (np.repeat(framedict['data'], 50, axis=0) * 0.02).T
-        #supersamperrs2D = (np.repeat(framedict['errs'], 50, axis=0) * 0.02).T
-        #supersampqual2D = (np.repeat(framedict['qual'], 50, axis=0) * 0.02).T
+
         framedict['data'] = framedict['data'].T
         framedict['errs'] = framedict['errs'].T
         framedict['qual'] = framedict['qual'].T
         
         opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(framedict['data'], framedict['errs'], finalextractionlims, binpars, axesdict)
         
-        #data1D = []
-        #errs1D = []
-		#
-        #for k in range(axesdict['dispaxislen']):
-        #    data1D.append(np.sum(framedict['data'][k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])]))
-        #    errs1D.append(np.sqrt(np.sum(np.power(framedict['errs'][k][int(finalextractionlims[0][k]):int(finalextractionlims[1][k])], 2))))
-        #data1D = np.array(data1D)
-        #errs1D = np.array(errs1D)
         finalextractionlims = np.array(finalextractionlims)
         sys.stdout.write('DONE.\n')
 
         # DIAGNOSTICS - Plot extracted spectrum.
         if params['-PLOT_EXTRACTED_SPECTRUM']:
-            # DIAGNOSTICS, EXTRACTED SPECTRUM
             plt.figure(figsize=(9,6))
             plt.errorbar(axesdict['waxis'], apdata1D, yerr=aperrs1D, color='k', marker='.', label='Aperture Spectrum')
             plt.errorbar(axesdict['waxis'], opdata1D, yerr=operrs1D, color='r', marker='.', label='Optimal Spectrum')
@@ -198,6 +195,7 @@ def motes():
             save_fits(axesdict, headparams, opdata1D, operrs1D, apdata1D, aperrs1D, imghead, params, file_2D, moffparams, framedict, binpars, finalextractionlims, skybinpars, skyextlims)
 
         sys.stdout.write(' >>> Extraction of ' + file_2D + ' completed.\n')
+
     sys.stdout.write(' >>> MOTES Processing Complete.\n\n')
     
     return None
@@ -206,6 +204,28 @@ def motes():
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # This function saves the extracted spectrum and intermediate products in a single FITS file.
 def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filename, moffpars, fdict, bpars, extractionlims, sbpars, skyextractionlims):
+    """This function saves the extracted spectrum and intermediate products in a single FITS file.
+
+    Description:
+    TODO
+
+    Args:
+        axdict (dict): _description_
+        hparams (_type_): _description_
+        opflux (_type_): _description_
+        operrs (_type_): _description_
+        apflux (_type_): _description_
+        aperrs (_type_): _description_
+        head (_type_): _description_
+        pars (_type_): _description_
+        filename (_type_): _description_
+        moffpars (_type_): _description_
+        fdict (_type_): _description_
+        bpars (_type_): _description_
+        extractionlims (_type_): _description_
+        sbpars (_type_): _description_
+        skyextractionlims (_type_): _description_
+    """
 
     head['MOTES']='######## Extracted 1D Spectrum Metadata ########'
     head.add_blank('', before='MOTES')
@@ -246,20 +266,6 @@ def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filen
         skybinhdu.header['EXTNAME'] = 'SKY_BIN_PARS'
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header['EXTNAME'] = 'SKY_EXT_LIMS'
-
-
-## CR HANDLING IS DEPRECATED
-#    if pars['-IDENT_CR']:
-#        head['HIERARCH CR CLIP ITER'] = int(pars['-CR_CLIP_ITER']), 'cosmic ray sigma-clipping iterations'
-#        head.add_blank('Cosmic Ray Masking and Bad Pixel Replacement', before='HIERARCH CR CLIP ITER')
-#        head['HIERARCH CR SIGMA MULT'] = pars['-CR_CLIP_STD_MULT'], 'cosmic ray sigma-clipping multiplier'
-#        head['HIERARCH CR FWHM MULT'] = pars['-CR_FWHM_MULTIPLIER'], 'FWHM multiplier for defining CR clip regions'
-#        if pars['-REPLACE_CRBP']:
-#            head['HIERARCH CR REPLACED'] = 'YES'
-#        else:
-#            head['HIERARCH CR REPLACED'] = 'NO'
-#        crmaskhdu = fits.ImageHDU(fdict['cmask'])
-#        crmaskhdu.header['EXTNAME'] = 'MOTES_CR_MASK'
     
     head['HIERARCH EXTRACTED HDU ROW 0'] = 'Wavelength Axis, ' + hparams['wavunit']
     head.add_blank('Data Saved in the Extracted Spectrum HDU', before='HIERARCH EXTRACTED HDU ROW 0')
@@ -286,9 +292,6 @@ def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filen
         hdu_list.append(skymodhdu)
         hdu_list.append(skybinhdu)
         hdu_list.append(skyextractionlims)
-## CR HANDLING IS DEPRECATED
-#    if pars['-IDENT_CR']:
-#        hdu_list.append(crmaskhdu)
 
     hdulist = fits.HDUList(hdu_list)
     filenamelist = filename.split('_')
@@ -299,12 +302,25 @@ def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filen
     sys.stdout.write('     m' + '_'.join(filenamelist[0:-1]) + '_' + filenamelist[-1] +'\n')
     return None
     
-    
-# ////////////////////////////////////////////////////////////////////////////#
-# SKY LOCALISATION AND SUBTRACTION
 def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
-	# For each dispersion bin determined by the get_bins function, median the bin along the dispersion axis, fit a
-    # moffat profile to the median data and then use the parameters of the fitted Moffat function to localise the 2D spectrum.
+    """ Perform sky subtraction on the 2D spectrum.
+
+    Description:
+    For each dispersion bin determined by the get_bins function, median the bin along the dispersion axis, fit a
+    moffat profile to the median data and then use the parameters of the fitted Moffat function to localise the 2D spectrum.
+
+    Args:
+        framedict (_type_): _description_
+        axesdict (_type_): _description_
+        datascale (_type_): _description_
+        headparams (_type_): _description_
+        binparams (_type_): _description_
+        params (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     sys.stdout.write(' >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n')
 
     skybin = []
@@ -325,6 +341,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # The shape of the profile fitted to the scaled spatial profile is the same as the unscaled,
         # but to to get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after the fitting.
+
         binmoffparams[0] /= datascale
         binmoffparams[4] /= datascale
         binmoffparams[5] /= datascale
@@ -362,6 +379,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
     # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
+
     skyextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'], params['-INTERP_KIND'])
 
     #skyextractionlims[0] *= 0.02
@@ -393,10 +411,5 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 	
     return framedict, skybin, skyextractionlims
 	
-
-###############################################################################
-# MAIN ///////////////////////////////////////////////////////////////////////#
-###############################################################################
-
 if __name__ == '__main__':
     motes()
