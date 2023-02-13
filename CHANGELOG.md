@@ -2,6 +2,13 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+
+## 0.4.3 2022-07-27
+Updates by D.Kiersz
+
+## Added
+- A CI/CD pipeline has been added to the repository. This will run the linting and deployment to PyPI on every push to the main branch.
+
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
 

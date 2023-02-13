@@ -1,0 +1,55 @@
+name: Motes CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - feature/package-and-cicd #TODO remove this before merge
+  pull_request:
+    branches:
+      - main
+      - feature/package-and-cicd #TODO remove this before merge
+
+# Build and test the project
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10] #TODO to implement with conda envs
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install conda environment file
+        run: |
+          python -m pip install --upgrade pip
+          $CONDA/bin/conda env update --file conda/motes.yml --name base
+      # credit to https://autobencoder.com/2020-08-24-conda-actions/ for below
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      # - name: Bandit security checks
+      #   run: |
+      #     $CONDA/bin/bandit -r .
+      # Unit tests with pytests and coverage?
+
+  # Deploy to PyPI?
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
