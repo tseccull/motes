@@ -5,10 +5,10 @@ on:
     branches:
       - main
       - feature/package-and-cicd #TODO remove this before merge
-  pull_request:
-    branches:
-      - main
-      - feature/package-and-cicd #TODO remove this before merge
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - feature/package-and-cicd #TODO remove this before merge
 
 # Build and test the project
 jobs:
