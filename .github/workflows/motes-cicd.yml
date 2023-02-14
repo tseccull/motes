@@ -13,31 +13,39 @@ on:
 # Build and test the project
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Miniconda CI on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: ["ubuntu-latest", "windows-latest"]
         python-version: [3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: motes
+          environment-file: conda/motes.yml
           python-version: ${{ matrix.python-version }}
-      - name: Install conda environment file
-        run: |
-          python -m pip install --upgrade pip
-          $CONDA/bin/conda env update --file conda/motes.yml --name base
+          auto-activate-base: false
       - name: Lint with flake8
+        shell: bash -l {0}
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Bandit security checks
+          python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Bandit vurnebility checks
+        shell: bash -l {0}
         run: |
-          $CONDA/bin/bandit -r .
+          bandit -r .
+      - name: Black code formatter check
+        shell: bash -l {0}
+        run: |
+          black --check .
+      - name: Static code analysis with pylint
+        shell: bash -l {0}
+        run: |
+          pylint src
       #Unit tests with pytests and coverage?
 
   # Deploy to PyPI?
