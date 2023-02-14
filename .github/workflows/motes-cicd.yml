@@ -32,20 +32,20 @@ jobs:
       - name: Lint with flake8
         shell: bash -l {0}
         run: |
-          python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          python -m flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          # python -m flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Bandit vurnebility checks
         shell: bash -l {0}
         run: |
-          bandit -r .
+          python -m bandit -r src
       - name: Black code formatter check
         shell: bash -l {0}
         run: |
-          black --check .
+          python -m black --check src
       - name: Static code analysis with pylint
         shell: bash -l {0}
         run: |
-          pylint src
+          python -m pylint src
       #Unit tests with pytests and coverage?
 
   # Deploy to PyPI?
