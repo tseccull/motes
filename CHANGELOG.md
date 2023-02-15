@@ -11,6 +11,8 @@ Updates by D.Kiersz
 * Fully refactored startup.py.
 * Black formatter applied across startup.py and harverster.py
 * Remove redundant param_dict from data_harvest
+* Remove redundant imports from common.py
+* Remove redundant `interpkind` var from interpolate_extraction_lims and related functions
 
 ## 0.4.0 2022-07-27
 Updates by T. Seccull

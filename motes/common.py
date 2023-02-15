@@ -1,6 +1,3 @@
-###############################################################################
-# IMPORT MODULES /////////////////////////////////////////////////////////////#
-###############################################################################
 import copy
 import matplotlib
 import matplotlib.gridspec as gridspec
@@ -9,22 +6,15 @@ import numpy as np
 import scipy.interpolate as interp
 import sys
 import warnings
-
 from matplotlib.widgets import Slider
-from scipy.optimize import curve_fit
 from scipy.optimize import least_squares
-from scipy.stats import pearsonr
-
-###############################################################################
-# FUNCTIONS //////////////////////////////////////////////////////////////////#
-###############################################################################
 
 def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
     """Calculate the FWHM (i.e., the extraction limits) from a Moffat profile based on the distance from the central peak as a multiple of FWHM.
 
     Args:
-        moffparams (_type_): parameters of the Moffat profile to be created and measured.
-        axesdict (_type_): dictionary containing axis data for the data frame. Here only the length of the spatial axis is retrieved.
+        moffparams (list): list containing the parameters of the Moffat profile to be created and measured. The parameters are: [amplitude, location, scale, power].
+        axesdict (dict): dictionary containing the axes of the data frame 2D spectrum. Here only the length of the spatial axis is retrieved.
         width_multiplier (float, optional): defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM. Defaults to 3.0.
 
     Returns:
@@ -45,10 +35,22 @@ def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
 
     return lower_extraction_limit, upper_extraction_limit, fwhm, moffparams[1]
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
 def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
+    """Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
+
+    Description:
+    inearly extrapolate the extraction limits at the ends of the 2D spectrum.
+
+    Args:
+        extlims (list): A list containing the lower and upper extraction limits for each spatial pixel.
+        dispaxislen (int): The length of the dispersion axis.
+        shortend (int): The number of pixels at the short end of the dispersion axis to be excluded from the extraction.
+        longend (int): The number of pixels at the long end of the dispersion axis to be excluded from the extraction.
+
+    Returns:
+    pars (dict): A dictionary containing the parameters read in from motesparams.txt.
+
+    """
     short_extrap_grad1 = extrap_grad(extlims[0], [   0,  150, 300])
     short_extrap_grad2 = extrap_grad(extlims[1], [   0,  150, 300])
     long_extrap_grad1  = extrap_grad(extlims[0], [-300, -150,  -1])
@@ -75,41 +77,54 @@ def extrap_grad(intextlims, median_lims):
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 def filter_data(data2D, errs2D):
-    # This function takes in the data2D and errs2D and outputs frames where any
-    # NaN or Inf values are 0.0 (this can be later filtered to a median of the column)
+    """Filters the data2D and errs2D to remove NaNs and Infs.
 
-    # This is used before the extraction procedures to ensure the S/N in
-    # the bin is numerical (required for optimal extraction).
-    # Input = Original data2D, errs2D
-    # Output = Filtered data2D, errs2D
+    Description:
+    This function takes in the data2D and errs2D and outputs frames where any
+    NaN or Inf values are 0.0 (this can be later filtered to a median of the column)
 
-    # Zero out any NaNs and Infs from the error frame and corresponding data.
+    This is used before the extraction procedures to ensure the S/N in the bin is numerical (required for optimal extraction).
+
+    Args:
+        data2D (np.array): Original data2D
+        errs2D (np.array): Original errs2D
+
+    Returns:
+        data2D (np.array): Filtered data2D
+        errs2D (np.array): Filtered errs2D
+    """
+
     errs2D[np.isfinite(errs2D) == False] = 0.0
     data2D[np.isfinite(errs2D) == False] = 0.0
-    # Likewise, ensure that data is numerical and  corresponding errors.
     data2D[np.isfinite(data2D) == False] = 0.0
     errs2D[np.isfinite(data2D) == False] = 0.0
 
     return data2D, errs2D
 	
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such that when summed it will
-# have a given signal to noise. So lower signal to noise regions will have larger bins. This function works from the
-# centre of the input 2D spectrum outward to the ends in order to ensure a good start for the binning process.
-# Flagged bad pixels will be replaced with appropriate values using a method described by the ESO X-Shooter
-# pipeline. Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-# INPUTS:  fdict - dictionary containing all the data, error, and quality frames
-#           slow - lower spatial limit of the region where the S/N will be measured when defining the extent of a bin
-#          shigh - upper spatial limit of the region where the S/N will be measured when defining the extent of a bin
-#    dispaxislen - length of th dispersion axis
-#         params - dictionary of parameters ready in from the motesparams.txt configuration file
-#            sky - optional kwarg used to tell get_bins whether the sky has been subtracted yet or not, and to set the minSNR threshold accordingly
-#   replace_crbp - optional kwarg; when True, get_bins will try to replace bad pixels with values estimated using the median spatial profile of the current bin
-# OUTPUTS: binlocations - a list containing the details for each bin determined by get_bins. The boundaries and S/N of each bin are recorded here.
-#          fdict - returns fdict with bad pixels replaced if replace_crbp=True. If replace_crbp=False, fdict is returned unchanged.
 def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=False):
+    """Define the bins of data over which Moffat profiles will be fitted.
+    
+    Description:
+
+    Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such that when summed it will have a given signal to noise (S/N). So lower S/N regions will have larger bins. This function works from the centre of the input 2D spectrum outward to the ends in order to ensure a good start for the binning process.
+
+    Flagged bad pixels will be replaced with appropriate values using a method described by the ESO X-Shooter pipeline. Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+    
+    Args:
+        fdict (dict): Dictionary containing all the data, error, and quality frames.
+        slow (int): Lower spatial limit of the region where the S/N will be measured when defining the extent of a bin.
+        shigh (int): Upper spatial limit of the region where the S/N will be measured when defining the extent of a bin.
+        dispaxislen (int): Length of the dispersion axis.
+        params (dict): Dictionary of parameters ready in from the motesparams.txt configuration file.
+        sky (bool): Optional kwarg used to tell get_bins whether the sky has been subtracted yet or not, and to set the minSNR threshold accordingly.
+        replace_crbp (bool): Optional kwarg; when True, get_bins will try to replace bad pixels with values estimated using the median spatial profile of the current bin.
+
+    Returns:
+        binlocations (list): A list containing the details for each bin determined by get_bins. The boundaries and S/N of each bin are recorded here.
+        fdict (dict): Returns fdict with bad pixels replaced if replace_crbp=True. If replace_crbp=False, fdict is returned unchanged.
+    """
+
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
     if params['-SUBTRACT_SKY'] and sky==True:
         minSNR = params['-SKY_SNR_BIN_LIM']
@@ -268,18 +283,24 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
 
     return binlocations, fdict
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Print and plot the output of get_bins
-# INPUTS:  binparams - list containing the locations and S/N of each bin
-#             params - dictionary of parameters read in from the motesparams.txt confifuration file.
-#             lowext - lower limit of the spatial region measured for S/N in get_bins()
-#            highext - upper limit of the spatial region measured for S/N in get_bins()
-#             data2D - 2D spectroscopic data
-#         headparams - dictionary of parameters full from the datafile header.
-#             axdict - dictionary containing axes and axis metadata for the current extraction
-# OUTPUTS: None 
 def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
+    """Print and plot the output of get_bins.
+    
+    Description: Print and plot the output of get_bins.
+
+    Args:
+        binparams (list): list containing the locations and S/N of each bin
+        params (dict): dictionary of parameters read in from the motesparams.txt confifuration file.
+        lowext (int): lower limit of the spatial region measured for S/N in get_bins()
+        highext (int): upper limit of the spatial region measured for S/N in get_bins()
+        data2D (numpy.ndarray): 2D spectroscopic data
+        headparams (dict): dictionary of parameters full from the datafile header.
+        axdict (dict): dictionary containing axes and axis metadata for the current extraction
+
+    Returns:
+        None
+    """
+
     sys.stdout.write(' >>> ' + str(len(binparams)) + ' spectrum localisation bins determined on dispersion axis.\n')
 
     # DIAGNOSTICS - Plot boundary locations of localisation bins on the dispersion axis.
@@ -299,7 +320,7 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 
-def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
+def interpolate_extraction_lims(extractionlims, dispaxislen):
     """_summary_
 
     Description:
@@ -307,9 +328,8 @@ def interpolate_extraction_lims(extractionlims, dispaxislen, interpkind):
     imits are also linearly extrapolated towards the ends of the spectral range.
 
     Args:
-        extractionlims (_type_): _description_
+        extractionlims (_type_): _description_ (list of lists)
         dispaxislen (_type_): _description_
-        interpkind (_type_): _description_
 
     Returns:
         finalextlims (_type_): _description_
@@ -415,15 +435,19 @@ def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
     return moff + bglevel + (datarange * bggrad)
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
-# least squares method. Returns the best fit parameters of the Moffat function
-# INPUTS:  r   - spatial axis of the data being fit
-#          col - data being fit
-#          seeing - estimated FWHM of the spatial profile
-#          pixres - spatial resolution of each pixel in arcsec/pixel
-# OUTPUTS: list of best fit output parameters returned by the least squares routine.
 def moffat_least_squares(r, col, seeing, pixres):
+    """Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a least squares method. Returns the best fit parameters of the Moffat function
+
+    Args:
+        r (_type_): spatial axis of the data being fit
+        col (_type_): data being fit
+        seeing (_type_): estimated FWHM of the spatial profile
+        pixres (_type_): spatial resolution of each pixel in arcsec/pixel
+
+    Returns:
+        _type_: list of best fit output parameters returned by the least squares routine.
+    """
+
     # Set up initial conditions for the least squares fit.
     # x0 = [amplitude, centre, alpha, beta, background gradient, background level]
     # Initial beta estimate comes from optimal value from atmospheric turbulence theory as described in
@@ -444,38 +468,54 @@ def moffat_least_squares(r, col, seeing, pixres):
     return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3], res_lsq.x[4], res_lsq.x[5]]
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculates residuals of fitted moffat profile and the data for the least squares fitting.
-# A = x[0]
-# c = x[1]
-# alpha = x[2]
-# beta = x[3]
-# B = x[4]
-# m = x[5]
-# INPUTS:  x         - list of parameters defining the shape of the model moffat profile
-#          datarange - spatial axis of the data
-#          data      - the data 
-# OUTPUTS: the residual of the model moffat profile and the data
 def moffat_resid(x, datarange, data):
+    """Calculates residuals of fitted moffat profile and the data for the least squares fitting.
+
+    Description:
+        A = x[0]
+        c = x[1]
+        alpha = x[2]
+        beta = x[3]
+        B = x[4]
+        m = x[5]
+
+    Args:
+        x (_type_): list of parameters defining the shape of the model moffat profile
+        datarange (_type_): spatial axis of the data
+        data (_type_): the data
+
+    Returns:
+        residual (_type_): the residual of the model moffat profile and the data
+    """
     moff = x[0] * ((1 + ((datarange - x[1]) * (datarange - x[1])) / (x[2] * x[2])) ** -x[3])
 
     return moff + x[4] + (datarange * x[5]) - data
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors are not 'revised' 
-# since we already have the 'variance frame' (and we are not working with counts). Ideally, this extraction reduces 
-# errors with the weighting and conserves the flux (when compared to the standard extraction). This subroutine uses an 
-# analytic Moffat profile (post sky-subtraction), instead of polynominals as in Horne (1986). Furthermore, profiling 
-# takes place bin by bin, accounting for spatial profile variations across the dispersion axis; extraction takes place
-# column by column within the bin limits and within the extraction limits previously calculated.
-
-# Input = data2D, errs2D
-# Input = binparameters (contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis)
-# Input = finalextractionlimits (contains limits at each dispersion pixel)
-# Input = axdict (dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame)
-# Outputs = optidata1D, optierrs1D, aperdata1D, apererrs1D
 def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
+    """Performs optimal extraction on the data2D and errs2D arrays using the extraction limits and bin parameters.
+
+    Description:
+        Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors are not 'revised' 
+        since we already have the 'variance frame' (and we are not working with counts). Ideally, this extraction reduces 
+        errors with the weighting and conserves the flux (when compared to the standard extraction). This subroutine uses an 
+        analytic Moffat profile (post sky-subtraction), instead of polynominals as in Horne (1986). Furthermore, profiling 
+        takes place bin by bin, accounting for spatial profile variations across the dispersion axis; extraction takes place
+        column by column within the bin limits and within the extraction limits previously calculated.
+
+    Args:
+        data2D (np.array): Input data frame
+        errs2D (np.array): Input error frame
+        extractionlimits (_type_): contains limits at each dispersion pixel
+        binparameters (_type_): Contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
+        axdict (_type_): dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
+
+    Returns:
+        optidata1D (_type_): _description_
+        optierrs1D (_type_): _description_
+        aperdata1D (_type_): _description_
+        apererrs1D (_type_): _description_
+    """
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
     data2D, errs2D = filter_data(data2D, np.abs(errs2D))
@@ -566,17 +606,20 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     return optidata1D, optierrs1D, aperdata1D, apererrs1D
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the Moffat function fitted to
-# the data on top.
-# INPUTS:       spataxis - the spatial, or x, axis of the profile.
-#                bindata - the binned data that has been fitted with a Moffat profile.
-#          hiresspataxis - A supersampled spatial axis used only for plotting purposes.
-#          binmoffparams - Parameters defining the Moffat profiel that was fitted to bindata.
-#               imgstart - Lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
-#             headparams - dictionary of parameters pulled from the header of the current datafile
-# OUTPUTS: None
 def plot_fitted_spatial_profile(spataxis, bindata, hiresspataxis, binmoffparams, imgstart, headparams):
+    """ Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the Moffat function fitted to the data on top.
+
+    Args:
+        spataxis (_type_): the spatial, or x, axis of the profile.
+        bindata (_type_): the binned data that has been fitted with a Moffat profile.
+        hiresspataxis (_type_): A supersampled spatial axis used only for plotting purposes.
+        binmoffparams (_type_): Parameters defining the Moffat profiel that was fitted to bindata.
+        imgstart (_type_): ower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
+        headparams (_type_): dictionary of parameters pulled from the header of the current datafile
+
+    Returns:
+        None
+    """
     plt.figure(figsize=(7,4.5))
     plt.plot(hiresspataxis + imgstart, 
              moffat(binmoffparams[0], binmoffparams[1], binmoffparams[2], binmoffparams[3], binmoffparams[4], binmoffparams[5], hiresspataxis), 
@@ -594,12 +637,22 @@ def plot_fitted_spatial_profile(spataxis, bindata, hiresspataxis, binmoffparams,
     plt.show()
 
     return None
-
-
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
-# Levenberg-Marquardt least squares method.
+
 def poly2_least_squares(r, col):
+    """ Fits a second order polynomial to a data column using a Levenberg-Marquardt least squares method.
+
+    Description:
+    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
+
+    Args:
+        r (_type_): the spatial axis of the data column.
+        col (_type_): the data column.
+
+    Returns:
+       params (list): the parameters of the fitted polynomial.
+
+    """
     # Set up initial conditions for the least squares fit.
     x0 = [0., 0., np.median(col)]
 
@@ -610,16 +663,28 @@ def poly2_least_squares(r, col):
                             method='trf'
                             )
 
-    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2]]
+    params = [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2]]
+    return params
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
-# m = x[0]
-# c = x[1]
 def poly2_resid(x, datarange, data):
-    return (x[0]*datarange*datarange) + (x[1]*datarange) + x[2] - data
+    """ Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
 
+    Description:
+    m = x[0]
+    c = x[1]
+
+    Args:
+        x (_type_): the parameters of the fitted polynomial.
+        datarange (_type_): the spatial axis of the data column.
+        data (_type_): the data column.
+
+    Returns:    
+        resid (_type_): the residuals of the fitted polynomial and the data.
+    """
+    resid = (x[0]*datarange*datarange) + (x[1]*datarange) + x[2] - data
+
+    return resid
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a

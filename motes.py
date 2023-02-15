@@ -1,5 +1,5 @@
 # motes.py
-# Description: Modular and Optimal Tracer and EExtractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
+# Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
 # Version: 0.4.1-dev
 # Date: 2023-02-11
 # Authors: Tom Seccull, Dominik Kiersz
@@ -153,7 +153,7 @@ def motes():
 
         # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
         # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
-        finalextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'], params['-INTERP_KIND'])
+        finalextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'])
         sys.stdout.write('DONE.\n')
 
         # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis. All pixels fully within the aperture are extracted.
@@ -207,7 +207,7 @@ def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filen
     """This function saves the extracted spectrum and intermediate products in a single FITS file.
 
     Description:
-    TODO
+    Constructs a fits file.
 
     Args:
         axdict (dict): _description_
@@ -225,6 +225,9 @@ def save_fits(axdict, hparams, opflux, operrs, apflux, aperrs, head, pars, filen
         extractionlims (_type_): _description_
         sbpars (_type_): _description_
         skyextractionlims (_type_): _description_
+
+    Returns:
+        None   
     """
 
     head['MOTES']='######## Extracted 1D Spectrum Metadata ########'
@@ -380,7 +383,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
     # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
 
-    skyextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'], params['-INTERP_KIND'])
+    skyextractionlims = common.interpolate_extraction_lims(extractionlimits, axesdict['dispaxislen'])
 
     #skyextractionlims[0] *= 0.02
     #skyextractionlims[1] *= 0.02
