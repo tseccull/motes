@@ -64,18 +64,29 @@ def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
     return short_extrap_lim1, short_extrap_lim2, long_extrap_lim1, long_extrap_lim2
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Given a range of data and limits to define a region of that data, calculate the region's gradient.
 def extrap_grad(intextlims, median_lims):
+    """Calculate the gradient of a region of data.
+
+    Description:
+    Given a range of data and limits to define a region of that data, calculate the region's gradient.
+
+    Args:
+        intextlims (np.array): A range of data.
+        median_lims (list): A list containing the limits of the region of data to be used to calculate the gradient.
+
+    Returns:
+       gradient (int) = The gradient of the region of data.
+
+    """
     median_of_y_points_x_to_y = np.median(intextlims[median_lims[0]:median_lims[1]])
     median_of_y_points_y_to_z = np.median(intextlims[median_lims[1]:median_lims[2]])
     median_of_x_points_x_to_y = np.median([median_lims[0], median_lims[1]])
     median_of_x_points_y_to_z = np.median([median_lims[1], median_lims[2]])
 
-    return (median_of_y_points_x_to_y - median_of_y_points_y_to_z)/(median_of_x_points_x_to_y - median_of_x_points_y_to_z)
+    gradient = (median_of_y_points_x_to_y - median_of_y_points_y_to_z)/(median_of_x_points_x_to_y - median_of_x_points_y_to_z)
 
+    return gradient
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 def filter_data(data2D, errs2D):
     """Filters the data2D and errs2D to remove NaNs and Infs.
 
@@ -316,9 +327,6 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
         show_img(data2D, axdict, headparams, drawlines, '2D Spectrum with Boundaries of Localisation Bins')
 
     return None
-
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 
 def interpolate_extraction_lims(extractionlims, dispaxislen):
     """_summary_
@@ -686,10 +694,20 @@ def poly2_resid(x, datarange, data):
 
     return resid
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
-# Levenberg-Marquardt least squares method.
 def poly3_least_squares(r, col):
+    """ Fits a third order polynomial to a data column using a Levenberg-Marquardt least squares method.
+
+    Description:
+    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
+
+    Args:
+        r (_type_): the spatial axis of the data column.
+        col (_type_): the data column.
+
+    Returns:
+         params (list): the parameters of the fitted polynomial.
+
+    """
     # Set up initial conditions for the least squares fit.
     x0 = [0., 0., 0., np.median(col)]
 
@@ -702,13 +720,23 @@ def poly3_least_squares(r, col):
 
     return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3]]
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
-# m = x[0]
-# c = x[1]
 def poly3_resid(x, datarange, data):
-    return (x[0]*datarange*datarange*datarange) + (x[1]*datarange*datarange) + (x[2]*datarange) + x[3] - data
+    """ Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+
+    Description:
+    m = x[0]
+    c = x[1]
+
+    Args:
+        x (_type_): the parameters of the fitted polynomial.
+        datarange (_type_): the spatial axis of the data column.
+        data (_type_): the data column.
+
+    Returns:
+        resid (_type_): the residuals of the fitted polynomial and the data.
+    """
+    resid = (x[0]*datarange*datarange*datarange) + (x[1]*datarange*datarange) + (x[2]*datarange) + x[3] - data
+    return resid
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
@@ -807,10 +835,25 @@ def show_img(data2D, axdict, headparams, drawlines, title):
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# Subtracts the sky background from the 2D image by defining bg regions using limits input to the function and then
-# fitting a profile to the background column by column while masking cosmic rays. The fitted linear for
-# each column is subtracted from the full column to produce a background subtracted 2D image.
 def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
+    """Subtracts the sky background from the 2D image.
+
+    Description:
+        Subtracts the sky background from the 2D image by defining bg regions using limits input to the function and then
+        fitting a profile to the background column by column while masking cosmic rays. The fitted linear for
+        each column is subtracted from the full column to produce a background subtracted 2D image.
+
+    Args:
+        bglowext (_type_): _description_
+        bghighext (_type_): _description_
+        fdict (_type_): _description_
+        axdict (_type_): _description_
+        pars (_type_): _description_
+        hpars (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
 
     fdict['data'] = fdict['data'].T
     fdict['errs'] = fdict['errs'].T

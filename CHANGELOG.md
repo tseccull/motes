@@ -9,7 +9,7 @@ Updates by D.Kiersz
 * `input` folder to store fits files
 * Start conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
 * Fully refactored startup.py.
-* Black formatter applied across startup.py and harverster.py
+* `Black` formatter applied across startup.py and harverster.py
 * Remove redundant param_dict from data_harvest
 * Remove redundant imports from common.py
 * Remove redundant `interpkind` var from interpolate_extraction_lims and related functions
