@@ -23,7 +23,6 @@ def motes():
         It loads .fit files from the input subdirectory and harvest the data.
         Estimates bins for the spectrum.
         It then performs optional sky extraction and optimal extraction. 
-
     """
 
     # Run startup functions
