@@ -2,14 +2,14 @@
 common.py - Common functions for the MOTES pipeline.
 """
 
+import sys
+import warnings
 import copy
 import matplotlib
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate as interp
-import sys
-import warnings
 from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 

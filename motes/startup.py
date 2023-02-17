@@ -50,7 +50,7 @@ def read_regions():
     Description:
     Search for, and read in, reg.txt file in root working directory.
     Reads an input line from reg.txt and returns a list of integers defining the boundaries of the region of the 2D data that contains the spectrum to be extracted.
-    For each file, the  first two integers are the number of pixel rows to remove from each end of the spatial axis of the spectrum, and the last two are the upper and lower wavelength bounds of the region on the dispersion axis.
+    For each file, the first two integers are the number of pixel rows to remove from each end of the spatial axis of the spectrum, and the last two are the upper and lower wavelength bounds of the region on the dispersion axis.
     The first two integers are optional and default to 0 if not provided. The last two integers are required and must be provided.
 
     Returns:
