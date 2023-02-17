@@ -1,3 +1,7 @@
+"""
+common.py - Common functions for the MOTES pipeline.
+"""
+
 import copy
 import matplotlib
 import matplotlib.gridspec as gridspec
@@ -900,7 +904,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             sys.stdout.write('     -BG_FWHM_MULTIPLIER < ' + str(round(np.min([np.shape(fdict['data'])[0], np.shape(fdict['data'])[1]])/(2*hpars['seeing']), 1)) + ' recommended in this case.\n')
             sys.stdout.write('     Enlarging the 2D spectrum region in reg.txt is also a viable solution.\n')
             sys.stdout.write('     Terminating MOTES.\n')
-            exit()
+            sys.exit()
 			
         skyrange = colrange[np.where(np.logical_or(colrange<bglowext[ii], colrange>bghighext[ii]))]
         if len(set(skypix))==1:

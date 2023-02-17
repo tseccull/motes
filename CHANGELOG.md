@@ -7,12 +7,15 @@ Updates by D.Kiersz
 
 ### Changed
 * `input` folder to store fits files
-* Start conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
-* Fully refactored startup.py.
+* Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
+* Refactored loops in startup.py.
 * `Black` formatter applied across startup.py and harverster.py
-* Remove redundant param_dict from data_harvest
+* Remove redundant param_dict from data_harvest()
 * Remove redundant imports from common.py
 * Remove redundant `interpkind` var from interpolate_extraction_lims and related functions
+* Remove redudnant variable declaration `wav_min = scihead["CRVAL1"]` from harvester.py
+* Import order of modules to conform to PEP8.
+* Instances of exit() to sys.exit() to conform to PEP8.
 
 ## 0.4.0 2022-07-27
 Updates by T. Seccull

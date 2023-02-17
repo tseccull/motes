@@ -1,3 +1,7 @@
+"""
+startup.py - First script to be run by MOTES to read in parameters and regions.
+"""
+
 import os
 import sys
 
@@ -16,7 +20,7 @@ def read_parfile():
     sys.stdout.flush()
 
     # Read in MOTES parameter file line by line and filter out the empty lines.
-    with open("motesparams.txt") as parfile:
+    with open("motesparams.txt", "r", encoding="utf-8") as parfile:
         parlines = parfile.read().splitlines()
         parlines = filter(None, parlines)
 
@@ -58,7 +62,7 @@ def read_regions():
         sys.stdout.write(" >>> reg.txt file found. Reading reg.txt. ")
         sys.stdout.flush()
 
-        with open("reg.txt") as reg:
+        with open("reg.txt", "r", encoding="utf-8") as reg:
             reg = reg.read().splitlines()
             intregion = [[int(lim) for lim in x.split(",")] for x in reg]
         sys.stdout.write("DONE.\n")
@@ -75,6 +79,6 @@ def read_regions():
         )
         sys.stdout.write("     See the docs for further info.\n")
         sys.stdout.write("     Terminating MOTES.\n\n")
-        exit()
+        sys.exit()
 
     return intregion

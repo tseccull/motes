@@ -1,11 +1,16 @@
-import astropy.io.fits as fits
-import copy
-import motes.common as common
-import numpy as np
+"""
+harvester.py - A collection of functions to read in data from the image file and repackage it into a dictionary for use in the rest of MOTES.
+"""
+
 import sys
+import copy
+import numpy as np
+from astropy.io import fits
+from motes import common
+
 
 def data_harvest(reg_counter, filename_2D, region):
-    """Extract header metadata and data frames, and repackage them into dictionaries.
+    """Extract header metadata and data frames, and repackage them into dictionaries for use in the rest of MOTES.
 
     Args:
         reg_counter (int): integer noting which line in region is being called to define the boundaries of the 2D data.
@@ -82,7 +87,7 @@ def data_harvest(reg_counter, filename_2D, region):
             '     Make sure "-HIGH_WAV_SLICE" < upper limit of wavelength axis\n'
             "     Terminating MOTES.\n\n"
         )
-        exit()
+        sys.exit()
 
     wavslice = np.where(
         np.logical_and(
@@ -246,7 +251,7 @@ def harvest_fors2(imgfilehdu, imgheader):
             "     Spatial pixel resolution could not be determined.\n"
         )
         sys.stdout.write("     Terminating MOTES.\n\n")
-        exit()
+        sys.exit()
 
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: " + str(pixres) + '"\n'
@@ -343,7 +348,6 @@ def harvest_gmos(imgfilehdu, imgheader):
     )
 
     iq = imgheader["RAWIQ"]
-    wav_min = scihead["CRVAL1"]
 
     for i in WavTab:
         if scihead["CRVAL1"] > i[0] and scihead["CRVAL1"] < i[1]:

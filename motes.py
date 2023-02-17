@@ -1,9 +1,10 @@
-# motes.py
-# Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
-# Version: 0.4.1-dev
-# Date: 2023-02-11
-# Authors: Tom Seccull, Dominik Kiersz
-
+"""MOTES: Modular and Optimal Tracer and Extractor of Spectra.
+Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
+Version: 0.4.2-dev
+Date: 2023-02-11
+Authors: Tom Seccull, Dominik Kiersz
+Licence: GNU General Public License v3.0
+"""
 import astropy.io.fits as fits
 import copy
 import datetime
