@@ -4,7 +4,6 @@ import motes.common as common
 import numpy as np
 import sys
 
-
 def data_harvest(reg_counter, filename_2D, region):
     """Extract header metadata and data frames, and repackage them into dictionaries.
 

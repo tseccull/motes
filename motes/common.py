@@ -512,8 +512,8 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
         column by column within the bin limits and within the extraction limits previously calculated.
 
     Args:
-        data2D (np.array): Input data frame
-        errs2D (np.array): Input error frame
+        data2D (numpy.ndarray): Input data frame
+        errs2D (numpy.ndarray): Input error frame
         extractionlimits (_type_): contains limits at each dispersion pixel
         binparameters (_type_): Contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
         axdict (_type_): dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
@@ -738,14 +738,20 @@ def poly3_resid(x, datarange, data):
     resid = (x[0]*datarange*datarange*datarange) + (x[1]*datarange*datarange) + (x[2]*datarange) + x[3] - data
     return resid
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# This function prints, to the terminal, a set parameters describing a fitted Moffat function.
-# INPUTS:  moffparams - list of Moffat profile parameters.
-#            imgstart - Lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
-#           datascale - multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares
-# OUTPUTS: None
 def printmoffparams(moffparams, imgstart, datascale):
+    """ Prints, to the terminal, a set parameters describing a fitted Moffat function.
+
+    Description:
+    Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares and prints them to the terminal.
+
+    Args:
+        moffparams (list): the parameters of the fitted Moffat profile.
+        imgstart (int): the lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt.
+        datascale (float): the multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares.
+
+    Returns:
+        None
+    """
     sys.stdout.write(' >>> Fitted Moffat function parameters:\n')
     sys.stdout.write('         A = ' + str(moffparams[0]) + '\n')
     sys.stdout.write('         c = ' + str(moffparams[1] + imgstart) + '\n')
@@ -758,15 +764,29 @@ def printmoffparams(moffparams, imgstart, datascale):
 
     return None
 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 # Takes an input image and line data to be drawn on that image and creates a figure to be shown on screen.
 def show_img(data2D, axdict, headparams, drawlines, title):
+    """ Creates a figure to be shown on screen.
+
+    Description:
+    Takes an input image and line data to be drawn on that image and creates a figure to be shown on screen.
+
+    Args:
+        data2D (numpy.ndarray): the input image.
+        axdict (dict): a dictionary containing the spatial and spectral axes of the input image.
+        headparams (dict): a dictionary containing the header parameters of the input image.
+        drawlines (list): a list of line data to be drawn on the input image.
+        title (str): the title of the figure.
+
+    Returns:
+        None
+    """
 
     # Catch and suppress the following UserWarning:
     # UserWarning: Warning: 'partition' will ignore the 'mask' of the MaskedArray.
     #     a.partition(kth, axis=axis, kind=kind, order=order)
     # Numpy masked array used only when displaying the spectrograms.
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         warnings.warn("partition", UserWarning)
