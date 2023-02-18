@@ -455,7 +455,7 @@ def moffat_least_squares(r, col, seeing, pixres):
         pixres (_type_): spatial resolution of each pixel in arcsec/pixel
 
     Returns:
-        _type_: list of best fit output parameters returned by the least squares routine.
+        param_list (list): list of best fit output parameters returned by the least squares routine.
     """
 
     # Set up initial conditions for the least squares fit.
@@ -474,9 +474,8 @@ def moffat_least_squares(r, col, seeing, pixres):
                             method='trf', 
                             ftol=1E-12
                             )
-
-    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3], res_lsq.x[4], res_lsq.x[5]]
-
+    param_list = [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3], res_lsq.x[4], res_lsq.x[5]]
+    return param_list
 
 def moffat_resid(x, datarange, data):
     """Calculates residuals of fitted moffat profile and the data for the least squares fitting.
@@ -907,6 +906,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
         skyrange = colrange[np.where(np.logical_or(colrange<bglowext[ii], colrange>bghighext[ii]))]
         if len(set(skypix))==1:
             continue
+        
         else:
             medpix = np.nanmedian(skypix)
             stdpix = np.nanstd(skypix)

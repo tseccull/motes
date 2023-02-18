@@ -6,7 +6,7 @@ This changelog follows the format described [here](https://keepachangelog.com/en
 Updates by D.Kiersz
 
 ### Changed
-* `input` folder to store fits files
+* `inputs` folder to store fits files
 * Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
 * Refactored loops in startup.py.
 * `Black` formatter applied across startup.py, motes.py and harverster.py
@@ -16,6 +16,10 @@ Updates by D.Kiersz
 * Remove redudnant variable declaration `wav_min = scihead["CRVAL1"]` from harvester.py
 * Import order of modules to conform to PEP8.
 * Instances of exit() to sys.exit() to conform to PEP8.
+
+### Fixed
+* Fixed a bug that caused the program to crash when the `inputs` folder did not exist.
+* Fixed a bug incorrect args supplied to data_harvest().
 
 ## 0.4.1 2023-02-15
 Updated by D. Kiersz

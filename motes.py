@@ -43,7 +43,7 @@ def motes():
             " >>> Gathering image frames and header data from input file.\n"
         )
         headparams, framedict, axesdict, imghead = harvester.data_harvest(
-            i, file_2D, intreg, params
+            i, file_2D, intreg
         )
         # Make backup copies of the original data and error frames.
         framedict["ogdata"] = copy.deepcopy(framedict["data"])
@@ -530,12 +530,19 @@ def save_fits(
 
     hdulist = fits.HDUList(hdu_list)
     filenamelist = filename.split("_")
-    hdulist.writeto("m" + "_".join(filenamelist[0:-1]) + "_" + filenamelist[-1])
+    hdulist.writeto(
+        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1]
+    )
     hdulist.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "     m" + "_".join(filenamelist[0:-1]) + "_" + filenamelist[-1] + "\n"
+        "_".join(filenamelist[0:-2])
+        + "_"
+        + "1D"
+        + "_"
+        + filenamelist[-1]
+        + "\n"
     )
     return None
 

@@ -4,3 +4,11 @@
 /motes/__pycache__
 *.py[cod]
 *$py.class
+
+# vscode
+settings.json
+
+# remove later
+*.fits
+motesparams.txt
+reg.txt
