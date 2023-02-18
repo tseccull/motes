@@ -1,8 +1,8 @@
 """
 MOTES: Modular and Optimal Tracer and Extractor of Spectra.
 Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
-Version: 0.4.2-dev
-Date: 2023-02-11
+Version: 0.4.2
+Date: 2023-02-16
 Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
@@ -16,6 +16,7 @@ import motes.startup as startup
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+
 
 def motes():
     """Run MOTES.
@@ -105,7 +106,7 @@ def motes():
             + str(int(highext + axesdict["imgstart"]))
             + "\n"
         )
-        
+
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the parameters of the fitted Moffat profile.
         if params["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
             common.printmoffparams(moffparams, axesdict["imgstart"], datascale)
@@ -175,7 +176,7 @@ def motes():
         extractionlimits = []
 
         for bin in binparams:
-            
+
             # Take the median spatial profile of the dispersion
             # bin, and leave out pixel columns in the chip gaps if this is a GMOS spectrum.
             binimg = framedict["data"][:, bin[0] : bin[1]]
@@ -250,7 +251,7 @@ def motes():
 
         # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
         # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
-        
+
         finalextractionlims = common.interpolate_extraction_lims(
             extractionlimits, axesdict["dispaxislen"]
         )
@@ -276,25 +277,45 @@ def motes():
         # Extract the spectrum from a supersampled version of the 2D image using the extraction limits.
         sys.stdout.write(" >>> Extracting 1D spectrum. ")
         sys.stdout.flush()
-        framedict['data'] = framedict['data'].T
-        framedict['errs'] = framedict['errs'].T
-        framedict['qual'] = framedict['qual'].T
-        
-        opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(framedict['data'], framedict['errs'], finalextractionlims, binpars, axesdict)
-        
+        framedict["data"] = framedict["data"].T
+        framedict["errs"] = framedict["errs"].T
+        framedict["qual"] = framedict["qual"].T
+
+        opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
+            framedict["data"],
+            framedict["errs"],
+            finalextractionlims,
+            binpars,
+            axesdict,
+        )
+
         finalextractionlims = np.array(finalextractionlims)
         sys.stdout.write("DONE.\n")
 
         # DIAGNOSTICS - Plot extracted spectrum.
-        if params['-PLOT_EXTRACTED_SPECTRUM']:
+        if params["-PLOT_EXTRACTED_SPECTRUM"]:
             # DIAGNOSTICS, EXTRACTED SPECTRUM
-            plt.figure(figsize=(9,6))
-            plt.errorbar(axesdict['waxis'], apdata1D, yerr=aperrs1D, color='k', marker='.', label='Aperture Spectrum')
-            plt.errorbar(axesdict['waxis'], opdata1D, yerr=operrs1D, color='r', marker='.', label='Optimal Spectrum')
-            plt.grid(alpha=0.5, linestyle='dotted')
-            plt.title('Extracted 1D Spectrum')
-            plt.ylabel('Flux, ' + headparams['fluxunit'])
-            plt.xlabel('Wavelength, ' + headparams['wavunit'])
+            plt.figure(figsize=(9, 6))
+            plt.errorbar(
+                axesdict["waxis"],
+                apdata1D,
+                yerr=aperrs1D,
+                color="k",
+                marker=".",
+                label="Aperture Spectrum",
+            )
+            plt.errorbar(
+                axesdict["waxis"],
+                opdata1D,
+                yerr=operrs1D,
+                color="r",
+                marker=".",
+                label="Optimal Spectrum",
+            )
+            plt.grid(alpha=0.5, linestyle="dotted")
+            plt.title("Extracted 1D Spectrum")
+            plt.ylabel("Flux, " + headparams["fluxunit"])
+            plt.xlabel("Wavelength, " + headparams["wavunit"])
             plt.legend()
             plt.show()
 
@@ -326,8 +347,6 @@ def motes():
     return None
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-# This function saves the extracted spectrum and intermediate products in a single FITS file.
 def save_fits(
     axdict,
     hparams,
@@ -466,23 +485,30 @@ def save_fits(
         skybinhdu = fits.ImageHDU(sbpars)
         skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
         skyextractionlims = fits.ImageHDU(skyextractionlims)
-        skyextractionlims.header['EXTNAME'] = 'SKY_EXT_LIMS'
+        skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head['HIERARCH EXTRACTED HDU ROW 0'] = 'Wavelength Axis, ' + hparams['wavunit']
-    head.add_blank('Data Saved in the Extracted Spectrum HDU', before='HIERARCH EXTRACTED HDU ROW 0')
-    head['HIERARCH EXTRACTED HDU ROW 1'] = 'Flux, ' + hparams['fluxunit']
-    head['HIERARCH EXTRACTED HDU ROW 2'] = 'Flux Uncertainty, ' + hparams['fluxunit']
-    head['EXTNAME'] = 'OPTI_1D_SPEC'
-    
-    opfluxhdu = fits.PrimaryHDU([axdict['waxis'], opflux, operrs], header=head)
-    apfluxhdu = fits.ImageHDU([axdict['waxis'], apflux, aperrs], header=head)
-    apfluxhdu.header['EXTNAME'] = 'APER_1D_SPEC'
-    spec2Dhdu = fits.ImageHDU(fdict['ogdata'])
-    spec2Dhdu.header['EXTNAME'] = 'ORIG_2D_SPEC'
-    errs2Dhdu = fits.ImageHDU(fdict['ogerrs'])
-    errs2Dhdu.header['EXTNAME'] = 'ORIG_2D_ERRS'
-    qual2Dhdu = fits.ImageHDU(fdict['ogqual'])
-    qual2Dhdu.header['EXTNAME'] = 'ORIG_2D_QUAL'
+    head["HIERARCH EXTRACTED HDU ROW 0"] = (
+        "Wavelength Axis, " + hparams["wavunit"]
+    )
+    head.add_blank(
+        "Data Saved in the Extracted Spectrum HDU",
+        before="HIERARCH EXTRACTED HDU ROW 0",
+    )
+    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["fluxunit"]
+    head["HIERARCH EXTRACTED HDU ROW 2"] = (
+        "Flux Uncertainty, " + hparams["fluxunit"]
+    )
+    head["EXTNAME"] = "OPTI_1D_SPEC"
+
+    opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
+    apfluxhdu = fits.ImageHDU([axdict["waxis"], apflux, aperrs], header=head)
+    apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
+    spec2Dhdu = fits.ImageHDU(fdict["ogdata"])
+    spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
+    errs2Dhdu = fits.ImageHDU(fdict["ogerrs"])
+    errs2Dhdu.header["EXTNAME"] = "ORIG_2D_ERRS"
+    qual2Dhdu = fits.ImageHDU(fdict["ogqual"])
+    qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
     binhdu = fits.ImageHDU(bpars)
     binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
     extractionlims = fits.ImageHDU(extractionlims)
@@ -512,6 +538,7 @@ def save_fits(
         "     m" + "_".join(filenamelist[0:-1]) + "_" + filenamelist[-1] + "\n"
     )
     return None
+
 
 def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     """Perform sky subtraction on the 2D spectrum.
@@ -625,11 +652,6 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         extractionlimits, axesdict["dispaxislen"]
     )
 
-
-
-    # skyextractionlims[0] *= 0.02
-    # skyextractionlims[1] *= 0.02
-
     sys.stdout.write("DONE.\n")
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis.
@@ -682,7 +704,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         )
 
     return framedict, skybin, skyextractionlims
-	
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     motes()

@@ -2,14 +2,14 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
-## 0.4.2 2023-02-11
+## 0.4.2 2023-02-16
 Updates by D.Kiersz
 
 ### Changed
 * `input` folder to store fits files
 * Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
 * Refactored loops in startup.py.
-* `Black` formatter applied across startup.py and harverster.py
+* `Black` formatter applied across startup.py, motes.py and harverster.py
 * Remove redundant param_dict from data_harvest()
 * Remove redundant imports from common.py
 * Remove redundant `interpkind` var from interpolate_extraction_lims and related functions
@@ -17,7 +17,7 @@ Updates by D.Kiersz
 * Import order of modules to conform to PEP8.
 * Instances of exit() to sys.exit() to conform to PEP8.
 
-## 0.4.1 2023-02-05
+## 0.4.1 2023-02-15
 Updated by D. Kiersz
 
 ### Added

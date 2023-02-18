@@ -337,7 +337,7 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
 
     Description:
     Takes an input of extraction limits from the fitting of the binned data and interpolates the limits over the unbinned data. 
-    imits are also linearly extrapolated towards the ends of the spectral range.
+    Limits are also linearly extrapolated towards the ends of the spectral range.
 
     Args:
         extractionlims (_type_): _description_ (list of lists)
@@ -412,10 +412,8 @@ def linear_resid(x, datarange, data):
     return residual
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-
 def make_wav_axis(start, increment, length):
-    """# Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the axis required.
+    """ Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the axis required.
 
     Args:
         start (_type_): _description_
