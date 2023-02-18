@@ -2,7 +2,7 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
-## 0.5 2023-02-16
+## 0.5.0 2023-02-16
 Updates by D.Kiersz
 
 ## Added
