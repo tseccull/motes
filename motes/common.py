@@ -873,7 +873,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
         hpars (_type_): _description_
 
     Returns:
-        _type_: _description_
+        fdict (_type_): _description_
     """
 
     fdict['data'] = fdict['data'].T
