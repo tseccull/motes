@@ -1,12 +1,12 @@
 # Change Log
 All notable changes to this package will be documented here. 
-This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
+This changelog follows the format described [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is followed.
 
 ## 0.4.2 2023-02-16
 Updates by D.Kiersz
 
 ### Changed
-* `inputs` folder to store fits files
+* `inputs` folder to store fits files, change output file format name to include 1D.
 * Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
 * Refactored loops in startup.py.
 * `Black` formatter applied across startup.py, motes.py and harverster.py
@@ -16,10 +16,7 @@ Updates by D.Kiersz
 * Remove redudnant variable declaration `wav_min = scihead["CRVAL1"]` from harvester.py
 * Import order of modules to conform to PEP8.
 * Instances of exit() to sys.exit() to conform to PEP8.
-
-### Fixed
-* Fixed a bug that caused the program to crash when the `inputs` folder did not exist.
-* Fixed a bug incorrect args supplied to data_harvest().
+* Updated link in CHANGELOG.md
 
 ## 0.4.1 2023-02-15
 Updated by D. Kiersz
