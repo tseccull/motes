@@ -2,7 +2,7 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
 
-## 0.4.2-dev 2023-02-11
+## 0.4.2 2023-02-11
 Updates by D.Kiersz
 
 ### Changed
@@ -16,6 +16,17 @@ Updates by D.Kiersz
 * Remove redudnant variable declaration `wav_min = scihead["CRVAL1"]` from harvester.py
 * Import order of modules to conform to PEP8.
 * Instances of exit() to sys.exit() to conform to PEP8.
+
+## 0.4.1 2023-02-05
+Updated by D. Kiersz
+
+### Added
+* Installation environment for Anaconda and dependencies with instructions. This is the first step for contenarising the application.
+
+### Changed
+* Updated README.md, including a spelling mistake.
+* In Removed the following line `sys.stdout.write('     Extraction of ' + direc + ' could not be completed.\n')`.
+* In `startup.py` use a list-comprehension instead of a loop.
 
 ## 0.4.0 2022-07-27
 Updates by T. Seccull
