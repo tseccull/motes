@@ -23,7 +23,7 @@ def motes():
 
     Description:
         This function is the entrypoint for the MOTES.
-        It loads .fit files from the input subdirectory and harvest the data.
+        It loads .fits files from the input subdirectory and harvest the data.
         Estimates bins for the spectrum.
         It then performs optional sky extraction and optimal extraction.
     """
