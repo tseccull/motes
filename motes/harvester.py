@@ -148,16 +148,16 @@ def harvest_floyds(imgfilehdu, imgheader):
     Please note that this spectrum must not be flux calibrated, to ensure that a reliable ERR frame is made.
 
     Args:
-        imgfilehdu (_type_): the Header Data Unit (HDU) read in from the data file.
-        imgheader (_type_): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
+        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
 
     Returns:
-        imgdata (np.array): the 2D data frame
-        imgerrs (np.array): the 2D error/uncertainty frame (variance_frame^0.5). In the case of FLOYDS, no variance or uncertainty frame is provided, so one is constructed using the data along with read noise and dark
+        imgdata (numpy.ndarray): the 2D data frame
+        imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5). In the case of FLOYDS, no variance or uncertainty frame is provided, so one is constructed using the data along with read noise and dark
                             current metadata contained in the file header. This is why flux calibrated 2D FLOYDS spectra should not be extracted with MOTES, as the flux calibration spoils the
                             construction of the error frame. Flux calibration should be applied after the spectrum is extracted if MOTES is used.
-        imgqual (np.array): the 2D quality frame noting the locations of bad pixels etc. Since FLOYDS spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) is created to ensure compatibility with MOTES.
-        ogimgqual (np.array): the original 2D quality frame prior to manipulation by MOTES. In the case of FLOYDS this frame is set to all zeros (see below).
+        imgqual (numpy.ndarray): the 2D quality frame noting the locations of bad pixels etc. Since FLOYDS spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) is created to ensure compatibility with MOTES.
+        ogimgqual (numpy.ndarray): the original 2D quality frame prior to manipulation by MOTES. In the case of FLOYDS this frame is set to all zeros (see below).
         headerdict (dict): a dictionary containing the header information required by MOTES.
     """
 
@@ -205,15 +205,15 @@ def harvest_fors2(imgfilehdu, imgheader):
     """Harvest the header and data from a FORS2 spectrum.
 
     Args:
-        imgfilehdu (_type_):  the Header Data Unit (HDU) read in from the data file.
-        imgheader (_type_): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
+        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
 
     Returns:
-        imgdata (np.array)   - the 2D data frame
-        imgerrs (np.array)   - the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (np.array)   - the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1)
+        imgdata (numpy.ndarray)   - the 2D data frame
+        imgerrs (numpy.ndarray)   - the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)   - the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1)
                            is created to ensure compatibility with MOTES.
-        ogimgqual (np.array) - the original 2D quality frame prior to manipulation by MOTES. In the case of FORS2 this frame is set to all zeros (see imgqual above).
+        ogimgqual (numpy.ndarray) - the original 2D quality frame prior to manipulation by MOTES. In the case of FORS2 this frame is set to all zeros (see imgqual above).
     """
 
     # Retrieve the data frame and error frame.
@@ -288,14 +288,14 @@ def harvest_gmos(imgfilehdu, imgheader):
     """Harvest the header and data from a GMOS spectrum.
 
     Args:
-        imgfilehdu (_type_): the Header Data Unit (HDU) read in from the data file.
-        imgheader (_type_): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
+        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
 
     Returns:
-        imgdata (np.array)   - the 2D data frame
-        imgerrs (np.array)    - the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (np.array)    - the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (np.array)  - the original 2D quality frame prior to manipulation by MOTES.
+        imgdata (numpy.ndarray)   - the 2D data frame
+        imgerrs (numpy.ndarray)    - the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)    - the 2D quality frame noting the locations of bad pixels etc.
+        ogimgqual (numpy.ndarray)  - the original 2D quality frame prior to manipulation by MOTES.
     """
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science image frame, as some metadata is stored there instead of the primary header.
@@ -413,15 +413,18 @@ def harvest_xshoo(imgfilehdu, imgheader):
     """Harvest the header and data from an X-Shooter spectrum.
 
     Args:
-        imgfilehdu (_type_): the Header Data Unit (HDU) read in from the data file.
-        imgheader (_type_): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
+        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
 
     Returns:
-        imgdata (np.array)   - the 2D data frame
-        imgerrs (np.array)    - the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (np.array)    - the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (np.array)  - the original 2D quality frame prior to manipulation by MOTES.
+        imgdata (numpy.ndarray)   - the 2D data frame
+        imgerrs (numpy.ndarray)    - the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)    - the 2D quality frame noting the locations of bad pixels etc.
+        ogimgqual (numpy.ndarray)  - the original 2D quality frame prior to manipulation by MOTES.
     """
+
+    print(type(imgfilehdu))
+    print(type(imgheader))
 
     # Retrieve the data frame, error frame, and qual frame.
     imgdata = imgfilehdu[0].data
