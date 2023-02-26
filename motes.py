@@ -370,21 +370,21 @@ def save_fits(
     Constructs a fits file.
 
     Args:
-        axdict (dict): _description_
-        hparams (_type_): _description_
-        opflux (_type_): _description_
-        operrs (_type_): _description_
-        apflux (_type_): _description_
-        aperrs (_type_): _description_
-        head (_type_): _description_
-        pars (_type_): _description_
-        filename (_type_): _description_
-        moffpars (_type_): _description_
-        fdict (_type_): _description_
-        bpars (_type_): _description_
-        extractionlims (_type_): _description_
-        sbpars (_type_): _description_
-        skyextractionlims (_type_): _description_
+        axdict (dict): Dictionary containing the axes information.
+        hparams (dict): Dictionary containing the header information.
+        opflux (numpy.ndarray): An array containing the flux values of the optimal extraction.
+        operrs (numpy.ndarray): An array containing the flux errors of the optimal extraction.
+        apflux (numpy.ndarray): An array containing the flux values of the aperture extraction.
+        aperrs (numpy.ndarray): An array containing the flux errors of the aperture extraction.
+        head (astropy.io.fits.header.Header): The original FITS header of the 2D spectrum.
+        pars (dict): Dictionary containing the MOTES parameters.
+        filename (str): Filename of the 1D spectrum.
+        moffpars (list): List containing the Moffat fit parameters.
+        fdict (dict): A dictionary containing the 2D spectrum data and errors.
+        bpars (numpy.ndarray): A dictionary containing the binning parameters.
+        extractionlims (numpy.ndarray): An array containing the extraction limits.
+        sbpars (numpy.ndarray): An array containing the binning parameters for the sky extraction.
+        skyextractionlims (list): A list containing the extraction limits for the sky extraction.
 
     Returns:
         None

@@ -23,10 +23,10 @@ def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
         width_multiplier (float, optional): defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM. Defaults to 3.0.
 
     Returns:
-        lower_extraction_limit - the lower bound of the region to be extracted.
-        upper_extraction_limit - the upper bound of the region to be extracted.
-        fwhm                   - the Full Width at Half Maximum of the Moffat profile.
-        moffparams[1]          - location of the center of the Moffat profile.
+        lower_extraction_limit (numpy.float64) - the lower bound of the region to be extracted.
+        upper_extraction_limit (numpy.float64) - the upper bound of the region to be extracted.
+        fwhm (numpy.float64)                   - the Full Width at Half Maximum of the Moffat profile.
+        moffparams[1] (numpy.float64)          - location of the center of the Moffat profile.
     """
 
     # Create a Moffat profile based on the input parameters.
@@ -527,12 +527,12 @@ def linear_least_squares(r, col):
 def linear_resid(x, datarange, data):
     """Calculate residuals of fitted linear profile and the data for the Levenberg-Marquardt least squares method.
     Args:
-        x (_type_): _description_
-        datarange (_type_): _description_
-        data (_type_): _description_
+        x (list): List containing the best fit parameters of the linear profile.
+        datarange (_type_):
+        data (_type_):
 
     Returns:
-        residual (_type_): _description_
+        residual (_type_): The residuals of the fitted linear profile and the data.
     """
     residual = (x[0] * datarange) + x[1] - data
     return residual
@@ -1088,16 +1088,18 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
         each column is subtracted from the full column to produce a background subtracted 2D image.
 
     Args:
-        bglowext (_type_): _description_
-        bghighext (_type_): _description_
-        fdict (_type_): _description_
-        axdict (_type_): _description_
-        pars (_type_): _description_
-        hpars (_type_): _description_
+        bglowext (numpy.ndarray): Lower limits of the background regions.
+        bghighext (numpy.ndarray): Upper limits of the background regions.
+        fdict (dict): Dictionary containing the 2D image.
+        axdict (dict): Dictionary containing the axis information.
+        pars (dict): Dictionary containing MOTES parameters.
+        hpars (dict): Dictionary containing header information.
 
     Returns:
-        fdict (_type_): _description_
+        fdict (dict): Dictionary containing the background subtracted 2D image.
     """
+
+    print("Subtracting sky background...")
 
     fdict["data"] = fdict["data"].T
     fdict["errs"] = fdict["errs"].T
