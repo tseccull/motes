@@ -429,18 +429,19 @@ def get_bins_output(
 
 
 def interpolate_extraction_lims(extractionlims, dispaxislen):
-    """_summary_
+    """Interpolate extraction limits over unbinned 2D spectrum to create the final extraction limits for the unbinned spectrum.
 
     Description:
+    Interpolate extraction limits over unbinned 2D spectrum to create the final extraction limits for the unbinned spectrum.
     Takes an input of extraction limits from the fitting of the binned data and interpolates the limits over the unbinned data.
     Limits are also linearly extrapolated towards the ends of the spectral range.
 
     Args:
-        extractionlims (_type_): _description_ (list of lists)
-        dispaxislen (_type_): _description_
+        extractionlims (numpy.ndarray): Extraction limits for each bin.
+        dispaxislen (float): Length of the dispersion axis of the unbinned 2D spectrum.
 
     Returns:
-        finalextlims (_type_): _description_
+        finalextlims (list): List containing the extraction limits for the unbinned 2D spectrum.
     """
 
     # If the 2D spectrum was so faint that only 1 dispersion bin could be determined, set the extraction limits
@@ -541,12 +542,12 @@ def make_wav_axis(start, increment, length):
     """Returns a wavelength axis array using a start wavelength, the wavelength increment and the number of values along the axis required.
 
     Args:
-        start (_type_): _description_
-        increment (_type_): _description_
-        length (_type_): _description_
+        start (float): The start wavelength of the axis, in nm.
+        increment (float): The wavelength increment between each value along the axis, in nm.
+        length (int): Number of values along the axis required.
 
     Returns:
-        wavaxis (_type_): _description_
+        wavaxis (numpy.ndarray): A wavelength axis array.
     """
     wavaxis = np.arange(
         start=start, step=increment, stop=(length * increment) + start
@@ -558,21 +559,24 @@ def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
     """Creates moffat profile added a linear sloped background based on input parameters
 
     Args:
-        amp (_type_): amplitude of the Moffat profile
-        c (_type_): location of the center/peak of the Moffat profile on the spatial axis.
-        alpha (_type_): he main parameter that defines the width of the Moffat profile.
-        beta (_type_): plays a role in defining the width of the Moffat profile in the outer wings far from the profile's peak.
-        bglevel (_type_): height of the linearly varying background
-        bggrad (_type_): gradient of the linearly varying background
-        datarange (_type_): x axis of the Moffat profile.
+        amp (float64): amplitude of the Moffat profile
+        c (float64): location of the center/peak of the Moffat profile on the spatial axis.
+        alpha (float64): he main parameter that defines the width of the Moffat profile.
+        beta (float64): plays a role in defining the width of the Moffat profile in the outer wings far from the profile's peak.
+        bglevel (float64): height of the linearly varying background
+        bggrad (float64): gradient of the linearly varying background
+        datarange (numpy.ndarray): x axis of the Moffat profile.
 
     Returns:
-        moff (_type_): a moffat profile defined on the datarange axis using the parameters input to the function.
+        moffat_background (numpy.ndarray): a moffat profile defined on the datarange axis using the parameters input to the function, with added background flux.
     """
-    moff = amp * (
+
+    moffat = amp * (
         (1 + (((datarange - c) * (datarange - c)) / (alpha * alpha))) ** -beta
     )
-    return moff + bglevel + (datarange * bggrad)
+    moffat_background = moffat + bglevel + (datarange * bggrad)
+
+    return moffat_background
 
 
 def moffat_least_squares(r, col, seeing, pixres):
@@ -644,18 +648,19 @@ def moffat_resid(x, datarange, data):
         m = x[5]
 
     Args:
-        x (_type_): list of parameters defining the shape of the model moffat profile
-        datarange (_type_): spatial axis of the data
-        data (_type_): the data
+        x (numpy.ndarray): an array of parameters defining the shape of the model moffat profile
+        datarange (numpy.ndarray): spatial axis of the data
+        data (numpy.ndarray): the data
 
     Returns:
-        residual (_type_): the residual of the model moffat profile and the data
+        residual (numpy.ndarray): the residual array between the model moffat profile and the data
     """
+
     moff = x[0] * (
         (1 + ((datarange - x[1]) * (datarange - x[1])) / (x[2] * x[2])) ** -x[3]
     )
-
-    return moff + x[4] + (datarange * x[5]) - data
+    residual = moff + x[4] + (datarange * x[5]) - data
+    return residual
 
 
 def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
@@ -672,16 +677,18 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     Args:
         data2D (numpy.ndarray): Input data frame
         errs2D (numpy.ndarray): Input error frame
-        extractionlimits (_type_): contains limits at each dispersion pixel
-        binparameters (_type_): Contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
-        axdict (_type_): dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
+        extractionlimits (numpy.ndarray): contains limits at each dispersion pixel
+        binparameters (list): Contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
+        axdict (dict): dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
 
     Returns:
-        optidata1D (_type_): _description_
-        optierrs1D (_type_): _description_
-        aperdata1D (_type_): _description_
-        apererrs1D (_type_): _description_
+        optidata1D (numpy.ndarray): 1D array of the optimally extracted spectrum
+        optierrs1D (numpy.ndarray): 1D array of the uncertainties of the optimally extracted spectrum
+        aperdata1D (numpy.ndarray): 1D array of the aperture extracted spectrum
+        apererrs1D (numpy.ndarray): 1D array of the uncertainties of the aperture extracted spectrum
     """
+
+    print("Performing optimal extraction...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
     data2D, errs2D = filter_data(data2D, np.abs(errs2D))

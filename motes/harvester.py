@@ -211,9 +211,10 @@ def harvest_fors2(imgfilehdu, imgheader):
     Returns:
         imgdata (numpy.ndarray)   - the 2D data frame
         imgerrs (numpy.ndarray)   - the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   - the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1)
-                           is created to ensure compatibility with MOTES.
+        imgqual (numpy.ndarray)   - the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) is created to ensure compatibility with MOTES.
         ogimgqual (numpy.ndarray) - the original 2D quality frame prior to manipulation by MOTES. In the case of FORS2 this frame is set to all zeros (see imgqual above).
+        headerdict (dict)          - a dictionary containing the header information.
+        wavaxis (numpy.ndarray)    - the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame and error frame.
@@ -296,6 +297,8 @@ def harvest_gmos(imgfilehdu, imgheader):
         imgerrs (numpy.ndarray)    - the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)    - the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray)  - the original 2D quality frame prior to manipulation by MOTES.
+        headerdict (dict)          - a dictionary containing the header information.
+        wavaxis (numpy.ndarray)    - the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science image frame, as some metadata is stored there instead of the primary header.
@@ -421,6 +424,8 @@ def harvest_xshoo(imgfilehdu, imgheader):
         imgerrs (numpy.ndarray)    - the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)    - the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray)  - the original 2D quality frame prior to manipulation by MOTES.
+        headerdict (dict)          - a dictionary containing the header information.
+        wavaxis (numpy.ndarray)    - the 1D wavelength axis of the spectrum.
     """
 
     print(type(imgfilehdu))

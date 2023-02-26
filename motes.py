@@ -555,15 +555,17 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     moffat profile to the median data and then use the parameters of the fitted Moffat function to localise the 2D spectrum.
 
     Args:
-        framedict (_type_): _description_
-        axesdict (_type_): _description_
-        datascale (_type_): _description_
-        headparams (_type_): _description_
-        binparams (_type_): _description_
-        params (_type_): _description_
+        framedict (dict): A dictionary containing the 2D spectrum and its associated errors and quality arrays.
+        axesdict (dict): A dictionary containing the wavelength and spatial axes of the 2D spectrum.
+        datascale (float): A flux scale factor to convert the flux units of the 2D spectrum to the same units as the sky.
+        headparams (dict): A dictionary containing the header parameters of the 2D spectrum.
+        binparams (dict): A dictionary containing the bin parameters of the 2D spectrum.
+        params (dict): A dictionary containing the parameters of the extraction.
 
     Returns:
-        _type_: _description_
+        framedict (dict): A dictionary containing the 2D spectrum and its associated errors and quality arrays.
+        skybin (list): A list containing bins for the sky background.
+        skyextractionlims (list): A list containing the extraction limits for the sky background.
     """
 
     sys.stdout.write(
