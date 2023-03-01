@@ -6,6 +6,7 @@ Date: 2023-02-16
 Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
+
 import astropy.io.fits as fits
 import copy
 import datetime

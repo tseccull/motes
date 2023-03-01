@@ -23,10 +23,10 @@ def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
         width_multiplier (float, optional): defines the distance from the center of the spatial profile at which to set the extraction limits, in multiples of the FWHM. Defaults to 3.0.
 
     Returns:
-        lower_extraction_limit (numpy.float64) - the lower bound of the region to be extracted.
-        upper_extraction_limit (numpy.float64) - the upper bound of the region to be extracted.
-        fwhm (numpy.float64)                   - the Full Width at Half Maximum of the Moffat profile.
-        moffparams[1] (numpy.float64)          - location of the center of the Moffat profile.
+        lower_extraction_limit (numpy.float64): the lower bound of the region to be extracted.
+        upper_extraction_limit (numpy.float64): the upper bound of the region to be extracted.
+        fwhm (numpy.float64): the Full Width at Half Maximum of the Moffat profile.
+        moffparams[1] (numpy.float64): location of the center of the Moffat profile.
     """
 
     # Create a Moffat profile based on the input parameters.
@@ -90,7 +90,7 @@ def extrap_grad(intextlims, median_lims):
         median_lims (list): A list containing the limits of the region of data to be used to calculate the gradient.
 
     Returns:
-       gradient (int) = The gradient of the region of data.
+       gradient (int): The gradient of the region of data.
 
     """
     median_of_y_points_x_to_y = np.median(
@@ -515,6 +515,15 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
 # Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a
 # Levenberg-Marquardt least squares method. Returns the best fit parameters of the Moffat function
 def linear_least_squares(r, col):
+    """Fit a linear profile to a data column using a Levenberg-Marquardt least squares method.
+
+    Args:
+        r (numpy.ndarray): Spatial axis of the data column being fitted.
+        col (numpy.ndarray): Data column being fitted.
+
+    Returns:
+        [res_lsq.x[0], res_lsq.x[1]] (list): list containing the best fit parameters of the linear profile.
+    """
     # Set up initial conditions for the least squares fit.
     x0 = [0.0, np.median(col)]
 
@@ -526,15 +535,111 @@ def linear_least_squares(r, col):
 
 def linear_resid(x, datarange, data):
     """Calculate residuals of fitted linear profile and the data for the Levenberg-Marquardt least squares method.
+
     Args:
-        x (list): List containing the best fit parameters of the linear profile.
-        datarange (_type_):
-        data (_type_):
+        x (list): A list containing the best fit parameters of the linear profile.
+        datarange (numpy.ndarray): the spatial axis of the data column.
+        data (numpy.ndarray): the data column.
 
     Returns:
-        residual (_type_): The residuals of the fitted linear profile and the data.
+        residual (numpy.ndarray): The residuals of the fitted line and the data.
     """
     residual = (x[0] * datarange) + x[1] - data
+    return residual
+
+
+def poly2_least_squares(r, col):
+    """Fits a second order polynomial to a data column using a Levenberg-Marquardt least squares method.
+
+    Description:
+    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
+
+    Args:
+        r (numpy.ndarray): Spatial axis of the data column being fitted.
+        col (numpy.ndarray): Data column being fitted.
+
+    Returns:
+       params (list): the parameters of the fitted polynomial.
+
+    """
+
+    print(type(r))
+    print(type(col))
+
+    # Set up initial conditions for the least squares fit.
+    x0 = [0.0, 0.0, np.median(col)]
+
+    # Run the least squares fit.
+    res_lsq = least_squares(poly2_resid, x0, args=(r, col), method="trf")
+
+    params = [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2]]
+    return params
+
+
+def poly2_resid(x, datarange, data):
+    """Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+
+    Description:
+    m = x[0]
+    c = x[1]
+
+    Args:
+        x (list): A list containing the best fit parameters of the polynomial.
+        datarange (numpy.ndarray): the spatial axis of the data column.
+        data (numpy.ndarray): the data column.
+
+    Returns:
+        residual (numpy.ndarray): The residuals of the fitted polynominal and the data.
+    """
+    residual = (x[0] * datarange * datarange) + (x[1] * datarange) + x[2] - data
+
+    return residual
+
+
+def poly3_least_squares(r, col):
+    """Fits a third order polynomial to a data column using a Levenberg-Marquardt least squares method.
+
+    Description:
+    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
+
+    Args:
+        r (numpy.ndarray): Spatial axis of the data column being fitted.
+        col (numpy.ndarray): Data column being fitted.
+
+    Returns:
+        params (list): the best-fit parameters of the fitted polynomial.
+    """
+    # Set up initial conditions for the least squares fit.
+    x0 = [0.0, 0.0, 0.0, np.median(col)]
+
+    # Run the least squares fit.
+    res_lsq = least_squares(poly3_resid, x0, args=(r, col), method="trf")
+
+    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3]]
+
+
+def poly3_resid(x, datarange, data):
+    """Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
+
+    Description:
+    m = x[0]
+    c = x[1]
+
+    Args:
+        x (list): A list containing the best fit parameters of the polynomial.
+        datarange (numpy.ndarray): the spatial axis of the data column.
+        data (numpy.ndarray): the data column.
+
+    Returns:
+        residual (numpy.ndarray): The residuals of the fitted polynominal and the data.
+    """
+    residual = (
+        (x[0] * datarange * datarange * datarange)
+        + (x[1] * datarange * datarange)
+        + (x[2] * datarange)
+        + x[3]
+        - data
+    )
     return residual
 
 
@@ -583,10 +688,10 @@ def moffat_least_squares(r, col, seeing, pixres):
     """Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a least squares method. Returns the best fit parameters of the Moffat function
 
     Args:
-        r (_type_): spatial axis of the data being fit
-        col (_type_): data being fit
-        seeing (_type_): estimated FWHM of the spatial profile
-        pixres (_type_): spatial resolution of each pixel in arcsec/pixel
+        r (numpy.ndarray): spatial axis of the data being fit
+        col (numpy.ndarray): data being fitted
+        seeing (float): estimated FWHM of the spatial profile
+        pixres (float): spatial resolution of each pixel in arcsec/pixel
 
     Returns:
         param_list (list): list of best fit output parameters returned by the least squares routine.
@@ -794,16 +899,17 @@ def plot_fitted_spatial_profile(
     """Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the Moffat function fitted to the data on top.
 
     Args:
-        spataxis (_type_): the spatial, or x, axis of the profile.
-        bindata (_type_): the binned data that has been fitted with a Moffat profile.
-        hiresspataxis (_type_): A supersampled spatial axis used only for plotting purposes.
-        binmoffparams (_type_): Parameters defining the Moffat profiel that was fitted to bindata.
-        imgstart (_type_): ower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
-        headparams (_type_): dictionary of parameters pulled from the header of the current datafile
+        spataxis (numpy.ndarray): the spatial, or x, axis of the profile.
+        bindata (numpy.ndarray): the binned data that has been fitted with a Moffat profile.
+        hiresspataxis (numpy.ndarray): A supersampled spatial axis used only for plotting purposes.
+        binmoffparams (list): Parameters defining the Moffat profiel that was fitted to bindata.
+        imgstart (int): ower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
+        headparams (dict): dictionary of parameters pulled from the header of the current datafile
 
     Returns:
         None
     """
+
     plt.figure(figsize=(7, 4.5))
     plt.plot(
         hiresspataxis + imgstart,
@@ -830,101 +936,6 @@ def plot_fitted_spatial_profile(
     plt.show()
 
     return None
-
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
-
-
-def poly2_least_squares(r, col):
-    """Fits a second order polynomial to a data column using a Levenberg-Marquardt least squares method.
-
-    Description:
-    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
-
-    Args:
-        r (_type_): the spatial axis of the data column.
-        col (_type_): the data column.
-
-    Returns:
-       params (list): the parameters of the fitted polynomial.
-
-    """
-    # Set up initial conditions for the least squares fit.
-    x0 = [0.0, 0.0, np.median(col)]
-
-    # Run the least squares fit.
-    res_lsq = least_squares(poly2_resid, x0, args=(r, col), method="trf")
-
-    params = [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2]]
-    return params
-
-
-def poly2_resid(x, datarange, data):
-    """Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
-
-    Description:
-    m = x[0]
-    c = x[1]
-
-    Args:
-        x (_type_): the parameters of the fitted polynomial.
-        datarange (_type_): the spatial axis of the data column.
-        data (_type_): the data column.
-
-    Returns:
-        resid (_type_): the residuals of the fitted polynomial and the data.
-    """
-    resid = (x[0] * datarange * datarange) + (x[1] * datarange) + x[2] - data
-
-    return resid
-
-
-def poly3_least_squares(r, col):
-    """Fits a third order polynomial to a data column using a Levenberg-Marquardt least squares method.
-
-    Description:
-    Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the column using a Levenberg-Marquardt least squares method.
-
-    Args:
-        r (_type_): the spatial axis of the data column.
-        col (_type_): the data column.
-
-    Returns:
-         params (list): the parameters of the fitted polynomial.
-
-    """
-    # Set up initial conditions for the least squares fit.
-    x0 = [0.0, 0.0, 0.0, np.median(col)]
-
-    # Run the least squares fit.
-    res_lsq = least_squares(poly3_resid, x0, args=(r, col), method="trf")
-
-    return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3]]
-
-
-def poly3_resid(x, datarange, data):
-    """Calculates residuals of fitted linear profile and the data for the Levenberg Marquardt least squares method.
-
-    Description:
-    m = x[0]
-    c = x[1]
-
-    Args:
-        x (_type_): the parameters of the fitted polynomial.
-        datarange (_type_): the spatial axis of the data column.
-        data (_type_): the data column.
-
-    Returns:
-        resid (_type_): the residuals of the fitted polynomial and the data.
-    """
-    resid = (
-        (x[0] * datarange * datarange * datarange)
-        + (x[1] * datarange * datarange)
-        + (x[2] * datarange)
-        + x[3]
-        - data
-    )
-    return resid
 
 
 def printmoffparams(moffparams, imgstart, datascale):
@@ -1078,7 +1089,6 @@ def show_img(data2D, axdict, headparams, drawlines, title):
     return None
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     """Subtracts the sky background from the 2D image.
 
