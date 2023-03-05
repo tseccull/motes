@@ -30,7 +30,6 @@ jobs:
             This PR has too many changes. Please address one issue/feature per PR.
             Note this PR might be rejected due to its size.
           files_to_ignore: ""
-
       - name: Add enhancement label
         uses: actions-ecosystem/action-add-labels@v1
         if: ${{ startsWith(github.head_ref, 'feature') }}
@@ -41,3 +40,8 @@ jobs:
         if: ${{ startsWith(github.head_ref, 'bug') }}
         with:
           labels: "bug"
+      - name: Add cicd label
+        uses: actions-ecosystem/action-add-labels@v1
+        if: ${{ contains(github.event.pull_request.title, 'CICD') }}
+        with:
+          labels: "cicd"
