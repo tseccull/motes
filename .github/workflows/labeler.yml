@@ -30,31 +30,14 @@ jobs:
             This PR has too many changes. Please address one issue/feature per PR.
             Note this PR might be rejected due to its size.
           files_to_ignore: ""
+
       - name: Add enhancement label
-        uses: actions/github-script@v6
+        uses: actions-ecosystem/action-add-labels@v1
+        if: ${{ startsWith(github.head_ref, 'feature') }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |-
-            const branch = context.payload.pull_request.head.ref
-            if (branch.includes('feature')) {
-              github.issues.addLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['enhancement']
-              })
-            }
+          labels: "enhancement"
       - name: Add bug label
-        uses: actions/github-script@v6
+        uses: actions-ecosystem/action-add-labels@v1
+        if: ${{ startsWith(github.head_ref, 'bug') }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |-
-            const branch = context.payload.pull_request.head.ref
-            if (branch.includes('bug')) {
-              github.issues.addLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['bug']
-              })
-            }
+          labels: "bug"
