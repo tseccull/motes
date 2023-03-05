@@ -7,9 +7,9 @@ Updates by D.Kiersz
 
 ### Changed
 * `inputs` folder to store fits files, change output file format name to include 1D.
-* Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
+* Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings, added to all functions. This is the first iteration of in-line documention that will need refining.
 * Refactored loops in startup.py.
-* `Black` formatter applied across startup.py, motes.py and harverster.py
+* `Black` formatter applied across all python files.
 * Remove redundant param_dict from data_harvest()
 * Remove redundant imports from common.py
 * Remove redundant `interpkind` var from interpolate_extraction_lims and related functions

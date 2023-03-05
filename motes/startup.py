@@ -13,7 +13,7 @@ def read_parfile():
     Import parameters from motesparams.txt parameter file into a dictionary.
 
     Returns:
-    pars (dict): A dictionary containing the parameters read in from motesparams.txt.
+    pars (dict): a dictionary containing the parameters read in from motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")

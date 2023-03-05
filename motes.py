@@ -371,16 +371,16 @@ def save_fits(
     Constructs a fits file.
 
     Args:
-        axdict (dict): Dictionary containing the axes information.
-        hparams (dict): Dictionary containing the header information.
+        axdict (dict): A dictionary containing the axes information.
+        hparams (dict): A dictionary containing the header information.
         opflux (numpy.ndarray): An array containing the flux values of the optimal extraction.
         operrs (numpy.ndarray): An array containing the flux errors of the optimal extraction.
         apflux (numpy.ndarray): An array containing the flux values of the aperture extraction.
         aperrs (numpy.ndarray): An array containing the flux errors of the aperture extraction.
         head (astropy.io.fits.header.Header): The original FITS header of the 2D spectrum.
-        pars (dict): Dictionary containing the MOTES parameters.
-        filename (str): Filename of the 1D spectrum.
-        moffpars (list): List containing the Moffat fit parameters.
+        pars (dict): A dictionary containing the MOTES parameters.
+        filename (str): The filename of the 1D spectrum.
+        moffpars (list): A list containing the Moffat fit parameters.
         fdict (dict): A dictionary containing the 2D spectrum data and errors.
         bpars (numpy.ndarray): A dictionary containing the binning parameters.
         extractionlims (numpy.ndarray): An array containing the extraction limits.

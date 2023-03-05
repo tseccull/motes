@@ -152,8 +152,8 @@ def get_bins(
         shigh (int): Upper spatial limit of the region where the S/N will be measured when defining the extent of a bin.
         dispaxislen (int): Length of the dispersion axis.
         params (dict): Dictionary of parameters ready in from the motesparams.txt configuration file.
-        sky (bool): Optional kwarg used to tell get_bins whether the sky has been subtracted yet or not, and to set the minSNR threshold accordingly.
-        replace_crbp (bool): Optional kwarg; when True, get_bins will try to replace bad pixels with values estimated using the median spatial profile of the current bin.
+        sky (bool, optional): Used to tell get_bins whether the sky has been subtracted yet or not, and to set the minSNR threshold accordingly. False by default.
+        replace_crbp (bool, optional): when True, get_bins will try to replace bad pixels with values estimated using the median spatial profile of the current bin. False by default.
 
     Returns:
         binlocations (list): A list containing the details for each bin determined by get_bins. The boundaries and S/N of each bin are recorded here.
@@ -378,13 +378,13 @@ def get_bins_output(
     Description: Print and plot the output of get_bins.
 
     Args:
-        binparams (list): list containing the locations and S/N of each bin
-        params (dict): dictionary of parameters read in from the motesparams.txt confifuration file.
+        binparams (list): A list containing the locations and S/N of each bin
+        params (dict): A dictionary of parameters read in from the motesparams.txt confifuration file.
         lowext (int): lower limit of the spatial region measured for S/N in get_bins()
         highext (int): upper limit of the spatial region measured for S/N in get_bins()
         data2D (numpy.ndarray): 2D spectroscopic data
-        headparams (dict): dictionary of parameters full from the datafile header.
-        axdict (dict): dictionary containing axes and axis metadata for the current extraction
+        headparams (dict): A dictionary of parameters full from the datafile header.
+        axdict (dict): A dictionary containing axes and axis metadata for the current extraction
 
     Returns:
         None
@@ -560,7 +560,6 @@ def poly2_least_squares(r, col):
 
     Returns:
        params (list): the parameters of the fitted polynomial.
-
     """
 
     print(type(r))
@@ -702,6 +701,7 @@ def moffat_least_squares(r, col, seeing, pixres):
     # Initial beta estimate comes from optimal value from atmospheric turbulence theory as described in
     # Trujillo, I. et al. (2001), MNRAS, 328, 977-985
     # See https://ui.adsabs.harvard.edu/abs/2001MNRAS.328..977T/abstract
+
     x0 = [
         np.nanmedian(np.sort(col)[-3:]),
         np.argmax(col),
@@ -782,9 +782,9 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     Args:
         data2D (numpy.ndarray): Input data frame
         errs2D (numpy.ndarray): Input error frame
-        extractionlimits (numpy.ndarray): contains limits at each dispersion pixel
-        binparameters (list): Contains the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
-        axdict (dict): dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
+        extractionlimits (numpy.ndarray): An array containing limits at each dispersion pixel
+        binparameters (list): A list containing the bin limits across the dispersion axis, to enable slicing the data across dispersion axis.
+        axdict (dict): A dictionary containing the spatial axis array and other relevant information about the size and shape of the data frame
 
     Returns:
         optidata1D (numpy.ndarray): 1D array of the optimally extracted spectrum
@@ -899,12 +899,12 @@ def plot_fitted_spatial_profile(
     """Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the Moffat function fitted to the data on top.
 
     Args:
-        spataxis (numpy.ndarray): the spatial, or x, axis of the profile.
-        bindata (numpy.ndarray): the binned data that has been fitted with a Moffat profile.
-        hiresspataxis (numpy.ndarray): A supersampled spatial axis used only for plotting purposes.
+        spataxis (numpy.ndarray): The spatial, or x, axis of the profile.
+        bindata (numpy.ndarray): The binned data that has been fitted with a Moffat profile.
+        hiresspataxis (numpy.ndarray): The supersampled spatial axis used only for plotting purposes.
         binmoffparams (list): Parameters defining the Moffat profiel that was fitted to bindata.
-        imgstart (int): ower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
-        headparams (dict): dictionary of parameters pulled from the header of the current datafile
+        imgstart (int): The limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt
+        headparams (dict): A dictionary of parameters pulled from the header of the current datafile
 
     Returns:
         None
@@ -945,9 +945,9 @@ def printmoffparams(moffparams, imgstart, datascale):
     Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares and prints them to the terminal.
 
     Args:
-        moffparams (list): the parameters of the fitted Moffat profile.
-        imgstart (int): the lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt.
-        datascale (float): the multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares.
+        moffparams (list): The parameters of the fitted Moffat profile.
+        imgstart (int): The lower limit of the spatial axis after the original 2D spectrum was cut down to the region defined in reg.txt.
+        datascale (float): The multiplier used to scale the spatial profile so it could be fit with a Moffat profile using scipy least_squares.
 
     Returns:
         None
@@ -977,11 +977,11 @@ def show_img(data2D, axdict, headparams, drawlines, title):
     Takes an input image and line data to be drawn on that image and creates a figure to be shown on screen.
 
     Args:
-        data2D (numpy.ndarray): the input image.
-        axdict (dict): a dictionary containing the spatial and spectral axes of the input image.
-        headparams (dict): a dictionary containing the header parameters of the input image.
-        drawlines (list): a list of line data to be drawn on the input image.
-        title (str): the title of the figure.
+        data2D (numpy.ndarray): The input image.
+        axdict (dict): A dictionary containing the spatial and spectral axes of the input image.
+        headparams (dict): A dictionary containing the header parameters of the input image.
+        drawlines (list): A list of line data to be drawn on the input image.
+        title (str): The title of the figure.
 
     Returns:
         None
@@ -1100,10 +1100,10 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     Args:
         bglowext (numpy.ndarray): Lower limits of the background regions.
         bghighext (numpy.ndarray): Upper limits of the background regions.
-        fdict (dict): Dictionary containing the 2D image.
-        axdict (dict): Dictionary containing the axis information.
-        pars (dict): Dictionary containing MOTES parameters.
-        hpars (dict): Dictionary containing header information.
+        fdict (dict): A dictionary containing the 2D image.
+        axdict (dict): A dictionary containing the axis information.
+        pars (dict): A dictionary containing MOTES parameters.
+        hpars (dict): A dictionary containing header information.
 
     Returns:
         fdict (dict): Dictionary containing the background subtracted 2D image.

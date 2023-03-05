@@ -13,15 +13,15 @@ def data_harvest(reg_counter, filename_2D, region):
     """Extract header metadata and data frames, and repackage them into dictionaries for use in the rest of MOTES.
 
     Args:
-        reg_counter (int): integer noting which line in region is being called to define the boundaries of the 2D data.
-        filename_2D (str): name of the data file.
-        region (list): list of regions read in from reg.txt in startup.read_regions()
+        reg_counter (int): An integer noting which line in region is being called to define the boundaries of the 2D data.
+        filename_2D (str): The name of the data file.
+        region (list): A list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
-        head_dict (dict): a dictionary containing parameters and metadata read from the header of the image file.
-        frame_dict (dict): a dictionary containing the 2D data frames read from the image file.
-        axes_dict (dict): a dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
-        imghead (dict): a copy of the image file header; this is also a dictionary.
+        head_dict (dict): A dictionary containing parameters and metadata read from the header of the image file.
+        frame_dict (dict): A dictionary containing the 2D data frames read from the image file.
+        axes_dict (dict): A dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
+        imghead (dict): A copy of the image file header; this is also a dictionary.
     """
 
     # Create dictionary to tell data_harvest which instrument specific
@@ -152,7 +152,7 @@ def harvest_floyds(imgfilehdu, imgheader):
         imgheader (astropy.io.fits.header.Header): the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray): the 2D data frame
+        imgdata (numpy.ndarray): the 2D data frame array
         imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5). In the case of FLOYDS, no variance or uncertainty frame is provided, so one is constructed using the data along with read noise and dark
                             current metadata contained in the file header. This is why flux calibrated 2D FLOYDS spectra should not be extracted with MOTES, as the flux calibration spoils the
                             construction of the error frame. Flux calibration should be applied after the spectrum is extracted if MOTES is used.
