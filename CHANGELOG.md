@@ -1,8 +1,24 @@
 # Change Log
 All notable changes to this package will be documented here. 
-This changelog follows the format described [here](https://keepachangelog.com/en/0.3.0/). [Semantic Versioning](https://semver.org/) is followed.
+This changelog follows the format described [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is followed.
 
-## 0.4.1 2023-02-05
+## 0.4.2 2023-03-05
+Updates by D.Kiersz
+
+### Changed
+* `inputs` folder to store fits files, change output file format name to include 1D.
+* Conversion to docstrings adhering to Google's style guide: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings, added to all functions. This is the first iteration of in-line documention that will need refining.
+* Refactored loops in startup.py.
+* `Black` formatter applied across all python files.
+* Remove redundant param_dict from data_harvest()
+* Remove redundant imports from common.py
+* Remove redundant `interpkind` var from interpolate_extraction_lims and related functions
+* Remove redudnant variable declaration `wav_min = scihead["CRVAL1"]` from harvester.py
+* Import order of modules to conform to PEP8.
+* Instances of exit() to sys.exit() to conform to PEP8.
+* Updated link in CHANGELOG.md
+
+## 0.4.1 2023-02-15
 Updated by D. Kiersz
 
 ### Added
