@@ -10,9 +10,9 @@ on:
 jobs:
   labeler:
     runs-on: ubuntu-latest
-    name: Label PR Size
+    name: Label Job
     steps:
-      - name: PR Size Labels
+      - name: Add size label
         uses: codelytv/pr-size-labeler@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,7 +26,35 @@ jobs:
           l_max_size: "1000"
           xl_label: "size/XL"
           fail_if_xl: "false"
-          message_if_xl: >-
+          message_if_xl: |-
             This PR has too many changes. Please address one issue/feature per PR.
             Note this PR might be rejected due to its size.
           files_to_ignore: ""
+      - name: Add enhancement label
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |-
+            const branch = context.payload.pull_request.head.ref
+            if (branch.includes('feature')) {
+              github.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['enhancement']
+              })
+            }
+      - name: Add bug label
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |-
+            const branch = context.payload.pull_request.head.ref
+            if (branch.includes('bug')) {
+              github.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['bug']
+              })
+            }
