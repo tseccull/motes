@@ -1,6 +1,8 @@
 name: Label Pull Requests
 
 on:
+  schedule:
+    - cron: "0 20 * * *"
   pull_request:
     branches:
       - main
