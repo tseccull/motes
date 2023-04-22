@@ -2,7 +2,7 @@
 
 Version 0.4.3
 
-Last Updated: 2023-04-21 - D.Kiersz
+Last Updated: 2023-04-21 - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 
