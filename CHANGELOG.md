@@ -2,6 +2,12 @@
 All notable changes to this package will be documented here. 
 This changelog follows the format described [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is followed.
 
+## 0.5.0 2023-04-21
+Updates by T. Seccull
+
+### Changed
+* A bug was fixed in the optimal_extraction() function in common.py related to the enforcement of positivity required for the spatial profile when performing optimal extraction as described by Horne (1986). Previously this was misinterpreted as setting the both the spatial profile and its associated data to zero where data pixels were negative. Instead, the enforcement of positivity applies only the the spatial profile. Because, however, the spatial profile in MOTES is a model Moffat PSF, it has no negative values to begin with and positivity therfore does not need to be enforced. The effect of this change will be minimal for spectra of bright targets that have few negative pixels in their spatial profile. This update prevents overestimation of counts in faint regions of the spectrum. 
+
 ## 0.4.2 2023-03-05
 Updates by D.Kiersz
 
