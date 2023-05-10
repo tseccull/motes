@@ -853,10 +853,10 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
         # Use the Moffat profile parameters for the current bin to make a moffat profile that approximates the shape of the spectrum's spatial profile in the current column.
         # The estimated centre of the extraction limits is used to shift the profile to the correct location along the spatial axis.
         # The background is assumed to have been subtracted by now, so the background level and gradient are set to 0.
+        # Because the profile is a model PSF, none of its values are negative and positivity of the profile need not be enforced.
         profile = moffat(b[0], profcent, b[2], b[3], 0.0, 0.0, ax)
-        # Enforce positivity of the data and normalise the spatial profile.
-        nprof = profile / np.sum(profile)
-        col[np.where(col < 0.0)] = 0.0
+        # Normalize the profile such that its sum equals unity.
+        nprof = profile/np.sum(profile)
 
         # Step 7 of Horne 1986 - Cosmic ray masking with a conservative 5 sigmas.
         value = np.abs((col - (f * nprof)) ** 2)
