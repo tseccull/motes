@@ -1,20 +1,17 @@
 name: Delete Old Workflow Runs
 
 on:
-   push:
-    branches:
-      - feature/package-and-cicd
    schedule:
     - cron: '0 20 * * *'
    workflow_dispatch:
     inputs:
       days:
         description: 'Number of days.'
-        default: 14
+        default: 30
         required: true
       minimum_runs:
         description: 'The minimum runs to keep for each workflow.'
-        default: 3
+        default: 5
         required: true
       dry_run:
         description: 'Only log actions, do not perform any delete operations.'
@@ -22,6 +19,7 @@ on:
 
 jobs:
   delele_runs:
+    name: Job - Delete old runs
     runs-on: ubuntu-latest
     steps:
       - name: Delete workflow runs based on variables

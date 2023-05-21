@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name: Miniconda CI on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    name: Job - Miniconda CI on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
