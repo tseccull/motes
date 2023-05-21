@@ -181,3 +181,5 @@ settings.json
 *.fits
 motesparams.txt
 reg.txt
+.vs
+.vscode

@@ -1,15 +1,13 @@
 name: Motes CI 
-# TODO: change this to Motes CI/CD after introducing PyPI publishing - not able atm
+# TODO: change this to Motes CI/CD after introducing PyPI publishing.
 
 on:
   push:
     branches:
       - main
-      - feature/package-and-cicd #TODO remove this before merge
-  # pull_request:
-  #   branches:
-  #     - main
-  #     - feature/package-and-cicd #TODO remove this before merge
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
