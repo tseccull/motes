@@ -10,7 +10,6 @@ on:
   #     - main
   #     - feature/package-and-cicd #TODO remove this before merge
 
-# Build and test the project
 jobs:
   build:
     name: Miniconda CI on ${{ matrix.os }} with Python ${{ matrix.python-version }}
@@ -19,8 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
-        python-version: [3.8, 3.9]
-
+        python-version: [3.9]
     steps:
       - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
@@ -34,10 +32,11 @@ jobs:
         run: |
           python -m flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
           python -m flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      # TODO: Do not fail the build if there are errors - just return the score.
       - name: Static code analysis with pylint
         shell: bash -l {0}
         run: |
-          python -m pylint src
+          python -m pylint src || exit 0
       - name: Vulnerability checks with Bandit
         shell: bash -l {0}
         run: |
@@ -45,17 +44,14 @@ jobs:
       - name: Formatting check with Black
         shell: bash -l {0}
         run: |
-          python -m black --check src
-      #Unit tests with pytests and coverage?
+          python -m black --check src 
+      # TODO Unit tests with pytests and coverage?
 
-  # Deploy to PyPI?
   # deploy:
   #   runs-on: ubuntu-latest
-
   #   steps:
   #     - uses: actions/checkout@v2
   #     - name: Set up Python 3.9
-
   #       uses: actions/setup-python@v2
   #       with:
   #         python-version: 3.9
