@@ -9,7 +9,7 @@ We are not ready for full CI/CD yet, but this small update is a step in the righ
 Deployment to [PyPI](https://pypi.org/) is the end goal, we are unable to register new projects at this time.
 
 ## Added
-- A CI pipeline has been added to the repository. This will run the linting/vurnebility checks against the code on every push to the main branch.
+- A CI pipeline has been added to the repository. This will run the linting/vurnebility checks against the code on every push to the main branch, but not enforce them. THis should help improve the quality of the code down the line.
 - Added a workflow to remove old workflows.
 - Badges to README.md
 

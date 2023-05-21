@@ -1,6 +1,9 @@
 name: Delete old workflow runs
 
 on:
+   pull_request:
+    branches:
+      - main # TODO delete this before merge
    schedule:
     - cron: '0 20 * * *'
    workflow_dispatch:
