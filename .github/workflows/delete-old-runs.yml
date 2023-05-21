@@ -1,4 +1,4 @@
-name: Delete old workflow runs
+name: Delete Old Workflow Runs
 
 on:
    pull_request:
@@ -15,7 +15,7 @@ on:
       minimum_runs:
         description: 'The minimum runs to keep for each workflow.'
         required: true
-        default: 5
+        default: 3
 
 jobs:
   delele_runs:
@@ -24,7 +24,7 @@ jobs:
       - name: GitHub Environment Variables
         env:
           DEFAULT_DAYS: 14
-          DEFAULT_MINIMUM_RUNS: 5
+          DEFAULT_MINIMUM_RUNS: 3
         run: |
           echo "DAYS=${{ github.event.inputs.days || env.DEFAULT_DAYS }}" >> $GITHUB_ENV
           echo "MINIMUM_RUNS=${{ github.event.inputs.minimum_runs || env.DEFAULT_MINIMUM_RUNS }}" >> $GITHUB_ENV
