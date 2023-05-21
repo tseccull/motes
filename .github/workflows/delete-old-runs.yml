@@ -1,6 +1,9 @@
 name: Delete Old Workflow Runs
 
 on:
+   push:
+    branches:
+      - feature/package-and-cicd
    schedule:
     - cron: '0 20 * * *'
    workflow_dispatch:
