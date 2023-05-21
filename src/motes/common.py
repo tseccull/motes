@@ -2,9 +2,10 @@
 common.py - Common functions for the MOTES pipeline.
 """
 
+import copy
 import sys
 import warnings
-import copy
+
 import matplotlib
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt

@@ -16,6 +16,7 @@ Deployment to [PyPI](https://pypi.org/) is the end goal, we are unable to regist
 ## Changed
 
 - Improvement to .gitignore by using a Python template from [gitignore.io](https://www.toptal.com/developers/gitignore).
+- Formatted with `black` and `isort` to conform to PEP8.
 
 ## 0.4.3 2023-04-21
 Updates by T. Seccull

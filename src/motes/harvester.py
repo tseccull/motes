@@ -2,10 +2,12 @@
 harvester.py - A collection of functions to read in data from the image file and repackage it into a dictionary for use in the rest of MOTES.
 """
 
-import sys
 import copy
+import sys
+
 import numpy as np
 from astropy.io import fits
+
 from motes import common
 
 

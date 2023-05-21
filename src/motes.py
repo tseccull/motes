@@ -7,16 +7,18 @@ Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
 
-import astropy.io.fits as fits
 import copy
 import datetime
 import glob
+import sys
+
+import astropy.io.fits as fits
+import matplotlib.pyplot as plt
+import numpy as np
+
 import motes.common as common
 import motes.harvester as harvester
 import motes.startup as startup
-import matplotlib.pyplot as plt
-import numpy as np
-import sys
 
 
 def motes():
