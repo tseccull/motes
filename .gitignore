@@ -12,3 +12,6 @@ settings.json
 *.fits
 motesparams.txt
 reg.txt
+
+# MkDocs documentation
+/site
