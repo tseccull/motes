@@ -1,22 +1,24 @@
 """
 MOTES: Modular and Optimal Tracer and Extractor of Spectra.
 Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
-Version: 0.4.2
-Date: 2023-02-16
+Version: 0.4.5
+Date: 2023-05-21
 Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
 
-import astropy.io.fits as fits
 import copy
 import datetime
 import glob
+import sys
+
+import astropy.io.fits as fits
+import matplotlib.pyplot as plt
+import numpy as np
+
 import motes.common as common
 import motes.harvester as harvester
 import motes.startup as startup
-import matplotlib.pyplot as plt
-import numpy as np
-import sys
 
 
 def motes():
@@ -34,9 +36,7 @@ def motes():
 
     # Open and process each spectrum contained in the current directory.
     for i, file_2D in enumerate(sorted(glob.glob("./inputs/*.fits"))):
-        sys.stdout.write(
-            ("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n"
-        )
+        sys.stdout.write(("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n")
         sys.stdout.write(" >>> Beginning MOTES Processing\n")
 
         # Gather header metadata and the image data from the 2D image file.
@@ -97,9 +97,7 @@ def motes():
         # Use the parameters of the Moffat profile fitted to the median spatial profile of the entire spectrum to determine
         # spatial limits that are used to bound the region of the spectrum used by the common.get_bins function to
         # to bin the 2D spectrum while taking account of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(
-            moffparams, axesdict
-        )
+        lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(lowext + axesdict["imgstart"]))
@@ -177,7 +175,6 @@ def motes():
         extractionlimits = []
 
         for bin in binparams:
-
             # Take the median spatial profile of the dispersion
             # bin, and leave out pixel columns in the chip gaps if this is a GMOS spectrum.
             binimg = framedict["data"][:, bin[0] : bin[1]]
@@ -205,9 +202,7 @@ def motes():
                 width_multiplier=params["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append(
-                [(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre]
-            )
+            extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart offset to the bin
             # locations so they can be saved as metadata along with the extracted spectrum.
@@ -488,17 +483,13 @@ def save_fits(
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = (
-        "Wavelength Axis, " + hparams["wavunit"]
-    )
+    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavunit"]
     head.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
     head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["fluxunit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = (
-        "Flux Uncertainty, " + hparams["fluxunit"]
-    )
+    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["fluxunit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
@@ -531,19 +522,12 @@ def save_fits(
 
     hdulist = fits.HDUList(hdu_list)
     filenamelist = filename.split("_")
-    hdulist.writeto(
-        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1]
-    )
+    hdulist.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
     hdulist.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "_".join(filenamelist[0:-2])
-        + "_"
-        + "1D"
-        + "_"
-        + filenamelist[-1]
-        + "\n"
+        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1] + "\n"
     )
     return None
 
@@ -609,9 +593,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
             width_multiplier=params["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append(
-            [(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre]
-        )
+        extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset to the bin
         # locations so they can be saved as metadata along with the extracted spectrum.

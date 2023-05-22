@@ -9,8 +9,8 @@ on:
 
 jobs:
   labeler:
+    name: Job - Labeler
     runs-on: ubuntu-latest
-    name: Label Job
     steps:
       - name: Add size label
         uses: codelytv/pr-size-labeler@v1

@@ -1,8 +1,11 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
 
-Version 0.4.3
+[![Motes CI](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml)
+![Licence](https://img.shields.io/github/license/tseccull/motes)
 
-Last Updated: 2023-04-21 - T. Seccull
+Version 0.4.4
+
+Last Updated: 2023-05-22 - D. Kiersz
 
 Developers: Tom Seccull & Dominik Kiersz
 
