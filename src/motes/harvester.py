@@ -2,10 +2,12 @@
 harvester.py - A collection of functions to read in data from the image file and repackage it into a dictionary for use in the rest of MOTES.
 """
 
-import sys
 import copy
+import sys
+
 import numpy as np
 from astropy.io import fits
+
 from motes import common
 
 
@@ -48,7 +50,9 @@ def data_harvest(reg_counter, filename_2D, region):
             ogimgqual,
             head_dict,
             wavaxis,
-        ) = instrument_dict[inst](imgfile, imghead)
+        ) = instrument_dict[
+            inst
+        ](imgfile, imghead)
 
     # Slice all dataframes based on the input from reg.txt
     imgshape = np.shape(imgdata)
@@ -70,17 +74,10 @@ def data_harvest(reg_counter, filename_2D, region):
     )
 
     # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for the purposes of plotting
-    spataxis = np.linspace(
-        0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0]
-    )
-    hiresspataxis = np.linspace(
-        spataxis[0], spataxis[-1], num=len(spataxis) * 5
-    )
+    spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
+    hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
-    if (
-        region[reg_counter][2] < wavaxis[0]
-        or region[reg_counter][3] > wavaxis[-1]
-    ):
+    if region[reg_counter][2] < wavaxis[0] or region[reg_counter][3] > wavaxis[-1]:
         sys.stdout.write(
             " >>> User defined wavelength limit(s) are outside native wavelength range\n"
             '     Make sure "-LOW_WAV_SLICE" > lower limit of wavelength axis\n'
@@ -174,9 +171,7 @@ def harvest_floyds(imgfilehdu, imgheader):
     # Determine the spatial pixel resolution of the image in arcsec.
     pixres = imgheader["PIXSCALE"]
     sys.stdout.write(
-        " >>> Spatial pixel resolution determined: "
-        + str(pixres).strip("0")
-        + '"\n'
+        " >>> Spatial pixel resolution determined: " + str(pixres).strip("0") + '"\n'
     )
 
     # Put header information into a dictionary
@@ -254,9 +249,7 @@ def harvest_fors2(imgfilehdu, imgheader):
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 
-    sys.stdout.write(
-        " >>> Spatial pixel resolution determined: " + str(pixres) + '"\n'
-    )
+    sys.stdout.write(" >>> Spatial pixel resolution determined: " + str(pixres) + '"\n')
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")

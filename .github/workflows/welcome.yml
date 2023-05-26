@@ -10,8 +10,8 @@ on:
 
 jobs:
   welcome:
+    name: Job - Welcome Contributions
     runs-on: ubuntu-latest
-    name: Welcome Job
     steps:
       - name: Welcome for First Issue or Pull Request
         uses: actions/first-interaction@v1

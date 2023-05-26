@@ -32,8 +32,7 @@ def read_parfile():
     # Convert all numerical values in the parameter list to floats.
     # If digit, convert to float. If not, leave as string.
     paramlist = [
-        float(i) if i.replace(".", "", 1).isdigit() else i
-        for i in flat_param_list
+        float(i) if i.replace(".", "", 1).isdigit() else i for i in flat_param_list
     ]
 
     # Assign parameters and their associated keywords to a dictionary.
@@ -69,9 +68,7 @@ def read_regions():
 
     # Complain and quit MOTES if reg.txt isn't found.
     else:
-        sys.stdout.write(
-            " >>> reg.txt file not found in root working directory.\n"
-        )
+        sys.stdout.write(" >>> reg.txt file not found in root working directory.\n")
         sys.stdout.write("     Root working directory is:\n")
         sys.stdout.write("     " + os.getcwd() + "\n")
         sys.stdout.write(
