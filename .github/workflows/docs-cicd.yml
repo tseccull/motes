@@ -1,4 +1,4 @@
-name: Deploy Docs to GitHub Pages
+name: Docs CICD
 
 on:
   push:
@@ -16,10 +16,10 @@ jobs:
           with:
             python-version: 3.9
             cache: pip
-            cache-dependency-path: requirements/docs.txt
+            cache-dependency-path: requirements/mkdocs.txt
         - name: Install dependencies
           run: |
-            pip install -r requirements/docs.txt
+            pip install -r requirements/mkdocs.txt
         - name: Build mkdocs
           run: |
             mkdocs build

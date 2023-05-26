@@ -2,7 +2,6 @@ site_name: MOTES Documentation
 repo_url: "https://github.com/tseccull/motes"
 site_description: "Documentation for the MOTES project"
 site_author: "Tom Seccull; Dominik Kiersz"
-site_url: "https://tseccull.github.io/motes/" # TODO? verify
 
 theme:
   name: "material"
