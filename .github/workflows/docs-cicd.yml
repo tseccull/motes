@@ -1,0 +1,41 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+# on:
+#   push:
+#     branches:
+#       - feature/mkdocs
+
+jobs:
+    build-and-deploy:
+        name: Build and Deploy
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        - name: Setup Python with caching
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.9
+            cache: pip
+        - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+        - name: Cache mkdocs
+          uses: actions/cache@v3
+          with:
+            key: mkdocs-material-${{ env.cache_id }}
+            path: .cache
+            restore-keys: |
+              mkdocs-material-
+        - name: Install dependencies
+          run: |
+            pip install mkdocs mkdocs-material pymdown-extensions "mkdocstrings[python]"
+        - name: Build mkdocs
+          run: |
+            mkdocs build
+        - name: Deploy to repo's GitHub Pages
+          run: |
+             mkdocs gh-deploy --force
+

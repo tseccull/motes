@@ -1,5 +1,5 @@
 """
-startup.py - First script to be run by MOTES to read in parameters and regions.
+startup.py - First script to be run by MOTES (specifically core.py) to read in parameters and regions.
 """
 
 import os

@@ -1,12 +1,14 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
 
 [![Motes CI](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml)
+[![Docs CI/CD](https://github.com/tseccull/motes/actions/workflows/docs-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/docs-cicd.yml)
+[![Website](https://img.shields.io/website?down_color=red&down_message=offline&label=Documentation&up_color=blue&up_message=online&url=https%3A%2F%2Fhttps://tseccull.github.io/motes/%2F)](https://tseccull.github.io/motes/)
 ![Licence](https://img.shields.io/github/license/tseccull/motes)
 
 Version 0.4.4
 
 Last Updated: 2023-05-22 - D. Kiersz
-
+P
 Developers: Tom Seccull & Dominik Kiersz
 
 MOTES is a python package used for tracing and extracting spectra of faint 

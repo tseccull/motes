@@ -20,13 +20,21 @@ markdown_extensions:
         permalink: True
 
 plugins:
-  - mkdocstrings
+  - mkdocstrings:
+      default_handler: python # The handler to use for markdown generation
+      handlers:
+        python:
+          paths: [src]
+          recursive: true
+          options:
+            docstring_style: google # The docstring style to use
+            show_source: true 
 
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
-  - Explanation: explanation.md
-  - Reference (motes): reference-motes.md
-  - Reference (motes.common): reference-common.md
-  - Reference (motes.startup): reference-startup.md
-  - Reference (motes.harvester): reference-harvester.md
+  - Reference: 
+    - Reference (motes.core): reference-core.md
+    - Reference (motes.startup): reference-startup.md
+    - Reference (motes.common): reference-common.md
+    - Reference (motes.harvester): reference-harvester.md

@@ -1,0 +1,11 @@
+name: mkdocs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.9
+  - pip:
+      - mkdocs
+      - mkdocs-material
+      - "mkdocstrings[python]"
+      - pymdown-extensions
