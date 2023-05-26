@@ -534,9 +534,6 @@ def poly2_least_squares(r, col):
        params (list): the parameters of the fitted polynomial.
     """
 
-    print(type(r))
-    print(type(col))
-
     # Set up initial conditions for the least squares fit.
     x0 = [0.0, 0.0, np.median(col)]
 

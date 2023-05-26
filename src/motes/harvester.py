@@ -421,9 +421,6 @@ def harvest_xshoo(imgfilehdu, imgheader):
         wavaxis (numpy.ndarray): the 1D wavelength axis of the spectrum.
     """
 
-    print(type(imgfilehdu))
-    print(type(imgheader))
-
     # Retrieve the data frame, error frame, and qual frame.
     imgdata = imgfilehdu[0].data
     imgerrs = imgfilehdu[1].data
