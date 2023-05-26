@@ -7,7 +7,7 @@ on:
     inputs:
       days:
         description: 'Number of days.'
-        default: 30
+        default: 90
         required: true
       minimum_runs:
         description: 'The minimum runs to keep for each workflow.'
@@ -22,7 +22,7 @@ jobs:
     name: Job - Delete old runs
     runs-on: ubuntu-latest
     steps:
-      - name: Delete workflow runs based on variables
+      - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

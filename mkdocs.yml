@@ -1,7 +1,23 @@
 site_name: MOTES Documentation
+repo_url: "https://github.com/tseccull/motes"
+site_description: "Documentation for the MOTES project"
+site_author: "Tom Seccull; Dominik Kiersz"
+site_url: "https://tseccull.github.io/motes/" # TODO? verify
 
 theme:
   name: "material"
+  locale: en
+  palette:
+    primary: "blue"
+    accent: "light-blue"
+  font:
+    text: "Roboto"
+    code: "Roboto Mono"
+
+markdown_extensions:
+    - smarty # https://python-markdown.github.io/extensions/smarty/
+    - toc:
+        permalink: True
 
 plugins:
   - mkdocstrings
@@ -10,6 +26,7 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Explanation: explanation.md
+  - Reference (motes): reference-motes.md
   - Reference (motes.common): reference-common.md
   - Reference (motes.startup): reference-startup.md
   - Reference (motes.harvester): reference-harvester.md
