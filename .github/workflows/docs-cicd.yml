@@ -26,4 +26,4 @@ jobs:
             mkdocs build
         - name: Deploy to repo's GitHub Pages
           run: |
-             mkdocs gh-deploy -v #TODO add strict later
+             mkdocs gh-deploy -v --force #TODO add strict later
