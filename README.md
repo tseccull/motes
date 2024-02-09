@@ -3,9 +3,9 @@
 [![Motes CI](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml)
 ![Licence](https://img.shields.io/github/license/tseccull/motes)
 
-Version 0.4.4
+Version 0.4.5
 
-Last Updated: 2023-05-22 - D. Kiersz
+Last Updated: 2024-02-09 - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 

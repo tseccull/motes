@@ -7,13 +7,14 @@ import sys
 
 
 def read_parfile():
-    """Read in parameters from motesparams.txt.
-
-    Description:
+    """
     Import parameters from motesparams.txt parameter file into a dictionary.
 
+    Args:
+        None
+
     Returns:
-    pars (dict): a dictionary containing the parameters read in from motesparams.txt.
+        pars (dict) : a dictionary containing the parameters read in from motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")
@@ -44,16 +45,20 @@ def read_parfile():
 
 
 def read_regions():
-    """Search and read reg.txt from root.
-
-    Description:
-    Search for, and read in, reg.txt file in root working directory.
-    Reads an input line from reg.txt and returns a list of integers defining the boundaries of the region of the 2D data that contains the spectrum to be extracted.
-    For each file, the first two integers are the number of pixel rows to remove from each end of the spatial axis of the spectrum, and the last two are the upper and lower wavelength bounds of the region on the dispersion axis.
-    The first two integers are optional and default to 0 if not provided. The last two integers are required and must be provided.
+    """
+    Search for, and read in, reg.txt file in root working directory. Reads an input line from 
+    reg.txt and returns a list of integers defining the boundaries of the region of the 2D data 
+    that contains the spectrum to be extracted. For each file, the first two integers are the 
+    number of pixel rows to remove from each end of the spatial axis of the spectrum, and the last 
+    two are the upper and lower wavelength bounds of the region on the dispersion axis.
+    
+    Args:
+        None
 
     Returns:
-        intregion (list): A list for each file contains a list of integers that define the boundaries of the region of the 2D spectum that will be used for the extraction.
+        intregion (list) : A list for each file contains a list of integers that define the 
+                           boundaries of the region of the 2D spectum that will be used for the 
+                           extraction.
     """
 
     # Search for reg.txt and read in the list that it contains.
@@ -72,9 +77,9 @@ def read_regions():
         sys.stdout.write("     Root working directory is:\n")
         sys.stdout.write("     " + os.getcwd() + "\n")
         sys.stdout.write(
-            "     Please provide a reg.txt file to tell MOTES the spatial extent of the 2D spectra.\n"
+            "     Please provide a reg.txt file to tell MOTES the spatial extent of the 2D\n"
         )
-        sys.stdout.write("     See the docs for further info.\n")
+        sys.stdout.write("     spectra. See the docs for further information.\n")
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 

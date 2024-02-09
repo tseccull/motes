@@ -1,8 +1,9 @@
 """
-MOTES: Modular and Optimal Tracer and Extractor of Spectra.
-Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for extracting spectrum from astronomical 2D spectrograms.
+MOTES Modular and Optimal Tracer and Extractor of Spectra.
+Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for 
+extracting spectrum from astronomical 2D spectrograms.
 Version: 0.4.5
-Date: 2023-05-21
+Date: 2023-12-23
 Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
@@ -22,13 +23,10 @@ import motes.startup as startup
 
 
 def motes():
-    """Run MOTES.
-
-    Description:
-        This function is the entrypoint for the MOTES.
-        It loads .fits files from the input subdirectory and harvest the data.
-        Estimates bins for the spectrum.
-        It then performs optional sky extraction and optimal extraction.
+    """
+    Run MOTES. This function is the entrypoint for the MOTES. It loads .fits files from the input 
+    subdirectory and harvests the 2D data frames. It estimates bins for the spectrum. It then 
+    performs optional sky subtraction and optimal extraction of 1D spectra.
     """
     # Run startup functions
     params = startup.read_parfile()  # Import parameters from file to dict
@@ -53,7 +51,8 @@ def motes():
             " >>> Gathering image frames and header data from input file completed.\n"
         )
 
-        # Perform initial least-squares Moffat fitting over the entire 2D spectrum collapsed along the dispersion axis with a median.
+        # Perform initial least-squares Moffat fitting over the entire 2D spectrum collapsed along 
+        # the dispersion axis with a median.
         sys.stdout.write(
             " >>> Fitting Moffat profile to median spatial profile of entire spectrum. "
         )
@@ -63,9 +62,10 @@ def motes():
         datadispcollapse = np.nanmedian(framedict["data"], axis=1)
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
-        # The shape of the profile fitted to the scaled spatial profile is the same as the unscaled,
-        # but to to get a model profile that matches the original profile, the profile amplitude (A),
-        # background level (B), and background gradient (m) all need to be scaled down again after the fitting.
+        # The shape of the profile fitted to the scaled spatial profile is the same as the 
+        # unscaled, but to to get a model profile that matches the original profile, the profile 
+        # amplitude (A), background level (B), and background gradient (m) all need to be scaled 
+        # down again after the fitting.
         datascale = 10 ** np.abs(
             np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse))))
         )
@@ -80,7 +80,8 @@ def motes():
         headparams["seeing"] = (
             2 * moffparams[2] * np.sqrt((2 ** (1 / moffparams[3])) - 1)
         )
-        # Scale the amplitude, background gradient, and background level of the model Moffat profile down.
+        # Scale the amplitude, background gradient, and background level of the model Moffat 
+        # profile down.
         moffparams[0] /= datascale
         moffparams[4] /= datascale
         moffparams[5] /= datascale
@@ -94,9 +95,10 @@ def motes():
             + '"\n'
         )
 
-        # Use the parameters of the Moffat profile fitted to the median spatial profile of the entire spectrum to determine
-        # spatial limits that are used to bound the region of the spectrum used by the common.get_bins function to
-        # to bin the 2D spectrum while taking account of its S/N.
+        # Use the parameters of the Moffat profile fitted to the median spatial profile of the 
+        # entire spectrum to determine spatial limits that are used to bound the region of the 
+        # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account 
+        # of its S/N.
         lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
@@ -106,7 +108,8 @@ def motes():
             + "\n"
         )
 
-        # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the parameters of the fitted Moffat profile.
+        # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the 
+        # parameters of the fitted Moffat profile.
         if params["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
             common.printmoffparams(moffparams, axesdict["imgstart"], datascale)
             common.plot_fitted_spatial_profile(
@@ -118,7 +121,8 @@ def motes():
                 headparams,
             )
 
-        # Determine the location of bins on the dispersion axis within which to measure the spatial profile.
+        # Determine the location of bins on the dispersion axis within which to measure the spatial 
+        # profile.
         binparams, framedict = common.get_bins(
             framedict,
             int(np.floor(lowext)),
@@ -128,7 +132,8 @@ def motes():
             sky=True,
         )
 
-        # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in motesparams.txt
+        # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in 
+        # motesparams.txt
         common.get_bins_output(
             binparams,
             params,
@@ -144,7 +149,8 @@ def motes():
             framedict, skybinpars, skyextlims = skyloc(
                 framedict, axesdict, datascale, headparams, binparams, params
             )
-        # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in motesparams.txt
+        # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in 
+        # motesparams.txt
         binparams, framedict = common.get_bins(
             framedict,
             int(np.floor(lowext)),
@@ -164,9 +170,9 @@ def motes():
             axesdict,
         )
 
-        # For each dispersion bin determined by the get_bins function, median the bin along the dispersion axis, fit a
-        # moffat profile to the median data and then use the parameters of the fitted Moffat function to localise the 2D
-        # spectrum.
+        # For each dispersion bin determined by the get_bins function, median the bin along the 
+        # dispersion axis, fit a moffat profile to the median data and then use the parameters of 
+        # the fitted Moffat function to localise the 2D spectrum.
         sys.stdout.write(
             " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
         )
@@ -175,14 +181,14 @@ def motes():
         extractionlimits = []
 
         for bin in binparams:
-            # Take the median spatial profile of the dispersion
-            # bin, and leave out pixel columns in the chip gaps if this is a GMOS spectrum.
+            # Take the median spatial profile of the dispersion bin, and leave out pixel columns in 
+            # the chip gaps if this is a GMOS spectrum.
             binimg = framedict["data"][:, bin[0] : bin[1]]
             chipgap = np.where(np.median(binimg, axis=0) != 1)
             bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
-            # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median spatial profile and
-            # return its parameters.
+            # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median 
+            # spatial profile and return its parameters.
             binmoffparams = common.moffat_least_squares(
                 axesdict["saxis"],
                 bindata * datascale,
@@ -194,8 +200,8 @@ def motes():
             binmoffparams[4] /= datascale
             binmoffparams[5] /= datascale
 
-            # Define the extraction limits of the current dispersion bin based on the parameters of the Moffat profile
-            # previously fitted to it.
+            # Define the extraction limits of the current dispersion bin based on the parameters of 
+            # the Moffat profile previously fitted to it.
             LowExt, HighExt, fwhm, centre = common.extraction_limits(
                 binmoffparams,
                 axesdict,
@@ -204,8 +210,9 @@ def motes():
 
             extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
-            # Record the Moffat function parameters for each dispersion bin and add the wavstart offset to the bin
-            # locations so they can be saved as metadata along with the extracted spectrum.
+            # Record the Moffat function parameters for each dispersion bin and add the wavstart 
+            # offset to the bin locations so they can be saved as metadata along with the extracted 
+            # spectrum.
             binmoffparams.append(bin[0] + axesdict["wavstart"])
             binmoffparams.append(bin[1] + axesdict["wavstart"])
             extbin.append(binmoffparams)
@@ -228,7 +235,8 @@ def motes():
         sys.stdout.flush()
         extractionlimits = np.array(extractionlimits).T
 
-        # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels fully within the aperture are extracted.
+        # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels 
+        # fully within the aperture are extracted.
         if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 extractionlimits[0] + axesdict["wavstart"],
@@ -245,15 +253,17 @@ def motes():
                 "2D Spectrum Overplotted with Extraction Limits",
             )
 
-        # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
-        # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
+        # Interpolate the extraction limits calculated for each median bin such that each 
+        # wavelength element across the entire unbinned wavelength axis of the entire 2D spectrum 
+        # has its own extraction limits.
 
         finalextractionlims = common.interpolate_extraction_lims(
             extractionlimits, axesdict["dispaxislen"]
         )
         sys.stdout.write("DONE.\n")
 
-        # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis. All pixels fully within the aperture are extracted.
+        # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the 
+        # ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
@@ -270,7 +280,8 @@ def motes():
                 "2D Spectrum Overplotted with Full Extraction Limits",
             )
 
-        # Extract the spectrum from a supersampled version of the 2D image using the extraction limits.
+        # Extract the spectrum from a supersampled version of the 2D image using the extraction 
+        # limits.
         sys.stdout.write(" >>> Extracting 1D spectrum. ")
         sys.stdout.flush()
         framedict["data"] = framedict["data"].T
@@ -360,27 +371,33 @@ def save_fits(
     sbpars,
     skyextractionlims,
 ):
-    """This function saves the extracted spectrum and intermediate products in a single FITS file.
-
-    Description:
-    Constructs a fits file.
+    """
+    This function saves the extracted spectrum and intermediate products in a single, newly 
+    constructed, FITS file.
 
     Args:
-        axdict (dict): A dictionary containing the axes information.
-        hparams (dict): A dictionary containing the header information.
-        opflux (numpy.ndarray): An array containing the flux values of the optimal extraction.
-        operrs (numpy.ndarray): An array containing the flux errors of the optimal extraction.
-        apflux (numpy.ndarray): An array containing the flux values of the aperture extraction.
-        aperrs (numpy.ndarray): An array containing the flux errors of the aperture extraction.
-        head (astropy.io.fits.header.Header): The original FITS header of the 2D spectrum.
-        pars (dict): A dictionary containing the MOTES parameters.
-        filename (str): The filename of the 1D spectrum.
-        moffpars (list): A list containing the Moffat fit parameters.
-        fdict (dict): A dictionary containing the 2D spectrum data and errors.
-        bpars (numpy.ndarray): A dictionary containing the binning parameters.
-        extractionlims (numpy.ndarray): An array containing the extraction limits.
-        sbpars (numpy.ndarray): An array containing the binning parameters for the sky extraction.
-        skyextractionlims (list): A list containing the extraction limits for the sky extraction.
+        axdict (dict)                        : A dictionary containing the axes information.
+        hparams (dict)                       : A dictionary containing the header information.
+        opflux (numpy.ndarray)               : An array containing the flux values of the optimally 
+                                               extracted 1D spectrum.
+        operrs (numpy.ndarray)               : An array containing the flux errors of the optimally 
+                                               extracted 1D spectrum.
+        apflux (numpy.ndarray)               : An array containing the flux values of the aperture 
+                                               extracted 1D spectrum.
+        aperrs (numpy.ndarray)               : An array containing the flux errors of the aperture 
+                                               extracted 1D spectrum.
+        head (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
+        pars (dict)                          : A dictionary containing the MOTES parameters.
+        filename (str)                       : The filename of the 1D spectrum.
+        moffpars (list)                      : A list containing the Moffat fit parameters.
+        fdict (dict)                         : A dictionary containing the original 2D spectrum 
+                                               data and error frames.
+        bpars (numpy.ndarray)                : A dictionary containing the binning parameters.
+        extractionlims (numpy.ndarray)       : An array containing the extraction limits.
+        sbpars (numpy.ndarray)               : An array containing the binning parameters for the 
+                                               sky extraction.
+        skyextractionlims (list)             : A list containing the extraction limits for the sky 
+                                               extraction.
 
     Returns:
         None
@@ -533,24 +550,27 @@ def save_fits(
 
 
 def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
-    """Perform sky subtraction on the 2D spectrum.
-
-    Description:
-    For each dispersion bin determined by the get_bins function, median the bin along the dispersion axis, fit a
-    moffat profile to the median data and then use the parameters of the fitted Moffat function to localise the 2D spectrum.
+    """
+    Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
+    extraction, and then use the regions outside the boundaries defined by that process to 
+    characterise and subtract background sky emission.
 
     Args:
-        framedict (dict): A dictionary containing the 2D spectrum and its associated errors and quality arrays.
-        axesdict (dict): A dictionary containing the wavelength and spatial axes of the 2D spectrum.
-        datascale (float): A flux scale factor to convert the flux units of the 2D spectrum to the same units as the sky.
-        headparams (dict): A dictionary containing the header parameters of the 2D spectrum.
-        binparams (dict): A dictionary containing the bin parameters of the 2D spectrum.
-        params (dict): A dictionary containing the parameters of the extraction.
+        framedict (dict)  : A dictionary containing the 2D spectrum and its associated errors and 
+                            quality arrays.
+        axesdict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D 
+                            spectrum.
+        datascale (float) : A flux scale factor to convert the flux units of the 2D spectrum to the 
+                            same units as the sky.
+        headparams (dict) : A dictionary containing the header parameters of the 2D spectrum.
+        binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
+        params (dict)     : A dictionary containing the parameters of the extraction.
 
     Returns:
-        framedict (dict): A dictionary containing the 2D spectrum and its associated errors and quality arrays.
-        skybin (list): A list containing bins for the sky background.
-        skyextractionlims (list): A list containing the extraction limits for the sky background.
+        framedict (dict)         : A dictionary containing the 2D spectrum and its associated 
+                                   errors and quality arrays.
+        skybin (list)            : A list containing bins for the sky background.
+        skyextractionlims (list) : A list containing the extraction limits for the sky background.
     """
 
     sys.stdout.write(
@@ -560,14 +580,14 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     skybin = []
     extractionlimits = []
     for bin in binparams:
-        # Take the median spatial profile of the dispersion
-        # bin, and leave out pixel columns in the chip gaps if this is a GMOS spectrum.
+        # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the 
+        # chip gaps if this is a GMOS spectrum.
         binimg = framedict["data"][:, bin[0] : bin[1]]
         chipgap = np.where(np.median(binimg, axis=0) != 1)
         bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
-        # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median spatial profile and
-        # return its parameters.
+        # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median 
+        # spatial profile and return its parameters.
         binmoffparams = common.moffat_least_squares(
             axesdict["saxis"],
             bindata * datascale,
@@ -576,17 +596,18 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         )
 
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
-        # so it's necessary to scale the data to a size that least squares can handle (see *1E18 above).
-        # The shape of the profile fitted to the scaled spatial profile is the same as the unscaled,
-        # but to to get a model profile that matches the original profile, the profile amplitude (A),
-        # background level (B), and background gradient (m) all need to be scaled down again after the fitting.
+        # so it's necessary to scale the data to a size that least squares can handle. The shape of 
+        # the profile fitted to the scaled spatial profile is the same as the unscaled, but to to 
+        # get a model profile that matches the original profile, the profile amplitude (A), 
+        # background level (B), and background gradient (m) all need to be scaled down again after 
+        # the fitting.
 
         binmoffparams[0] /= datascale
         binmoffparams[4] /= datascale
         binmoffparams[5] /= datascale
 
-        # Define the extraction limits of the current dispersion bin based on the parameters of the Moffat profile
-        # previously fitted to it.
+        # Define the extraction limits of the current dispersion bin based on the parameters of the 
+        # Moffat profile previously fitted to it.
         LowExt, HighExt, fwhm, centre = common.extraction_limits(
             binmoffparams,
             axesdict,
@@ -595,8 +616,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
         extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
 
-        # Record the Moffat function parameters for each dispersion bin and add the wavstart offset to the bin
-        # locations so they can be saved as metadata along with the extracted spectrum.
+        # Record the Moffat function parameters for each dispersion bin and add the wavstart offset 
+        # to the bin locations so they can be saved as metadata along with the extracted spectrum.
         binmoffparams.append(bin[0] + axesdict["wavstart"])
         binmoffparams.append(bin[1] + axesdict["wavstart"])
         skybin.append(binmoffparams)
@@ -637,8 +658,9 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
             "2D Spectrum Overplotted with Target/Sky Boundaries",
         )
 
-    # Interpolate the extraction limits calculated for each median bin such that each wavelength element across the
-    # entire unbinned wavelength axis of the entire 2D spectrum has its own extraction limits.
+    # Interpolate the extraction limits calculated for each median bin such that each wavelength 
+    # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own 
+    # extraction limits.
 
     skyextractionlims = common.interpolate_extraction_lims(
         extractionlimits, axesdict["dispaxislen"]
@@ -646,7 +668,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     sys.stdout.write("DONE.\n")
 
-    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis.
+    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the 
+    # ends of the wavelength axis.
     if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
@@ -678,7 +701,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     sys.stdout.write("\n     DONE.\n")
     sys.stdout.flush()
 
-    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the ends of the wavelength axis.
+    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the 
+    # ends of the wavelength axis.
     if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],

@@ -1,33 +1,38 @@
 """
-harvester.py - A collection of functions to read in data from the image file and repackage it into a dictionary for use in the rest of MOTES.
+harvester.py - A collection of functions to read in data from the image file and repackage it into 
+               a dictionary for use in the rest of MOTES.
 """
 
 import copy
 import sys
 
+import astropy.io.fits as fits
 import numpy as np
-from astropy.io import fits
 
 from motes import common
 
 
 def data_harvest(reg_counter, filename_2D, region):
-    """Extract header metadata and data frames, and repackage them into dictionaries for use in the rest of MOTES.
+    """Extract header metadata and data frames, and repackage them into dictionaries for use in the 
+       rest of MOTES.
 
     Args:
-        reg_counter (int): An integer noting which line in region is being called to define the boundaries of the 2D data.
-        filename_2D (str): The name of the data file.
-        region (list): A list of regions read in from reg.txt in startup.read_regions()
-
-    Returns:
-        head_dict (dict): A dictionary containing parameters and metadata read from the header of the image file.
-        frame_dict (dict): A dictionary containing the 2D data frames read from the image file.
-        axes_dict (dict): A dictionary containing the spatial and spectral axis arrays associated with the data frames, along with metadata used to define the boundaries of the 2D data.
-        imghead (dict): A copy of the image file header; this is also a dictionary.
+        reg_counter (int) : An integer noting which line in region is being called to define the 
+                            boundaries of the 2D data.
+        filename_2D (str) : The name of the data file.
+        region (list)     : A list of regions read in from reg.txt in startup.read_regions()
+						  
+    Returns:              
+        head_dict (dict)  : A dictionary containing parameters and metadata read from the header of 
+                            the image file.
+        frame_dict (dict) : A dictionary containing the 2D data frames read from the image file.
+        axes_dict (dict)  : A dictionary containing the spatial and spectral axis arrays associated 
+                            with the data frames, along with metadata used to define the boundaries 
+                            of the 2D data.
+        imghead (dict)    : A copy of the image file header; this is also a dictionary.
     """
 
-    # Create dictionary to tell data_harvest which instrument specific
-    # function to call.
+    # Create dictionary to tell data_harvest which instrument specific function to call.
     instrument_dict = {
         "en06": harvest_floyds,
         "en12": harvest_floyds,
@@ -37,8 +42,8 @@ def data_harvest(reg_counter, filename_2D, region):
         "XSHOOTER": harvest_xshoo,
     }
 
-    # Open file containing the spectral data, then extract the header,
-    # image frame, error frame, and quality frame (if the file has one).
+    # Open file containing the spectral data, then extract the header, image frame, error frame, 
+    # and quality frame (if the file has one).
     with fits.open(filename_2D) as imgfile:
         imghead = imgfile[0].header
         inst = imghead["INSTRUME"]
@@ -73,7 +78,8 @@ def data_harvest(reg_counter, filename_2D, region):
         + ".\n"
     )
 
-    # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for the purposes of plotting
+    # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for 
+    # the purposes of plotting
     spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
     hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
@@ -138,24 +144,34 @@ def data_harvest(reg_counter, filename_2D, region):
 
 
 def harvest_floyds(imgfilehdu, imgheader):
-    """Harvest the header and data from a FLOYDS spectrum.
-
-    Description:
-    Harvest the header and data from a FLOYDS spectrum.
-    Please note that this spectrum must not be flux calibrated, to ensure that a reliable ERR frame is made.
+    """
+    Harvest the header and data from a FLOYDS spectrum. Please note that this spectrum must not be 
+    flux calibrated, to ensure that a reliable ERR frame is made.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
-        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from 
+                                                            the data file.
+        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray): the 2D data frame array
-        imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5). In the case of FLOYDS, no variance or uncertainty frame is provided, so one is constructed using the data along with read noise and dark
-                            current metadata contained in the file header. This is why flux calibrated 2D FLOYDS spectra should not be extracted with MOTES, as the flux calibration spoils the
-                            construction of the error frame. Flux calibration should be applied after the spectrum is extracted if MOTES is used.
-        imgqual (numpy.ndarray): the 2D quality frame noting the locations of bad pixels etc. Since FLOYDS spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) is created to ensure compatibility with MOTES.
-        ogimgqual (numpy.ndarray): the original 2D quality frame prior to manipulation by MOTES. In the case of FLOYDS this frame is set to all zeros (see below).
-        headerdict (dict): a dictionary containing the header information required by MOTES.
+        imgdata (numpy.ndarray)   : the 2D data frame array
+        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the 
+                                    case of FLOYDS, no variance or uncertainty frame is provided, 
+                                    so one is constructed using the data along with read noise and 
+                                    dark current metadata contained in the file header. This is why 
+                                    flux calibrated 2D FLOYDS spectra should not be extracted with 
+                                    MOTES, as the flux calibration spoils the construction of the 
+                                    error frame. Flux calibration should be applied after the 
+                                    spectrum is extracted if MOTES is used.
+        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc. 
+                                    Since FLOYDS spectra are not provided with a qual frame, a 
+                                    blank one (flagging all pixels as good; i.e. ==1) is created to 
+                                    ensure compatibility with MOTES.
+        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES. 
+                                    In the case of FLOYDS this frame is set to all ones (see 
+                                    above).
+        headerdict (dict)         : a dictionary containing the header information required by 
+                                    MOTES.
     """
 
     # Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
@@ -197,19 +213,26 @@ def harvest_floyds(imgfilehdu, imgheader):
 
 
 def harvest_fors2(imgfilehdu, imgheader):
-    """Harvest the header and data from a FORS2 spectrum.
+    """
+    Harvest the header and data from a FORS2 spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
-        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from 
+                                                            the data file.
+        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray): the 2D data frame
-        imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray): the 2D quality frame noting the locations of bad pixels etc. Since FORS2 spectra are not provided with a qual frame, a blank one (flagging all pixels as good; i.e. ==1) is created to ensure compatibility with MOTES.
-        ogimgqual (numpy.ndarray): the original 2D quality frame prior to manipulation by MOTES. In the case of FORS2 this frame is set to all zeros (see imgqual above).
-        headerdict (dict): a dictionary containing the header information.
-        wavaxis (numpy.ndarray): the 1D wavelength axis of the spectrum.
+        imgdata (numpy.ndarray)   : the 2D data frame
+        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc. 
+                                    Since FORS2 spectra are not provided with a qual frame, a blank 
+                                    one (flagging all pixels as good; i.e. ==1) is created to 
+                                    ensure compatibility with MOTES.
+        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES. 
+                                    In the case of FORS2 this frame is set to all zeros (see 
+                                    imgqual above).
+        headerdict (dict)         : a dictionary containing the header information.
+        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame and error frame.
@@ -218,7 +241,8 @@ def harvest_fors2(imgfilehdu, imgheader):
     imgqual = np.ones(np.shape(imgdata))
     ogimgqual = copy.deepcopy(imgqual) - 1
 
-    # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the detector and the configuration of the collimator (high resolution or standard resolution).
+    # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the 
+    # detector and the configuration of the collimator (high resolution or standard resolution).
     # If the pixel resolution can't be determined, complain and quit MOTES.
     if (
         imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
@@ -279,22 +303,25 @@ def harvest_fors2(imgfilehdu, imgheader):
 
 
 def harvest_gmos(imgfilehdu, imgheader):
-    """Harvest the header and data from a GMOS spectrum.
+    """
+    Harvest the header and data from a GMOS spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
-        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from 
+                                                            the data file.
+        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray): the 2D data frame
-        imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray): the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (numpy.ndarray): the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict): a dictionary containing the header information.
-        wavaxis (numpy.ndarray): the 1D wavelength axis of the spectrum.
+        imgdata (numpy.ndarray)   : the 2D data frame
+        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        headerdict (dict)         : a dictionary containing the header information.
+        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
-    # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science image frame, as some metadata is stored there instead of the primary header.
+    # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science 
+    # image frame, as some metadata is stored there instead of the primary header.
     scihead = imgfilehdu["SCI"].header
     imgdata = imgfilehdu["SCI"].data
     imgerrs = imgfilehdu["VAR"].data ** 0.5
@@ -306,11 +333,13 @@ def harvest_gmos(imgfilehdu, imgheader):
     imgqual[np.where(imgdata + imgqual == 1)] = 0
     imgqual = 1 - imgqual
 
-    # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual frame.
+    # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual 
+    # frame.
     imgqual[np.where(np.isfinite(imgdata) == False)] = 0
     imgdata[np.where(np.isfinite(imgdata) == False)] = 1.0
 
-    # All this is to get an initial estimate of the IQ. Tables below are based on the condition constraints used by Gemini.
+    # All this is to get an initial estimate of the IQ. Tables below are based on the condition 
+    # constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
     IQ_dict = {
         "20-percentile": 0,
@@ -380,9 +409,10 @@ def harvest_gmos(imgfilehdu, imgheader):
         scihead["CRVAL1"], scihead["CD1_1"], scihead["NAXIS1"]
     )
 
-    # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad pixels or trip up the bin definition stage.
-    # Chip gaps are identified as pixel columns which are all zeros, and then three columns
-    # either side of the chip gaps are also flagged just to be safe.
+    # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad 
+    # pixels or trip up the bin definition stage. Chip gaps are identified as pixel columns which 
+    # are all zeros, and then three columns either side of the chip gaps are also flagged just to 
+    # be safe.
     zerorows = [1 if all(x == 0) else 0 for x in imgdata.T]
     boundary_cols = 3
     zerorows = np.concatenate(
@@ -406,19 +436,21 @@ def harvest_gmos(imgfilehdu, imgheader):
 
 
 def harvest_xshoo(imgfilehdu, imgheader):
-    """Harvest the header and data from an X-Shooter spectrum.
+    """
+    Harvest the header and data from an X-Shooter spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU): the Header Data Unit (HDU) read in from the data file.
-        imgheader (astropy.io.fits.header.Header): the header read in from the data file.
+        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from 
+                                                            the data file.
+        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray): the 2D data frame
-        imgerrs (numpy.ndarray): the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray): the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (numpy.ndarray): the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict): a dictionary containing the header information.
-        wavaxis (numpy.ndarray): the 1D wavelength axis of the spectrum.
+        imgdata (numpy.ndarray)   : the 2D data frame
+        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        headerdict (dict)         : a dictionary containing the header information.
+        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     print(type(imgfilehdu))
