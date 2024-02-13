@@ -4,12 +4,27 @@ This changelog follows the format described
 [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is 
 followed.
 
+## 0.4.6 2024-02-13
+Updates by T. Seccull & D. Kiersz
+
+Removed disabled github actions and unneccessary CI/CD components from the repo. A robust linting 
+pipeline has been added.
+
+### Added
+- `.github/workflows/motes.yml` is a linting pipeline that activates on push and pull requests. It runs flake8,
+  pylint, black, and bandit.
+
+### Removed
+- `.github/workflows/motes-cicd.yml` has been replaced with `.github/workflows/motes.yml`
+- `.github/workflows/labeler.yml` has been removed.
+- `.github/workflows/delete-old-runs.yml` has been removed.
+
 ## 0.4.5 2024-02-09
 Updates by T. Seccull
 
 Running tests on MOTES in its current main branch form to make sure basic functionality is good. 
 
-## Changed
+### Changed
 - Tidied up formatting for script comments, function descriptions, the CHANGELOG, and text printing 
   to the screen for consistency and ease of reading in a text editor.
 - Converted some `print()` statements in `common.py` to `sys.stdout.write()` for consistency with 
@@ -23,14 +38,14 @@ We are not ready for full CI/CD yet, but this small update is a step in the righ
 introduces a CI pipeline. Deployment to [PyPI](https://pypi.org/) is the end goal, we are unable to 
 register new projects at this time.
 
-## Added
+### Added
 - A CI pipeline has been added to the repository. This will run the linting/vurnebility checks 
   against the code on every push to the main branch, but not enforce them for now. This should help 
   improve the quality of the code down the line.
 - Added a workflow to remove old workflows.
 - Badges to README.md.
 
-## Changed
+### Changed
 
 - Improvement to .gitignore by using a Python template from 
   [gitignore.io](https://www.toptal.com/developers/gitignore).
