@@ -99,7 +99,7 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
+        lowext, highext, fwhm, cent = common.extraction_limits(moffparams)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(lowext + axesdict["imgstart"]))
@@ -204,7 +204,6 @@ def motes():
             # the Moffat profile previously fitted to it.
             LowExt, HighExt, fwhm, centre = common.extraction_limits(
                 binmoffparams,
-                axesdict,
                 width_multiplier=params["-FWHM_MULTIPLIER"],
             )
 
@@ -610,7 +609,6 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # Moffat profile previously fitted to it.
         LowExt, HighExt, fwhm, centre = common.extraction_limits(
             binmoffparams,
-            axesdict,
             width_multiplier=params["-BG_FWHM_MULTIPLIER"],
         )
 
