@@ -100,8 +100,8 @@ def extrap_grad(intextlims, median_lims):
        gradient (int): The gradient of the region of data.
 
     """
-    median_of_y_points_x_to_y = np.median(intextlims[median_lims[0] : median_lims[1]])
-    median_of_y_points_y_to_z = np.median(intextlims[median_lims[1] : median_lims[2]])
+    median_of_y_points_x_to_y = np.median(intextlims[median_lims[0]:median_lims[1]])
+    median_of_y_points_y_to_z = np.median(intextlims[median_lims[1]:median_lims[2]])
     median_of_x_points_x_to_y = np.median([median_lims[0], median_lims[1]])
     median_of_x_points_y_to_z = np.median([median_lims[1], median_lims[2]])
 
@@ -127,10 +127,10 @@ def filter_data(data2D, errs2D):
         errs2D (numpy.ndarray) : Filtered errs2D
     """
 
-    errs2D[np.isfinite(errs2D) == False] = 0.0
-    data2D[np.isfinite(errs2D) == False] = 0.0
-    data2D[np.isfinite(data2D) == False] = 0.0
-    errs2D[np.isfinite(data2D) == False] = 0.0
+    errs2D[if not np.isfinite(errs2D)] = 0.0
+    data2D[if not np.isfinite(errs2D)] = 0.0
+    data2D[if not np.isfinite(data2D)] = 0.0
+    errs2D[if not np.isfinite(data2D)] = 0.0
 
     return data2D, errs2D
 
@@ -170,10 +170,8 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
     """
 
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
-    if params["-SUBTRACT_SKY"] and sky == True:
+    if params["-SUBTRACT_SKY"] and sky:
         minSNR = params["-SKY_SNR_BIN_LIM"]
-    elif params["-SUBTRACT_SKY"] and sky == False:
-        minSNR = params["-SNR_BIN_LIM"]
     else:
         minSNR = params["-SNR_BIN_LIM"]
 
