@@ -155,7 +155,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
         dispaxislen (int)             : Length of the dispersion axis.
         params (dict)                 : Dictionary of parameters ready in from the motesparams.txt
                                         configuration file.
-        sky (bool, optional)          : Used to tell get_bins whether the sky has been subtracted
+        has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
                                         yet or not, and to set the minSNR threshold accordingly.
                                         False by default.
         replace_crbp (bool, optional) : when True, get_bins will try to replace bad pixels with
