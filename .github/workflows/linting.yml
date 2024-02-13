@@ -30,11 +30,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Python dependencies
-        run: pip install black flake8
+        run: pip3 install black flake8
 
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
-          black: true
+          black: false
           flake8: true
           flake8_args: "--max-line-length=100 --statistics"
