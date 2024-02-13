@@ -15,7 +15,7 @@ from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 
 
-def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
+def extraction_limits(moffparams, width_multiplier=3.0):
     """
     Calculate the extraction limits from a Moffat profile based on the distance from the central
     peak as a multiple of FWHM.
@@ -40,7 +40,6 @@ def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
     """
 
     # Create a Moffat profile based on the input parameters.
-    r = np.linspace(0, axesdict["spataxislen"] - 1, num=axesdict["spataxislen"])
     fwhm = 2 * moffparams[2] * (((2 ** (1 / moffparams[3])) - 1) ** 0.5)
 
     # Respectively define the upper and lower extraction limits at a distance above and below the
