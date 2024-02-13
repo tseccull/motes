@@ -1,6 +1,6 @@
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
-Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for 
+Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for
 extracting spectrum from astronomical 2D spectrograms.
 Version: 0.4.5
 Date: 2023-12-23
@@ -183,7 +183,7 @@ def motes():
         for bin in binparams:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
-            binimg = framedict["data"][:, bin[0] : bin[1]]
+            binimg = framedict["data"][:, bin[0]:bin[1]]
             chipgap = np.where(np.median(binimg, axis=0) != 1)
             bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
@@ -582,7 +582,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     for bin in binparams:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
-        binimg = framedict["data"][:, bin[0] : bin[1]]
+        binimg = framedict["data"][:, bin[0]:bin[1]]
         chipgap = np.where(np.median(binimg, axis=0) != 1)
         bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
