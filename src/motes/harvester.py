@@ -1,5 +1,5 @@
 """
-harvester.py - A collection of functions to read in data from the image file and repackage it into 
+harvester.py - A collection of functions to read in data from the image file and repackage it into
                a dictionary for use in the rest of MOTES.
 """
 
@@ -335,8 +335,8 @@ def harvest_gmos(imgfilehdu, imgheader):
 
     # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual
     # frame.
-    imgqual[np.where(np.isfinite(imgdata) == False)] = 0
-    imgdata[np.where(np.isfinite(imgdata) == False)] = 1.0
+    imgqual[~np.isfinite(imgdata)] = 0
+    imgdata[~np.isfinite(imgdata)] = 1.0
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
     # constraints used by Gemini.
@@ -473,7 +473,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
     imgqual[imgqual > 0] *= -1
     imgqual[imgqual == 0] = 1
     imgqual[imgqual < 0] = 0
-    imgqual[np.where(np.isfinite(imgdata) == False)] = 0
+    imgqual[~np.isfinite(imgdata)] = 0
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
