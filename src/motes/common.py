@@ -15,7 +15,7 @@ from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 
 
-#def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
+# def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
 def extraction_limits(moffparams, width_multiplier=3.0):
     """
     Calculate the extraction limits from a Moffat profile based on the distance from the central
@@ -271,7 +271,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
                     fdict["data"][:, int(x - i)][cr] = total_nocr * (
                         nmeddatacol[cr] / proportion_nocr
                     )
-                    # Being veeery conservative with estimating the uncertainties here, just to 
+                    # Being veeery conservative with estimating the uncertainties here, just to
                     # be safe when it comes to replacing cosmic rays.
                     fdict["errs"][:, int(x - i)][cr] += np.max(
                         fdict["errs"][:, int(x - i)][nocr]
@@ -336,9 +336,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
             # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
 
             meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
-            #medtile = np.tile(meddatacol, (width, 1)).T
-            #madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
-            #errmeddatacol = np.nanmedian(madtile, axis=1)
+            # medtile = np.tile(meddatacol, (width, 1)).T
+            # madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
+            # errmeddatacol = np.nanmedian(madtile, axis=1)
 
             nmeddatacol = meddatacol / np.sum(meddatacol)
 
@@ -353,7 +353,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
                     fdict["data"][:, int(x - i)][cr] = total_nocr * (
                         nmeddatacol[cr] / proportion_nocr
                     )
-                    # Being veeery conservative with estimating the uncertainties here, just to 
+                    # Being veeery conservative with estimating the uncertainties here, just to
                     # be safe when it comes to replacing cosmic rays.
                     fdict["errs"][:, int(x - i)][cr] += np.max(
                         fdict["errs"][:, int(x - i)][nocr]
