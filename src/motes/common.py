@@ -257,7 +257,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
                 # are bad), repair the bad ones. Leave columns of all bad pixels as they are.
                 if (
                     0.0 in fdict["qual"][:, int(x - i)]
-                    and all(x == 0 for x in fdict["qual"][:, int(x - i)]) == False
+                    and any(x != 0 for x in fdict["qual"][:, int(x - i)])
                 ):
                     # print(fdict[fdict['qual'][:, int(x-i)])
                     # print(np.isfinite(fdict['data'][:, int(x - i)]))
