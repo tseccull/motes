@@ -137,7 +137,7 @@ def filter_data(data2D, errs2D):
     return data2D, errs2D
 
 
-def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=False):
+def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crbp=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -157,7 +157,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
         dispaxislen (int)             : Length of the dispersion axis.
         params (dict)                 : Dictionary of parameters ready in from the motesparams.txt
                                         configuration file.
-        sky (bool, optional)          : Used to tell get_bins whether the sky has been subtracted
+        has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
                                         yet or not, and to set the minSNR threshold accordingly.
                                         False by default.
         replace_crbp (bool, optional) : when True, get_bins will try to replace bad pixels with
@@ -172,10 +172,8 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
     """
 
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
-    if params["-SUBTRACT_SKY"] and sky == True:
+    if params["-SUBTRACT_SKY"] and has_sky:
         minSNR = params["-SKY_SNR_BIN_LIM"]
-    elif params["-SUBTRACT_SKY"] and sky == False:
-        minSNR = params["-SNR_BIN_LIM"]
     else:
         minSNR = params["-SNR_BIN_LIM"]
 
