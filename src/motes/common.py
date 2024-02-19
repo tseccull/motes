@@ -129,10 +129,10 @@ def filter_data(data2D, errs2D):
         errs2D (numpy.ndarray) : Filtered errs2D
     """
 
-    errs2D[np.isfinite(errs2D) == False] = 0.0
-    data2D[np.isfinite(errs2D) == False] = 0.0
-    data2D[np.isfinite(data2D) == False] = 0.0
-    errs2D[np.isfinite(data2D) == False] = 0.0
+    errs2D[~np.isfinite(errs2D)] = 0.0
+    data2D[~np.isfinite(errs2D)] = 0.0
+    data2D[~np.isfinite(data2D)] = 0.0
+    errs2D[~np.isfinite(data2D)] = 0.0
 
     return data2D, errs2D
 
