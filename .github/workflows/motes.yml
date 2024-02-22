@@ -1,6 +1,5 @@
 name: Motes
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -49,4 +48,4 @@ jobs:
       - name: Formatting check with Black
         shell: bash -l {0}
         run: |
-          python -m black --check src
+          python -m black --diff --check src
