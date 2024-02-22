@@ -15,7 +15,6 @@ from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 
 
-# def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
 def extraction_limits(moffparams, width_multiplier=3.0):
     """
     Calculate the extraction limits from a Moffat profile based on the distance from the central
@@ -41,7 +40,6 @@ def extraction_limits(moffparams, width_multiplier=3.0):
     """
 
     # Create a Moffat profile based on the input parameters.
-    # r = np.linspace(0, axesdict["spataxislen"] - 1, num=axesdict["spataxislen"])
     fwhm = 2 * moffparams[2] * (((2 ** (1 / moffparams[3])) - 1) ** 0.5)
 
     # Respectively define the upper and lower extraction limits at a distance above and below the
@@ -246,10 +244,6 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
             # flux.
 
             meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
-            # medtile = np.tile(meddatacol, (width, 1)).T
-            # madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
-            # errmeddatacol = np.nanmedian(madtile, axis=1)
-
             nmeddatacol = meddatacol / np.sum(meddatacol)
 
             for i in range(int(width)):
@@ -259,8 +253,6 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
                     0.0 in fdict["qual"][:, int(x - i)]
                     and any(x != 0 for x in fdict["qual"][:, int(x - i)])
                 ):
-                    # print(fdict[fdict['qual'][:, int(x-i)])
-                    # print(np.isfinite(fdict['data'][:, int(x - i)]))
                     cr = np.where(fdict["qual"][:, int(x - i)] == 0)
                     nocr = np.where(fdict["qual"][:, int(x - i)] == 1)
                     proportion_nocr = np.sum(nmeddatacol[nocr])
@@ -336,10 +328,6 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
             # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
 
             meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
-            # medtile = np.tile(meddatacol, (width, 1)).T
-            # madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
-            # errmeddatacol = np.nanmedian(madtile, axis=1)
-
             nmeddatacol = meddatacol / np.sum(meddatacol)
 
             for i in range(int(width)):
