@@ -99,7 +99,6 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        #lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
         lowext, highext, fwhm, cent = common.extraction_limits(moffparams)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
@@ -205,7 +204,6 @@ def motes():
             # the Moffat profile previously fitted to it.
             LowExt, HighExt, fwhm, centre = common.extraction_limits(
                 binmoffparams,
-                #axesdict,
                 width_multiplier=params["-FWHM_MULTIPLIER"],
             )
 
@@ -602,7 +600,6 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after
         # the fitting.
-
         binmoffparams[0] /= datascale
         binmoffparams[4] /= datascale
         binmoffparams[5] /= datascale
@@ -611,7 +608,6 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # Moffat profile previously fitted to it.
         LowExt, HighExt, fwhm, centre = common.extraction_limits(
             binmoffparams,
-            #axesdict,
             width_multiplier=params["-BG_FWHM_MULTIPLIER"],
         )
 
@@ -662,7 +658,6 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     # Interpolate the extraction limits calculated for each median bin such that each wavelength
     # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
     # extraction limits.
-
     skyextractionlims = common.interpolate_extraction_lims(
         extractionlimits, axesdict["dispaxislen"]
     )
