@@ -135,7 +135,7 @@ def filter_data(data2D, errs2D):
     return data2D, errs2D
 
 
-def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crbp=False):
+def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False): # , replace_crbp=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -158,9 +158,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
         has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
                                         yet or not, and to set the minSNR threshold accordingly.
                                         False by default.
-        replace_crbp (bool, optional) : when True, get_bins will try to replace bad pixels with
-                                        values estimated using the median spatial profile of the
-                                        current bin. False by default.
+#        replace_crbp (bool, optional) : when True, get_bins will try to replace bad pixels with
+#                                        values estimated using the median spatial profile of the
+#                                        current bin. False by default.
 
     Returns:
         binlocations (list) : A list containing the details for each bin determined by get_bins.
@@ -231,43 +231,43 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
             # Estimate the S/N
             snrestimate = signal / rssnoise
 
-        if replace_crbp:
-            # Replace bad pixels and cosmic rays if requested by the user. The method employed here
-            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
-            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-
-            # Here a median spatial profile for the current bin is determined by bootstrapping the
-            # good pixels in each spatial pixel row with repeats to estimate a distribution of
-            # median values for each value in the median spatial distribution for the bin. The mean
-            # of each of these distributions is then taken to be the value of that median spatial
-            # pixel. The standard error of each of these distributions becomes the error of the
-            # flux.
-
-            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
-            nmeddatacol = meddatacol / np.sum(meddatacol)
-
-            for i in range(int(width)):
-                # If there are both good and bad pixels in the current column (i.e. not all pixels
-                # are bad), repair the bad ones. Leave columns of all bad pixels as they are.
-                if (
-                    0.0 in fdict["qual"][:, int(x - i)]
-                    and any(x != 0 for x in fdict["qual"][:, int(x - i)])
-                ):
-                    cr = np.where(fdict["qual"][:, int(x - i)] == 0)
-                    nocr = np.where(fdict["qual"][:, int(x - i)] == 1)
-                    proportion_nocr = np.sum(nmeddatacol[nocr])
-                    total_nocr = np.sum(meddatacol[nocr])
-
-                    # Scale the median spatial profile so its summed flux within the spectrum
-                    # aperture is equal to the same for the pixel column being fixed.
-                    fdict["data"][:, int(x - i)][cr] = total_nocr * (
-                        nmeddatacol[cr] / proportion_nocr
-                    )
-                    # Being veeery conservative with estimating the uncertainties here, just to
-                    # be safe when it comes to replacing cosmic rays.
-                    fdict["errs"][:, int(x - i)][cr] += np.max(
-                        fdict["errs"][:, int(x - i)][nocr]
-                    )
+#        if replace_crbp:
+#            # Replace bad pixels and cosmic rays if requested by the user. The method employed here
+#            # is the same as that used by ESO in their X-Shooter data reduction pipeline.
+#            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+#
+#            # Here a median spatial profile for the current bin is determined by bootstrapping the
+#            # good pixels in each spatial pixel row with repeats to estimate a distribution of
+#            # median values for each value in the median spatial distribution for the bin. The mean
+#            # of each of these distributions is then taken to be the value of that median spatial
+#            # pixel. The standard error of each of these distributions becomes the error of the
+#            # flux.
+#
+#            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
+#            nmeddatacol = meddatacol / np.sum(meddatacol)
+#
+#            for i in range(int(width)):
+#                # If there are both good and bad pixels in the current column (i.e. not all pixels
+#                # are bad), repair the bad ones. Leave columns of all bad pixels as they are.
+#                if (
+#                    0.0 in fdict["qual"][:, int(x - i)]
+#                    and any(x != 0 for x in fdict["qual"][:, int(x - i)])
+#                ):
+#                    cr = np.where(fdict["qual"][:, int(x - i)] == 0)
+#                    nocr = np.where(fdict["qual"][:, int(x - i)] == 1)
+#                    proportion_nocr = np.sum(nmeddatacol[nocr])
+#                    total_nocr = np.sum(meddatacol[nocr])
+#
+#                    # Scale the median spatial profile so its summed flux within the spectrum
+#                    # aperture is equal to the same for the pixel column being fixed.
+#                    fdict["data"][:, int(x - i)][cr] = total_nocr * (
+#                        nmeddatacol[cr] / proportion_nocr
+#                    )
+#                    # Being veeery conservative with estimating the uncertainties here, just to
+#                    # be safe when it comes to replacing cosmic rays.
+#                    fdict["errs"][:, int(x - i)][cr] += np.max(
+#                        fdict["errs"][:, int(x - i)][nocr]
+#                    )
 
         binlocations.append([int(x - width), int(x), snrestimate])
 
@@ -322,30 +322,30 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False, replace_crb
             # Estimate the S/N
             snrestimate = signal / rssnoise
 
-        if replace_crbp:
-            # Replace bad pixels, and cosmic rays if requested by the user. The method employed
-            # here is the same as that used by ESO in their X-Shooter data reduction pipeline.
-            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
-
-            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
-            nmeddatacol = meddatacol / np.sum(meddatacol)
-
-            for i in range(int(width)):
-                if 0.0 in fdict["qual"][:, int(x + i)]:
-                    cr = np.where(fdict["qual"][:, int(x + i)] == 0)
-                    proportion_nocr = np.sum(nmeddatacol[nocr])
-                    total_nocr = np.sum(meddatacol[nocr])
-
-                    # Scale the median spatial profile so its summed flux within the spectrum
-                    # aperture is equal to the same for the pixel column being fixed.
-                    fdict["data"][:, int(x - i)][cr] = total_nocr * (
-                        nmeddatacol[cr] / proportion_nocr
-                    )
-                    # Being veeery conservative with estimating the uncertainties here, just to
-                    # be safe when it comes to replacing cosmic rays.
-                    fdict["errs"][:, int(x - i)][cr] += np.max(
-                        fdict["errs"][:, int(x - i)][nocr]
-                    )
+#        if replace_crbp:
+#            # Replace bad pixels, and cosmic rays if requested by the user. The method employed
+#            # here is the same as that used by ESO in their X-Shooter data reduction pipeline.
+#            # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
+#
+#            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
+#            nmeddatacol = meddatacol / np.sum(meddatacol)
+#
+#            for i in range(int(width)):
+#                if 0.0 in fdict["qual"][:, int(x + i)]:
+#                    cr = np.where(fdict["qual"][:, int(x + i)] == 0)
+#                    proportion_nocr = np.sum(nmeddatacol[nocr])
+#                    total_nocr = np.sum(meddatacol[nocr])
+#
+#                    # Scale the median spatial profile so its summed flux within the spectrum
+#                    # aperture is equal to the same for the pixel column being fixed.
+#                    fdict["data"][:, int(x - i)][cr] = total_nocr * (
+#                        nmeddatacol[cr] / proportion_nocr
+#                    )
+#                    # Being veeery conservative with estimating the uncertainties here, just to
+#                    # be safe when it comes to replacing cosmic rays.
+#                    fdict["errs"][:, int(x - i)][cr] += np.max(
+#                        fdict["errs"][:, int(x - i)][nocr]
+#                    )
 
         binlocations.append([int(x), int(x + width), snrestimate])
 
