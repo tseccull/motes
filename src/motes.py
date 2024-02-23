@@ -74,7 +74,7 @@ def motes():
             axes_dict["saxis"],
             full_median_spatial_profile * data_scaling_factor,
             header_parameters["seeing"],
-            header_parameters["pixresolution"],
+            header_parameters["pixel_resolution"],
         )
         # Get an improved estimate of the FWHM of the spectrum from the best fit Moffat profile.
         header_parameters["seeing"] = (
@@ -91,7 +91,7 @@ def motes():
             " >>> FWHM of median spatial profile is "
             + str(round(header_parameters["seeing"], 2))
             + " Pixels, or "
-            + str(round(header_parameters["seeing"] * header_parameters["pixresolution"], 2))
+            + str(round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2))
             + '"\n'
         )
 
@@ -193,7 +193,7 @@ def motes():
                 axes_dict["saxis"],
                 bindata * data_scaling_factor,
                 header_parameters["seeing"],
-                header_parameters["pixresolution"],
+                header_parameters["pixel_resolution"],
             )
 
             binmoffparams[0] /= data_scaling_factor
@@ -460,7 +460,7 @@ def save_fits(
         "moffat profile background slope",
     )
     head["HIERARCH IQ"] = (
-        round(hparams["seeing"] * hparams["pixresolution"], 2),
+        round(hparams["seeing"] * hparams["pixel_resolution"], 2),
         'IQ measured from median profile, "',
     )
 
@@ -591,7 +591,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
             axes_dict["saxis"],
             bindata * data_scaling_factor,
             header_parameters["seeing"],
-            header_parameters["pixresolution"],
+            header_parameters["pixel_resolution"],
         )
 
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
