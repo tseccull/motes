@@ -41,12 +41,12 @@ def motes():
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        header_parameters, framedict, axesdict, imghead = harvester.data_harvest(
+        header_parameters, frame_dict, axesdict, imghead = harvester.data_harvest(
             i, input_file_path, data_region
         )
         # Make backup copies of the original data and error frames.
-        framedict["ogdata"] = copy.deepcopy(framedict["data"])
-        framedict["ogerrs"] = copy.deepcopy(framedict["errs"])
+        frame_dict["ogdata"] = copy.deepcopy(frame_dict["data"])
+        frame_dict["ogerrs"] = copy.deepcopy(frame_dict["errs"])
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file completed.\n"
         )
@@ -59,7 +59,7 @@ def motes():
         sys.stdout.flush()
 
         # Calculate median spatial profile of the spectrum.
-        datadispcollapse = np.nanmedian(framedict["data"], axis=1)
+        datadispcollapse = np.nanmedian(frame_dict["data"], axis=1)
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
         # The shape of the profile fitted to the scaled spatial profile is the same as the
@@ -123,8 +123,8 @@ def motes():
 
         # Determine the location of bins on the dispersion axis within which to measure the spatial
         # profile.
-        binparams, framedict = common.get_bins(
-            framedict,
+        binparams, frame_dict = common.get_bins(
+            frame_dict,
             int(np.floor(lowext)),
             int(np.ceil(highext)),
             axesdict["dispaxislen"],
@@ -139,20 +139,20 @@ def motes():
             motes_parameters,
             lowext,
             highext,
-            framedict["data"],
+            frame_dict["data"],
             header_parameters,
             axesdict,
         )
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
-            framedict, skybinpars, skyextlims = skyloc(
-                framedict, axesdict, datascale, header_parameters, binparams, motes_parameters
+            frame_dict, skybinpars, skyextlims = skyloc(
+                frame_dict, axesdict, datascale, header_parameters, binparams, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
-        binparams, framedict = common.get_bins(
-            framedict,
+        binparams, frame_dict = common.get_bins(
+            frame_dict,
             int(np.floor(lowext)),
             int(np.ceil(highext)),
             axesdict["dispaxislen"],
@@ -165,7 +165,7 @@ def motes():
             motes_parameters,
             lowext,
             highext,
-            framedict["data"],
+            frame_dict["data"],
             header_parameters,
             axesdict,
         )
@@ -183,7 +183,7 @@ def motes():
         for each_bin in binparams:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
-            binimg = framedict["data"][:, each_bin[0] : each_bin[1]]
+            binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
             chipgap = np.where(np.median(binimg, axis=0) != 1)
             bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
@@ -245,7 +245,7 @@ def motes():
             ]
 
             common.show_img(
-                framedict["data"],
+                frame_dict["data"],
                 axesdict,
                 header_parameters,
                 drawlines,
@@ -272,7 +272,7 @@ def motes():
             ]
 
             common.show_img(
-                framedict["data"],
+                frame_dict["data"],
                 axesdict,
                 header_parameters,
                 drawlines,
@@ -283,13 +283,13 @@ def motes():
         # limits.
         sys.stdout.write(" >>> Extracting 1D spectrum. ")
         sys.stdout.flush()
-        framedict["data"] = framedict["data"].T
-        framedict["errs"] = framedict["errs"].T
-        framedict["qual"] = framedict["qual"].T
+        frame_dict["data"] = frame_dict["data"].T
+        frame_dict["errs"] = frame_dict["errs"].T
+        frame_dict["qual"] = frame_dict["qual"].T
 
         opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
-            framedict["data"],
-            framedict["errs"],
+            frame_dict["data"],
+            frame_dict["errs"],
             finalextractionlims,
             binpars,
             axesdict,
@@ -340,7 +340,7 @@ def motes():
                 motes_parameters,
                 input_file_path,
                 moffparams,
-                framedict,
+                frame_dict,
                 binpars,
                 finalextractionlims,
                 skybinpars,
@@ -548,14 +548,14 @@ def save_fits(
     return None
 
 
-def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_parameters):
+def skyloc(frame_dict, axesdict, datascale, header_parameters, binparams, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
     characterise and subtract background sky emission.
 
     Args:
-        framedict (dict)  : A dictionary containing the 2D spectrum and its associated errors and
+        frame_dict (dict)  : A dictionary containing the 2D spectrum and its associated errors and
                             quality arrays.
         axesdict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D
                             spectrum.
@@ -566,7 +566,7 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
         motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
 
     Returns:
-        framedict (dict)         : A dictionary containing the 2D spectrum and its associated
+        frame_dict (dict)         : A dictionary containing the 2D spectrum and its associated
                                    errors and quality arrays.
         skybin (list)            : A list containing bins for the sky background.
         skyextractionlims (list) : A list containing the extraction limits for the sky background.
@@ -581,7 +581,7 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
     for each_bin in binparams:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
-        binimg = framedict["data"][:, each_bin[0] : each_bin[1]]
+        binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
         chipgap = np.where(np.median(binimg, axis=0) != 1)
         bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
@@ -648,7 +648,7 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
         ]
 
         common.show_img(
-            framedict["data"],
+            frame_dict["data"],
             axesdict,
             header_parameters,
             drawlines,
@@ -675,7 +675,7 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
         ]
 
         common.show_img(
-            framedict["data"],
+            frame_dict["data"],
             axesdict,
             header_parameters,
             drawlines,
@@ -685,10 +685,10 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
     sys.stdout.write(" >>> Subtracting sky.\n")
     sys.stdout.flush()
 
-    framedict = common.subtract_sky(
+    frame_dict = common.subtract_sky(
         skyextractionlims[0],
         skyextractionlims[1],
-        framedict,
+        frame_dict,
         axesdict,
         motes_parameters,
         header_parameters,
@@ -708,14 +708,14 @@ def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_p
         ]
 
         common.show_img(
-            framedict["data"],
+            frame_dict["data"],
             axesdict,
             header_parameters,
             drawlines,
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
-    return framedict, skybin, skyextractionlims
+    return frame_dict, skybin, skyextractionlims
 
 
 if __name__ == "__main__":
