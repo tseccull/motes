@@ -115,7 +115,7 @@ def motes():
             common.plot_fitted_spatial_profile(
                 axes_dict["spatial_axis"],
                 full_median_spatial_profile,
-                axes_dict["hrsaxis"],
+                axes_dict["hi_resolution_spatial_axis"],
                 moffat_profile_parameters,
                 axes_dict["data_spatial_floor"],
                 header_parameters,
@@ -221,7 +221,7 @@ def motes():
                 common.plot_fitted_spatial_profile(
                     axes_dict["spatial_axis"],
                     bindata,
-                    axes_dict["hrsaxis"],
+                    axes_dict["hi_resolution_spatial_axis"],
                     binmoffparams,
                     axes_dict["data_spatial_floor"],
                     header_parameters,
@@ -624,7 +624,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
             common.plot_fitted_spatial_profile(
                 axes_dict["spatial_axis"],
                 bindata,
-                axes_dict["hrsaxis"],
+                axes_dict["hi_resolution_spatial_axis"],
                 binmoffparams,
                 axes_dict["data_spatial_floor"],
                 header_parameters,
