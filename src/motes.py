@@ -123,7 +123,7 @@ def motes():
 
         # Determine the location of bins on the dispersion axis within which to measure the spatial
         # profile.
-        binparams, frame_dict = common.get_bins(
+        bin_parameters, frame_dict = common.get_bins(
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(binning_region_spatial_ceiling)),
@@ -135,7 +135,7 @@ def motes():
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
         common.get_bins_output(
-            binparams,
+            bin_parameters,
             motes_parameters,
             binning_region_spatial_floor,
             binning_region_spatial_ceiling,
@@ -147,11 +147,11 @@ def motes():
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
             frame_dict, skybinpars, skyextlims = skyloc(
-                frame_dict, axes_dict, data_scaling_factor, header_parameters, binparams, motes_parameters
+                frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
-        binparams, frame_dict = common.get_bins(
+        bin_parameters, frame_dict = common.get_bins(
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(binning_region_spatial_ceiling)),
@@ -161,7 +161,7 @@ def motes():
         )
 
         common.get_bins_output(
-            binparams,
+            bin_parameters,
             motes_parameters,
             binning_region_spatial_floor,
             binning_region_spatial_ceiling,
@@ -180,7 +180,7 @@ def motes():
         extbin = []
         extractionlimits = []
 
-        for each_bin in binparams:
+        for each_bin in bin_parameters:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
             binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
@@ -548,7 +548,7 @@ def save_fits(
     return None
 
 
-def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binparams, motes_parameters):
+def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
@@ -562,7 +562,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
         data_scaling_factor (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
                             same units as the sky.
         header_parameters (dict) : A dictionary containing the header parameters of the 2D spectrum.
-        binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
+        bin_parameters (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
         motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
 
     Returns:
@@ -578,7 +578,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
 
     skybin = []
     extractionlimits = []
-    for each_bin in binparams:
+    for each_bin in bin_parameters:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
         binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
