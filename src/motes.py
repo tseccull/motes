@@ -99,7 +99,7 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        binning_region_spatial_floor, binning_region_spatial_ceiling, moffat_fwhm, cent = common.extraction_limits(moffat_profile_parameters)
+        binning_region_spatial_floor, binning_region_spatial_ceiling, moffat_fwhm, moffat_center = common.extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(binning_region_spatial_floor + axes_dict["imgstart"]))
@@ -202,12 +202,12 @@ def motes():
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
-            LowExt, HighExt, moffat_fwhm, centre = common.extraction_limits(
+            LowExt, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
                 binmoffparams,
                 width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
+            extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
@@ -441,7 +441,7 @@ def save_fits(
     )
     head["HIERARCH MOFF C"] = (
         round(moffpars[1] + axdict["imgstart"], 5),
-        "moffat profile centre",
+        "moffat profile center",
     )
     head["HIERARCH MOFF ALPHA"] = (
         round(moffpars[2], 5),
@@ -606,12 +606,12 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the
         # Moffat profile previously fitted to it.
-        LowExt, HighExt, moffat_fwhm, centre = common.extraction_limits(
+        LowExt, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
             binmoffparams,
             width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
+        extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
