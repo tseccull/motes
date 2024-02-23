@@ -944,7 +944,7 @@ def plot_fitted_spatial_profile(
     return None
 
 
-def printmoffparams(moffparams, imgstart, datascale):
+def print_moffat_parameters(moffparams, imgstart, datascale):
     """
     Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the
     original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to
