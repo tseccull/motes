@@ -29,7 +29,7 @@ def motes():
     performs optional sky subtraction and optimal extraction of 1D spectra.
     """
     # Run startup functions
-    motes_parameters = startup.read_parfile()  # Import parameters from file to dict
+    motes_parameters = startup.read_motes_parameter_file()  # Import parameters from file to dict
     data_region = startup.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
