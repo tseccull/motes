@@ -99,12 +99,12 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        binning_region_spatial_floor, highext, fwhm, cent = common.extraction_limits(moffat_profile_parameters)
+        binning_region_spatial_floor, binning_region_spatial_ceiling, fwhm, cent = common.extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(binning_region_spatial_floor + axes_dict["imgstart"]))
             + "-"
-            + str(int(highext + axes_dict["imgstart"]))
+            + str(int(binning_region_spatial_ceiling + axes_dict["imgstart"]))
             + "\n"
         )
 
@@ -126,7 +126,7 @@ def motes():
         binparams, frame_dict = common.get_bins(
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
-            int(np.ceil(highext)),
+            int(np.ceil(binning_region_spatial_ceiling)),
             axes_dict["dispaxislen"],
             motes_parameters,
             sky=True,
@@ -138,7 +138,7 @@ def motes():
             binparams,
             motes_parameters,
             binning_region_spatial_floor,
-            highext,
+            binning_region_spatial_ceiling,
             frame_dict["data"],
             header_parameters,
             axes_dict,
@@ -154,7 +154,7 @@ def motes():
         binparams, frame_dict = common.get_bins(
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
-            int(np.ceil(highext)),
+            int(np.ceil(binning_region_spatial_ceiling)),
             axes_dict["dispaxislen"],
             motes_parameters,
             replace_crbp=bool(motes_parameters["-REPLACE_CRBP"]),
@@ -164,7 +164,7 @@ def motes():
             binparams,
             motes_parameters,
             binning_region_spatial_floor,
-            highext,
+            binning_region_spatial_ceiling,
             frame_dict["data"],
             header_parameters,
             axes_dict,
