@@ -33,8 +33,8 @@ def motes():
     data_region = startup.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
-    for i, in_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):
-        sys.stdout.write(("/" * (70 - len(in_file_path[:70]))) + " " + in_file_path[:70] + "\n")
+    for i, input_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):
+        sys.stdout.write(("/" * (70 - len(input_file_path[:70]))) + " " + input_file_path[:70] + "\n")
         sys.stdout.write(" >>> Beginning MOTES Processing\n")
 
         # Gather header metadata and the image data from the 2D image file.
@@ -42,7 +42,7 @@ def motes():
             " >>> Gathering image frames and header data from input file.\n"
         )
         headparams, framedict, axesdict, imghead = harvester.data_harvest(
-            i, in_file_path, data_region
+            i, input_file_path, data_region
         )
         # Make backup copies of the original data and error frames.
         framedict["ogdata"] = copy.deepcopy(framedict["data"])
@@ -338,7 +338,7 @@ def motes():
                 aperrs1D,
                 imghead,
                 motes_parameters,
-                in_file_path,
+                input_file_path,
                 moffparams,
                 framedict,
                 binpars,
@@ -347,7 +347,7 @@ def motes():
                 skyextlims,
             )
 
-        sys.stdout.write(" >>> Extraction of " + in_file_path + " completed.\n")
+        sys.stdout.write(" >>> Extraction of " + input_file_path + " completed.\n")
 
     sys.stdout.write(" >>> MOTES Processing Complete.\n\n")
     return None
