@@ -111,7 +111,7 @@ def motes():
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
         if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
-            common.printmoffparams(moffat_profile_parameters, axes_dict["data_spatial_floor"], data_scaling_factor)
+            common.print_moffat_parameters(moffat_profile_parameters, axes_dict["data_spatial_floor"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
                 axes_dict["saxis"],
                 full_median_spatial_profile,
