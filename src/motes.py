@@ -71,7 +71,7 @@ def motes():
         )
         # Fit the median spatial profile with a Moffat function.
         moffat_profile_parameters = common.moffat_least_squares(
-            axes_dict["saxis"],
+            axes_dict["spatial_axis"],
             full_median_spatial_profile * data_scaling_factor,
             header_parameters["seeing"],
             header_parameters["pixel_resolution"],
@@ -113,7 +113,7 @@ def motes():
         if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
             common.print_moffat_parameters(moffat_profile_parameters, axes_dict["data_spatial_floor"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
-                axes_dict["saxis"],
+                axes_dict["spatial_axis"],
                 full_median_spatial_profile,
                 axes_dict["hrsaxis"],
                 moffat_profile_parameters,
@@ -190,7 +190,7 @@ def motes():
             # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
             # spatial profile and return its parameters.
             binmoffparams = common.moffat_least_squares(
-                axes_dict["saxis"],
+                axes_dict["spatial_axis"],
                 bindata * data_scaling_factor,
                 header_parameters["seeing"],
                 header_parameters["pixel_resolution"],
@@ -219,7 +219,7 @@ def motes():
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
             if motes_parameters["-DIAG_PLOT_MOFFAT"]:
                 common.plot_fitted_spatial_profile(
-                    axes_dict["saxis"],
+                    axes_dict["spatial_axis"],
                     bindata,
                     axes_dict["hrsaxis"],
                     binmoffparams,
@@ -588,7 +588,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
         # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
         # spatial profile and return its parameters.
         binmoffparams = common.moffat_least_squares(
-            axes_dict["saxis"],
+            axes_dict["spatial_axis"],
             bindata * data_scaling_factor,
             header_parameters["seeing"],
             header_parameters["pixel_resolution"],
@@ -622,7 +622,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
         if motes_parameters["-DIAG_PLOT_MOFFAT"]:
             common.plot_fitted_spatial_profile(
-                axes_dict["saxis"],
+                axes_dict["spatial_axis"],
                 bindata,
                 axes_dict["hrsaxis"],
                 binmoffparams,
