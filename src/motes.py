@@ -41,7 +41,7 @@ def motes():
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        header_parameters, frame_dict, axes_dict, imghead = harvester.data_harvest(
+        header_parameters, frame_dict, axes_dict, input_file_primary_header = harvester.data_harvest(
             i, input_file_path, data_region
         )
         # Make backup copies of the original data and error frames.
@@ -336,7 +336,7 @@ def motes():
                 operrs1D,
                 apdata1D,
                 aperrs1D,
-                imghead,
+                input_file_primary_header,
                 motes_parameters,
                 input_file_path,
                 moffparams,
