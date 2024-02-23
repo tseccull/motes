@@ -70,7 +70,7 @@ def motes():
             np.floor(np.log10(np.abs(np.nanmedian(full_median_spatial_profile))))
         )
         # Fit the median spatial profile with a Moffat function.
-        moffparams = common.moffat_least_squares(
+        moffat_profile_parameters = common.moffat_least_squares(
             axes_dict["saxis"],
             full_median_spatial_profile * data_scaling_factor,
             header_parameters["seeing"],
@@ -78,13 +78,13 @@ def motes():
         )
         # Get an improved estimate of the FWHM of the spectrum from the best fit Moffat profile.
         header_parameters["seeing"] = (
-            2 * moffparams[2] * np.sqrt((2 ** (1 / moffparams[3])) - 1)
+            2 * moffat_profile_parameters[2] * np.sqrt((2 ** (1 / moffat_profile_parameters[3])) - 1)
         )
         # Scale the amplitude, background gradient, and background level of the model Moffat
         # profile down.
-        moffparams[0] /= data_scaling_factor
-        moffparams[4] /= data_scaling_factor
-        moffparams[5] /= data_scaling_factor
+        moffat_profile_parameters[0] /= data_scaling_factor
+        moffat_profile_parameters[4] /= data_scaling_factor
+        moffat_profile_parameters[5] /= data_scaling_factor
 
         sys.stdout.write("DONE.\n")
         sys.stdout.write(
@@ -99,7 +99,7 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(moffparams)
+        lowext, highext, fwhm, cent = common.extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(lowext + axes_dict["imgstart"]))
@@ -111,12 +111,12 @@ def motes():
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
         if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
-            common.printmoffparams(moffparams, axes_dict["imgstart"], data_scaling_factor)
+            common.printmoffparams(moffat_profile_parameters, axes_dict["imgstart"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
                 axes_dict["saxis"],
                 full_median_spatial_profile,
                 axes_dict["hrsaxis"],
-                moffparams,
+                moffat_profile_parameters,
                 axes_dict["imgstart"],
                 header_parameters,
             )
@@ -339,7 +339,7 @@ def motes():
                 input_file_primary_header,
                 motes_parameters,
                 input_file_path,
-                moffparams,
+                moffat_profile_parameters,
                 frame_dict,
                 binpars,
                 finalextractionlims,
