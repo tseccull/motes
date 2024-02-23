@@ -46,7 +46,7 @@ def motes():
         )
         # Make backup copies of the original data and error frames.
         frame_dict["original_data"] = copy.deepcopy(frame_dict["data"])
-        frame_dict["ogerrs"] = copy.deepcopy(frame_dict["errs"])
+        frame_dict["original_errs"] = copy.deepcopy(frame_dict["errs"])
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file completed.\n"
         )
@@ -513,7 +513,7 @@ def save_fits(
     apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
-    errs2Dhdu = fits.ImageHDU(fdict["ogerrs"])
+    errs2Dhdu = fits.ImageHDU(fdict["original_errs"])
     errs2Dhdu.header["EXTNAME"] = "ORIG_2D_ERRS"
     qual2Dhdu = fits.ImageHDU(fdict["ogqual"])
     qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
