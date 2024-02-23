@@ -102,22 +102,22 @@ def motes():
         binning_region_spatial_floor, binning_region_spatial_ceiling, moffat_fwhm, moffat_center = common.extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
-            + str(int(binning_region_spatial_floor + axes_dict["imgstart"]))
+            + str(int(binning_region_spatial_floor + axes_dict["data_spatial_floor"]))
             + "-"
-            + str(int(binning_region_spatial_ceiling + axes_dict["imgstart"]))
+            + str(int(binning_region_spatial_ceiling + axes_dict["data_spatial_floor"]))
             + "\n"
         )
 
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
         if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
-            common.printmoffparams(moffat_profile_parameters, axes_dict["imgstart"], data_scaling_factor)
+            common.printmoffparams(moffat_profile_parameters, axes_dict["data_spatial_floor"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
                 axes_dict["saxis"],
                 full_median_spatial_profile,
                 axes_dict["hrsaxis"],
                 moffat_profile_parameters,
-                axes_dict["imgstart"],
+                axes_dict["data_spatial_floor"],
                 header_parameters,
             )
 
@@ -223,7 +223,7 @@ def motes():
                     bindata,
                     axes_dict["hrsaxis"],
                     binmoffparams,
-                    axes_dict["imgstart"],
+                    axes_dict["data_spatial_floor"],
                     header_parameters,
                 )
 
@@ -239,9 +239,9 @@ def motes():
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 extractionlimits[0] + axes_dict["wavstart"],
-                extractionlimits[1] + axes_dict["imgstart"] - 1,
+                extractionlimits[1] + axes_dict["data_spatial_floor"] - 1,
                 extractionlimits[0] + axes_dict["wavstart"],
-                extractionlimits[2] + axes_dict["imgstart"] + 1,
+                extractionlimits[2] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
@@ -266,9 +266,9 @@ def motes():
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-                finalextractionlims[0] + axes_dict["imgstart"] - 1,
+                finalextractionlims[0] + axes_dict["data_spatial_floor"] - 1,
                 np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-                finalextractionlims[1] + axes_dict["imgstart"] + 1,
+                finalextractionlims[1] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
@@ -409,7 +409,7 @@ def save_fits(
         "file creation date",
     )
     head["HIERARCH SPATPIXL"] = (
-        axdict["imgstart"],
+        axdict["data_spatial_floor"],
         "lower limit of spatial axis, pix",
     )
     head["HIERARCH SPATPIXH"] = (
@@ -440,7 +440,7 @@ def save_fits(
         before="HIERARCH MOFF A",
     )
     head["HIERARCH MOFF C"] = (
-        round(moffpars[1] + axdict["imgstart"], 5),
+        round(moffpars[1] + axdict["data_spatial_floor"], 5),
         "moffat profile center",
     )
     head["HIERARCH MOFF ALPHA"] = (
@@ -626,7 +626,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
                 bindata,
                 axes_dict["hrsaxis"],
                 binmoffparams,
-                axes_dict["imgstart"],
+                axes_dict["data_spatial_floor"],
                 header_parameters,
             )
 
@@ -642,9 +642,9 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             extractionlimits[0] + axes_dict["wavstart"],
-            (extractionlimits[1]) + axes_dict["imgstart"],
+            (extractionlimits[1]) + axes_dict["data_spatial_floor"],
             extractionlimits[0] + axes_dict["wavstart"],
-            (extractionlimits[2]) + axes_dict["imgstart"],
+            (extractionlimits[2]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
@@ -669,9 +669,9 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-            (skyextractionlims[0]) + axes_dict["imgstart"],
+            (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-            (skyextractionlims[1]) + axes_dict["imgstart"],
+            (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
@@ -702,9 +702,9 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binpar
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-            (skyextractionlims[0]) + axes_dict["imgstart"],
+            (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
-            (skyextractionlims[1]) + axes_dict["imgstart"],
+            (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
