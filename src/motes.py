@@ -59,7 +59,7 @@ def motes():
         sys.stdout.flush()
 
         # Calculate median spatial profile of the spectrum.
-        datadispcollapse = np.nanmedian(frame_dict["data"], axis=1)
+        full_median_spatial_profile = np.nanmedian(frame_dict["data"], axis=1)
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
         # The shape of the profile fitted to the scaled spatial profile is the same as the
@@ -67,12 +67,12 @@ def motes():
         # amplitude (A), background level (B), and background gradient (m) all need to be scaled
         # down again after the fitting.
         datascale = 10 ** np.abs(
-            np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse))))
+            np.floor(np.log10(np.abs(np.nanmedian(full_median_spatial_profile))))
         )
         # Fit the median spatial profile with a Moffat function.
         moffparams = common.moffat_least_squares(
             axes_dict["saxis"],
-            datadispcollapse * datascale,
+            full_median_spatial_profile * datascale,
             header_parameters["seeing"],
             header_parameters["pixresolution"],
         )
@@ -114,7 +114,7 @@ def motes():
             common.printmoffparams(moffparams, axes_dict["imgstart"], datascale)
             common.plot_fitted_spatial_profile(
                 axes_dict["saxis"],
-                datadispcollapse,
+                full_median_spatial_profile,
                 axes_dict["hrsaxis"],
                 moffparams,
                 axes_dict["imgstart"],
