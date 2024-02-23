@@ -180,10 +180,10 @@ def motes():
         extbin = []
         extractionlimits = []
 
-        for bin in binparams:
+        for each_bin in binparams:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
-            binimg = framedict["data"][:, bin[0] : bin[1]]
+            binimg = framedict["data"][:, each_bin[0] : each_bin[1]]
             chipgap = np.where(np.median(binimg, axis=0) != 1)
             bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
@@ -208,7 +208,7 @@ def motes():
                 width_multiplier=params["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+            extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
@@ -579,10 +579,10 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     skybin = []
     extractionlimits = []
-    for bin in binparams:
+    for each_bin in binparams:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
-        binimg = framedict["data"][:, bin[0] : bin[1]]
+        binimg = framedict["data"][:, each_bin[0] : each_bin[1]]
         chipgap = np.where(np.median(binimg, axis=0) != 1)
         bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
 
@@ -614,7 +614,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
             width_multiplier=params["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+        extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
