@@ -6,7 +6,7 @@ import os
 import sys
 
 
-def read_parfile():
+def read_motes_parameter_file():
     """
     Import parameters from motesparams.txt parameter file into a dictionary.
 
