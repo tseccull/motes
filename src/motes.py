@@ -29,12 +29,12 @@ def motes():
     performs optional sky subtraction and optimal extraction of 1D spectra.
     """
     # Run startup functions
-    params = startup.read_parfile()  # Import parameters from file to dict
-    intreg = startup.read_regions()  # Search for, and read in, reg.txt
+    motes_parameters = startup.read_parfile()  # Import parameters from file to dict
+    data_region = startup.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
-    for i, file_2D in enumerate(sorted(glob.glob("./inputs/*.fits"))):
-        sys.stdout.write(("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n")
+    for i, in_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):
+        sys.stdout.write(("/" * (70 - len(in_file_path[:70]))) + " " + in_file_path[:70] + "\n")
         sys.stdout.write(" >>> Beginning MOTES Processing\n")
 
         # Gather header metadata and the image data from the 2D image file.
@@ -42,7 +42,7 @@ def motes():
             " >>> Gathering image frames and header data from input file.\n"
         )
         headparams, framedict, axesdict, imghead = harvester.data_harvest(
-            i, file_2D, intreg
+            i, in_file_path, data_region
         )
         # Make backup copies of the original data and error frames.
         framedict["ogdata"] = copy.deepcopy(framedict["data"])
@@ -110,7 +110,7 @@ def motes():
 
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
-        if params["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
+        if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
             common.printmoffparams(moffparams, axesdict["imgstart"], datascale)
             common.plot_fitted_spatial_profile(
                 axesdict["saxis"],
@@ -128,7 +128,7 @@ def motes():
             int(np.floor(lowext)),
             int(np.ceil(highext)),
             axesdict["dispaxislen"],
-            params,
+            motes_parameters,
             sky=True,
         )
 
@@ -136,7 +136,7 @@ def motes():
         # motesparams.txt
         common.get_bins_output(
             binparams,
-            params,
+            motes_parameters,
             lowext,
             highext,
             framedict["data"],
@@ -145,9 +145,9 @@ def motes():
         )
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
-        if params["-SUBTRACT_SKY"]:
+        if motes_parameters["-SUBTRACT_SKY"]:
             framedict, skybinpars, skyextlims = skyloc(
-                framedict, axesdict, datascale, headparams, binparams, params
+                framedict, axesdict, datascale, headparams, binparams, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
@@ -156,13 +156,13 @@ def motes():
             int(np.floor(lowext)),
             int(np.ceil(highext)),
             axesdict["dispaxislen"],
-            params,
-            replace_crbp=bool(params["-REPLACE_CRBP"]),
+            motes_parameters,
+            replace_crbp=bool(motes_parameters["-REPLACE_CRBP"]),
         )
 
         common.get_bins_output(
             binparams,
-            params,
+            motes_parameters,
             lowext,
             highext,
             framedict["data"],
@@ -204,7 +204,7 @@ def motes():
             # the Moffat profile previously fitted to it.
             LowExt, HighExt, fwhm, centre = common.extraction_limits(
                 binmoffparams,
-                width_multiplier=params["-FWHM_MULTIPLIER"],
+                width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
             extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
@@ -217,7 +217,7 @@ def motes():
             extbin.append(binmoffparams)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
-            if params["-DIAG_PLOT_MOFFAT"]:
+            if motes_parameters["-DIAG_PLOT_MOFFAT"]:
                 common.plot_fitted_spatial_profile(
                     axesdict["saxis"],
                     bindata,
@@ -236,7 +236,7 @@ def motes():
 
         # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels
         # fully within the aperture are extracted.
-        if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+        if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 extractionlimits[0] + axesdict["wavstart"],
                 extractionlimits[1] + axesdict["imgstart"] - 1,
@@ -263,7 +263,7 @@ def motes():
 
         # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
-        if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+        if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
                 np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
                 finalextractionlims[0] + axesdict["imgstart"] - 1,
@@ -299,7 +299,7 @@ def motes():
         sys.stdout.write("DONE.\n")
 
         # DIAGNOSTICS - Plot extracted spectrum.
-        if params["-PLOT_EXTRACTED_SPECTRUM"]:
+        if motes_parameters["-PLOT_EXTRACTED_SPECTRUM"]:
             # DIAGNOSTICS, EXTRACTED SPECTRUM
             plt.figure(figsize=(9, 6))
             plt.errorbar(
@@ -326,7 +326,7 @@ def motes():
             plt.show()
 
         # Save the extracted spectrum to a new .fits file.
-        if params["-SAVE"]:
+        if motes_parameters["-SAVE"]:
             sys.stdout.write(" >>> Saving 1D spectrum and metadata.\n")
             sys.stdout.flush()
             save_fits(
@@ -337,8 +337,8 @@ def motes():
                 apdata1D,
                 aperrs1D,
                 imghead,
-                params,
-                file_2D,
+                motes_parameters,
+                in_file_path,
                 moffparams,
                 framedict,
                 binpars,
@@ -347,7 +347,7 @@ def motes():
                 skyextlims,
             )
 
-        sys.stdout.write(" >>> Extraction of " + file_2D + " completed.\n")
+        sys.stdout.write(" >>> Extraction of " + in_file_path + " completed.\n")
 
     sys.stdout.write(" >>> MOTES Processing Complete.\n\n")
     return None
@@ -548,7 +548,7 @@ def save_fits(
     return None
 
 
-def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
+def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
@@ -563,7 +563,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
                             same units as the sky.
         headparams (dict) : A dictionary containing the header parameters of the 2D spectrum.
         binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
-        params (dict)     : A dictionary containing the parameters of the extraction.
+        motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
 
     Returns:
         framedict (dict)         : A dictionary containing the 2D spectrum and its associated
@@ -608,7 +608,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # Moffat profile previously fitted to it.
         LowExt, HighExt, fwhm, centre = common.extraction_limits(
             binmoffparams,
-            width_multiplier=params["-BG_FWHM_MULTIPLIER"],
+            width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
         extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, centre])
@@ -620,7 +620,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         skybin.append(binmoffparams)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
-        if params["-DIAG_PLOT_MOFFAT"]:
+        if motes_parameters["-DIAG_PLOT_MOFFAT"]:
             common.plot_fitted_spatial_profile(
                 axesdict["saxis"],
                 bindata,
@@ -639,7 +639,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
     extractionlimits = np.array(extractionlimits).T
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             extractionlimits[0] + axesdict["wavstart"],
             (extractionlimits[1]) + axesdict["imgstart"],
@@ -666,7 +666,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
             (skyextractionlims[0]) + axesdict["imgstart"],
@@ -690,7 +690,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         skyextractionlims[1],
         framedict,
         axesdict,
-        params,
+        motes_parameters,
         headparams,
     )
 
@@ -699,7 +699,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
             np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
             (skyextractionlims[0]) + axesdict["imgstart"],
