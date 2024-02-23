@@ -41,7 +41,7 @@ def motes():
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        headparams, framedict, axesdict, imghead = harvester.data_harvest(
+        header_parameters, framedict, axesdict, imghead = harvester.data_harvest(
             i, input_file_path, data_region
         )
         # Make backup copies of the original data and error frames.
@@ -73,11 +73,11 @@ def motes():
         moffparams = common.moffat_least_squares(
             axesdict["saxis"],
             datadispcollapse * datascale,
-            headparams["seeing"],
-            headparams["pixresolution"],
+            header_parameters["seeing"],
+            header_parameters["pixresolution"],
         )
         # Get an improved estimate of the FWHM of the spectrum from the best fit Moffat profile.
-        headparams["seeing"] = (
+        header_parameters["seeing"] = (
             2 * moffparams[2] * np.sqrt((2 ** (1 / moffparams[3])) - 1)
         )
         # Scale the amplitude, background gradient, and background level of the model Moffat
@@ -89,9 +89,9 @@ def motes():
         sys.stdout.write("DONE.\n")
         sys.stdout.write(
             " >>> FWHM of median spatial profile is "
-            + str(round(headparams["seeing"], 2))
+            + str(round(header_parameters["seeing"], 2))
             + " Pixels, or "
-            + str(round(headparams["seeing"] * headparams["pixresolution"], 2))
+            + str(round(header_parameters["seeing"] * header_parameters["pixresolution"], 2))
             + '"\n'
         )
 
@@ -118,7 +118,7 @@ def motes():
                 axesdict["hrsaxis"],
                 moffparams,
                 axesdict["imgstart"],
-                headparams,
+                header_parameters,
             )
 
         # Determine the location of bins on the dispersion axis within which to measure the spatial
@@ -140,14 +140,14 @@ def motes():
             lowext,
             highext,
             framedict["data"],
-            headparams,
+            header_parameters,
             axesdict,
         )
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
             framedict, skybinpars, skyextlims = skyloc(
-                framedict, axesdict, datascale, headparams, binparams, motes_parameters
+                framedict, axesdict, datascale, header_parameters, binparams, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
@@ -166,7 +166,7 @@ def motes():
             lowext,
             highext,
             framedict["data"],
-            headparams,
+            header_parameters,
             axesdict,
         )
 
@@ -192,8 +192,8 @@ def motes():
             binmoffparams = common.moffat_least_squares(
                 axesdict["saxis"],
                 bindata * datascale,
-                headparams["seeing"],
-                headparams["pixresolution"],
+                header_parameters["seeing"],
+                header_parameters["pixresolution"],
             )
 
             binmoffparams[0] /= datascale
@@ -224,7 +224,7 @@ def motes():
                     axesdict["hrsaxis"],
                     binmoffparams,
                     axesdict["imgstart"],
-                    headparams,
+                    header_parameters,
                 )
 
         binpars = np.array(extbin)
@@ -247,7 +247,7 @@ def motes():
             common.show_img(
                 framedict["data"],
                 axesdict,
-                headparams,
+                header_parameters,
                 drawlines,
                 "2D Spectrum Overplotted with Extraction Limits",
             )
@@ -274,7 +274,7 @@ def motes():
             common.show_img(
                 framedict["data"],
                 axesdict,
-                headparams,
+                header_parameters,
                 drawlines,
                 "2D Spectrum Overplotted with Full Extraction Limits",
             )
@@ -320,8 +320,8 @@ def motes():
             )
             plt.grid(alpha=0.5, linestyle="dotted")
             plt.title("Extracted 1D Spectrum")
-            plt.ylabel("Flux, " + headparams["fluxunit"])
-            plt.xlabel("Wavelength, " + headparams["wavunit"])
+            plt.ylabel("Flux, " + header_parameters["fluxunit"])
+            plt.xlabel("Wavelength, " + header_parameters["wavunit"])
             plt.legend()
             plt.show()
 
@@ -331,7 +331,7 @@ def motes():
             sys.stdout.flush()
             save_fits(
                 axesdict,
-                headparams,
+                header_parameters,
                 opdata1D,
                 operrs1D,
                 apdata1D,
@@ -548,7 +548,7 @@ def save_fits(
     return None
 
 
-def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_parameters):
+def skyloc(framedict, axesdict, datascale, header_parameters, binparams, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
@@ -561,7 +561,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
                             spectrum.
         datascale (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
                             same units as the sky.
-        headparams (dict) : A dictionary containing the header parameters of the 2D spectrum.
+        header_parameters (dict) : A dictionary containing the header parameters of the 2D spectrum.
         binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
         motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
 
@@ -590,8 +590,8 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
         binmoffparams = common.moffat_least_squares(
             axesdict["saxis"],
             bindata * datascale,
-            headparams["seeing"],
-            headparams["pixresolution"],
+            header_parameters["seeing"],
+            header_parameters["pixresolution"],
         )
 
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
@@ -627,7 +627,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
                 axesdict["hrsaxis"],
                 binmoffparams,
                 axesdict["imgstart"],
-                headparams,
+                header_parameters,
             )
 
     skybin = np.array(skybin)
@@ -650,7 +650,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
         common.show_img(
             framedict["data"],
             axesdict,
-            headparams,
+            header_parameters,
             drawlines,
             "2D Spectrum Overplotted with Target/Sky Boundaries",
         )
@@ -677,7 +677,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
         common.show_img(
             framedict["data"],
             axesdict,
-            headparams,
+            header_parameters,
             drawlines,
             "2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
@@ -691,7 +691,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
         framedict,
         axesdict,
         motes_parameters,
-        headparams,
+        header_parameters,
     )
 
     sys.stdout.write("\n     DONE.\n")
@@ -710,7 +710,7 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, motes_paramete
         common.show_img(
             framedict["data"],
             axesdict,
-            headparams,
+            header_parameters,
             drawlines,
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
