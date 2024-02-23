@@ -99,10 +99,10 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(moffat_profile_parameters)
+        binning_region_spatial_floor, highext, fwhm, cent = common.extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
-            + str(int(lowext + axes_dict["imgstart"]))
+            + str(int(binning_region_spatial_floor + axes_dict["imgstart"]))
             + "-"
             + str(int(highext + axes_dict["imgstart"]))
             + "\n"
@@ -125,7 +125,7 @@ def motes():
         # profile.
         binparams, frame_dict = common.get_bins(
             frame_dict,
-            int(np.floor(lowext)),
+            int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(highext)),
             axes_dict["dispaxislen"],
             motes_parameters,
@@ -137,7 +137,7 @@ def motes():
         common.get_bins_output(
             binparams,
             motes_parameters,
-            lowext,
+            binning_region_spatial_floor,
             highext,
             frame_dict["data"],
             header_parameters,
@@ -153,7 +153,7 @@ def motes():
         # motesparams.txt
         binparams, frame_dict = common.get_bins(
             frame_dict,
-            int(np.floor(lowext)),
+            int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(highext)),
             axes_dict["dispaxislen"],
             motes_parameters,
@@ -163,7 +163,7 @@ def motes():
         common.get_bins_output(
             binparams,
             motes_parameters,
-            lowext,
+            binning_region_spatial_floor,
             highext,
             frame_dict["data"],
             header_parameters,
