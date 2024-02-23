@@ -66,13 +66,13 @@ def motes():
         # unscaled, but to to get a model profile that matches the original profile, the profile
         # amplitude (A), background level (B), and background gradient (m) all need to be scaled
         # down again after the fitting.
-        datascale = 10 ** np.abs(
+        data_scaling_factor = 10 ** np.abs(
             np.floor(np.log10(np.abs(np.nanmedian(full_median_spatial_profile))))
         )
         # Fit the median spatial profile with a Moffat function.
         moffparams = common.moffat_least_squares(
             axes_dict["saxis"],
-            full_median_spatial_profile * datascale,
+            full_median_spatial_profile * data_scaling_factor,
             header_parameters["seeing"],
             header_parameters["pixresolution"],
         )
@@ -82,9 +82,9 @@ def motes():
         )
         # Scale the amplitude, background gradient, and background level of the model Moffat
         # profile down.
-        moffparams[0] /= datascale
-        moffparams[4] /= datascale
-        moffparams[5] /= datascale
+        moffparams[0] /= data_scaling_factor
+        moffparams[4] /= data_scaling_factor
+        moffparams[5] /= data_scaling_factor
 
         sys.stdout.write("DONE.\n")
         sys.stdout.write(
@@ -111,7 +111,7 @@ def motes():
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
         if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
-            common.printmoffparams(moffparams, axes_dict["imgstart"], datascale)
+            common.printmoffparams(moffparams, axes_dict["imgstart"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
                 axes_dict["saxis"],
                 full_median_spatial_profile,
@@ -147,7 +147,7 @@ def motes():
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
             frame_dict, skybinpars, skyextlims = skyloc(
-                frame_dict, axes_dict, datascale, header_parameters, binparams, motes_parameters
+                frame_dict, axes_dict, data_scaling_factor, header_parameters, binparams, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
@@ -191,14 +191,14 @@ def motes():
             # spatial profile and return its parameters.
             binmoffparams = common.moffat_least_squares(
                 axes_dict["saxis"],
-                bindata * datascale,
+                bindata * data_scaling_factor,
                 header_parameters["seeing"],
                 header_parameters["pixresolution"],
             )
 
-            binmoffparams[0] /= datascale
-            binmoffparams[4] /= datascale
-            binmoffparams[5] /= datascale
+            binmoffparams[0] /= data_scaling_factor
+            binmoffparams[4] /= data_scaling_factor
+            binmoffparams[5] /= data_scaling_factor
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
@@ -548,7 +548,7 @@ def save_fits(
     return None
 
 
-def skyloc(frame_dict, axes_dict, datascale, header_parameters, binparams, motes_parameters):
+def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, binparams, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
@@ -559,7 +559,7 @@ def skyloc(frame_dict, axes_dict, datascale, header_parameters, binparams, motes
                             quality arrays.
         axes_dict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D
                             spectrum.
-        datascale (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
+        data_scaling_factor (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
                             same units as the sky.
         header_parameters (dict) : A dictionary containing the header parameters of the 2D spectrum.
         binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
@@ -589,7 +589,7 @@ def skyloc(frame_dict, axes_dict, datascale, header_parameters, binparams, motes
         # spatial profile and return its parameters.
         binmoffparams = common.moffat_least_squares(
             axes_dict["saxis"],
-            bindata * datascale,
+            bindata * data_scaling_factor,
             header_parameters["seeing"],
             header_parameters["pixresolution"],
         )
@@ -600,9 +600,9 @@ def skyloc(frame_dict, axes_dict, datascale, header_parameters, binparams, motes
         # get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after
         # the fitting.
-        binmoffparams[0] /= datascale
-        binmoffparams[4] /= datascale
-        binmoffparams[5] /= datascale
+        binmoffparams[0] /= data_scaling_factor
+        binmoffparams[4] /= data_scaling_factor
+        binmoffparams[5] /= data_scaling_factor
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the
         # Moffat profile previously fitted to it.
