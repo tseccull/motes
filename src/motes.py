@@ -127,7 +127,7 @@ def motes():
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(binning_region_spatial_ceiling)),
-            axes_dict["dispaxislen"],
+            axes_dict["dispersion_axis_length"],
             motes_parameters,
             sky=True,
         )
@@ -155,7 +155,7 @@ def motes():
             frame_dict,
             int(np.floor(binning_region_spatial_floor)),
             int(np.ceil(binning_region_spatial_ceiling)),
-            axes_dict["dispaxislen"],
+            axes_dict["dispersion_axis_length"],
             motes_parameters,
             replace_crbp=bool(motes_parameters["-REPLACE_CRBP"]),
         )
@@ -257,7 +257,7 @@ def motes():
         # has its own extraction limits.
 
         finalextractionlims = common.interpolate_extraction_lims(
-            extractionlimits, axes_dict["dispaxislen"]
+            extractionlimits, axes_dict["dispersion_axis_length"]
         )
         sys.stdout.write("DONE.\n")
 
@@ -265,9 +265,9 @@ def motes():
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
-                np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
                 finalextractionlims[0] + axes_dict["data_spatial_floor"] - 1,
-                np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
                 finalextractionlims[1] + axes_dict["data_spatial_floor"] + 1,
             ]
 
@@ -659,7 +659,7 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_pa
     # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
     # extraction limits.
     skyextractionlims = common.interpolate_extraction_lims(
-        extractionlimits, axes_dict["dispaxislen"]
+        extractionlimits, axes_dict["dispersion_axis_length"]
     )
 
     sys.stdout.write("DONE.\n")
@@ -668,9 +668,9 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_pa
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
-            np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
@@ -701,9 +701,9 @@ def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_pa
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
-            np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispaxislen"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
