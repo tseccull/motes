@@ -1,5 +1,5 @@
 [flake8]
-ignores = E203
+ignores = E203, E501
 per-file-ignores = 
     src/motes/common.py: C901
 max-line-length = 79
