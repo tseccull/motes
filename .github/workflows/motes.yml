@@ -29,6 +29,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install '.[lint]'
 
+      - name: Formatting check with Black
+        run: |
+          python -m black src --config=pyproject.toml 
+
       - name: Linting check with flake8
         run: |
           python -m flake8 src --exit-zero --config=.flake8
@@ -40,7 +44,3 @@ jobs:
       - name: Vulnerability checks with Bandit
         run: |
           python -m bandit -r src
-
-      - name: Formatting check with Black
-        run: |
-          python -m black src --config=pyproject.toml 
