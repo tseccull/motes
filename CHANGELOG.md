@@ -9,14 +9,15 @@ Updates by D. Kiersz
 
 ### Added
 
-- `pyproject.toml` file, as per https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
+- Add a rudimentary `pyproject.toml` file, as per https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
 
 ### Changed
 
-- Pip installs required packages from `pyproject.toml` in a single step. Upgrade to Poetry will be done in the future.
+- Pip installs required packages from `pyproject.toml` in a single step. Upgrade to Poetry will be done in the future, but the build system uses setuptools.
 - Remove instances of `shell: bash -l {0}` and use defaults in a particular runner environment. The Python environment is set up with `actions/setup-python@v5`, and the dependencies are installed in this environment.
-- Simplify the flake8 linting step by running one instance of flake8 with all the necessary flags, fed via `pyproject.toml`.
-- Flake8 `max-line-length` to 79, as per PEP8. However,resulting E501 error is currently ignored ignore linting fixes are issues.
+- Simplify the flake8 linting step by running one instance of flake8 with all the necessary flags, fed via `.flake8` as per https://flake8.pycqa.org/en/latest/user/configuration.html 
+- Flake8 `max-line-length` to 79, as per PEP8. However, resulting E501 error is currently ignored ignore linting fixes are issues.
+- Add explicit version requirements to dependences.
 
 ### Fixed
 
