@@ -43,4 +43,4 @@ jobs:
 
       - name: Formatting check with Black
         run: |
-          python -m black src --config=pyproject.toml
+          python -m black src --config=pyproject.toml 

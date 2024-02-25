@@ -34,4 +34,3 @@ fail-under = 8.0
 
 [tool.black]
 line-length = 79
-check = true

@@ -40,7 +40,9 @@ def extraction_limits(moffparams, axesdict, width_multiplier=3.0):
     """
 
     # Create a Moffat profile based on the input parameters.
-    r = np.linspace(0, axesdict["spataxislen"] - 1, num=axesdict["spataxislen"])
+    r = np.linspace(
+        0, axesdict["spataxislen"] - 1, num=axesdict["spataxislen"]
+    )
     fwhm = 2 * moffparams[2] * (((2 ** (1 / moffparams[3])) - 1) ** 0.5)
 
     # Respectively define the upper and lower extraction limits at a distance above and below the
@@ -76,8 +78,12 @@ def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
 
     short_extrap_lim1 = extlims[0][0] - (short_extrap_grad1 * shortend)
     short_extrap_lim2 = extlims[1][0] - (short_extrap_grad2 * shortend)
-    long_extrap_lim1 = extlims[0][-1] + (long_extrap_grad1 * (dispaxislen - longend))
-    long_extrap_lim2 = extlims[1][-1] + (long_extrap_grad2 * (dispaxislen - longend))
+    long_extrap_lim1 = extlims[0][-1] + (
+        long_extrap_grad1 * (dispaxislen - longend)
+    )
+    long_extrap_lim2 = extlims[1][-1] + (
+        long_extrap_grad2 * (dispaxislen - longend)
+    )
 
     return (
         short_extrap_lim1,
@@ -101,8 +107,12 @@ def extrap_grad(intextlims, median_lims):
        gradient (int): The gradient of the region of data.
 
     """
-    median_of_y_points_x_to_y = np.median(intextlims[median_lims[0] : median_lims[1]])
-    median_of_y_points_y_to_z = np.median(intextlims[median_lims[1] : median_lims[2]])
+    median_of_y_points_x_to_y = np.median(
+        intextlims[median_lims[0] : median_lims[1]]
+    )
+    median_of_y_points_y_to_z = np.median(
+        intextlims[median_lims[1] : median_lims[2]]
+    )
     median_of_x_points_x_to_y = np.median([median_lims[0], median_lims[1]])
     median_of_x_points_y_to_z = np.median([median_lims[1], median_lims[2]])
 
@@ -136,7 +146,9 @@ def filter_data(data2D, errs2D):
     return data2D, errs2D
 
 
-def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=False):
+def get_bins(
+    fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=False
+):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -212,7 +224,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
                 list(
                     filter(
                         lambda x: x <= mincols,
-                        np.sum(fdict["qual"][:, int(x - width) : int(x)], axis=1),
+                        np.sum(
+                            fdict["qual"][:, int(x - width) : int(x)], axis=1
+                        ),
                     )
                 )
             )
@@ -246,9 +260,13 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
             # pixel. The standard error of each of these distributions becomes the error of the
             # flux.
 
-            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
+            meddatacol = np.nanmedian(
+                fdict["data"][:, int(x - width) : int(x)], axis=1
+            )
             medtile = np.tile(meddatacol, (width, 1)).T
-            madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
+            madtile = np.abs(
+                fdict["data"][:, int(x - width) : int(x)] - medtile
+            )
             errmeddatacol = np.nanmedian(madtile, axis=1)
 
             nmeddatacol = meddatacol / np.sum(meddatacol)
@@ -258,7 +276,8 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
                 # are bad), repair the bad ones. Leave columns of all bad pixels as they are.
                 if (
                     0.0 in fdict["qual"][:, int(x - i)]
-                    and all(x == 0 for x in fdict["qual"][:, int(x - i)]) == False
+                    and all(x == 0 for x in fdict["qual"][:, int(x - i)])
+                    == False
                 ):
                     # print(fdict[fdict['qual'][:, int(x-i)])
                     # print(np.isfinite(fdict['data'][:, int(x - i)]))
@@ -304,7 +323,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
                 list(
                     filter(
                         lambda x: x <= mincols,
-                        np.sum(fdict["qual"][:, int(x) : int(x + width)], axis=1),
+                        np.sum(
+                            fdict["qual"][:, int(x) : int(x + width)], axis=1
+                        ),
                     )
                 )
             )
@@ -314,7 +335,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
             # sum of the flux in the bin and the noise is the root sum square of the errors on the
             # flux in the bin. Errors are taken from the spectrum's error frame.
-            bindatacol = np.nansum(fdict["data"][:, int(x) : int(x + width)], axis=1)
+            bindatacol = np.nansum(
+                fdict["data"][:, int(x) : int(x + width)], axis=1
+            )
             binerrscol = np.sqrt(
                 np.nansum(
                     np.power(fdict["errs"][:, int(x) : int(x + width)], 2),
@@ -334,9 +357,13 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
             # here is the same as that used by ESO in their X-Shooter data reduction pipeline.
             # Modigliani et al. (2010)  Proc. SPIE, 7737, 28 https://doi.org/10.1117/12.857211
 
-            meddatacol = np.nanmedian(fdict["data"][:, int(x - width) : int(x)], axis=1)
+            meddatacol = np.nanmedian(
+                fdict["data"][:, int(x - width) : int(x)], axis=1
+            )
             medtile = np.tile(meddatacol, (width, 1)).T
-            madtile = np.abs(fdict["data"][:, int(x - width) : int(x)] - medtile)
+            madtile = np.abs(
+                fdict["data"][:, int(x - width) : int(x)] - medtile
+            )
             errmeddatacol = np.nanmedian(madtile, axis=1)
 
             nmeddatacol = meddatacol / np.sum(meddatacol)
@@ -367,7 +394,9 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, sky=False, replace_crbp=Fa
     return binlocations, fdict
 
 
-def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
+def get_bins_output(
+    binparams, params, lowext, highext, data2D, headparams, axdict
+):
     """
     Print and plot the output of get_bins.
 
@@ -403,11 +432,13 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
                 )
             )
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[0] + axdict["wavstart"]
+                np.ones(len(axdict["saxis"][binlineloc])) * b[0]
+                + axdict["wavstart"]
             )
             drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[1] + axdict["wavstart"]
+                np.ones(len(axdict["saxis"][binlineloc])) * b[1]
+                + axdict["wavstart"]
             )
             drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
 
@@ -460,10 +491,14 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
 
         intermextlims = [
             interpextract_1(
-                np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))
+                np.array(
+                    np.arange(extractionlims[0][0], extractionlims[0][-1])
+                )
             ),
             interpextract_2(
-                np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))
+                np.array(
+                    np.arange(extractionlims[0][0], extractionlims[0][-1])
+                )
             ),
         ]
 
@@ -583,7 +618,9 @@ def poly2_resid(x, datarange, data):
     Returns:
         residual (numpy.ndarray) : The residuals of the fitted polynominal and the data.
     """
-    residual = (x[0] * datarange * datarange) + (x[1] * datarange) + x[2] - data
+    residual = (
+        (x[0] * datarange * datarange) + (x[1] * datarange) + x[2] - data
+    )
 
     return residual
 
@@ -645,7 +682,9 @@ def make_wav_axis(start, increment, length):
     Returns:
         wavaxis (numpy.ndarray) : A wavelength axis array.
     """
-    wavaxis = np.arange(start=start, step=increment, stop=(length * increment) + start)
+    wavaxis = np.arange(
+        start=start, step=increment, stop=(length * increment) + start
+    )
     return wavaxis
 
 
@@ -762,13 +801,16 @@ def moffat_resid(x, datarange, data):
     """
 
     moff = x[0] * (
-        (1 + ((datarange - x[1]) * (datarange - x[1])) / (x[2] * x[2])) ** -x[3]
+        (1 + ((datarange - x[1]) * (datarange - x[1])) / (x[2] * x[2]))
+        ** -x[3]
     )
     residual = moff + x[4] + (datarange * x[5]) - data
     return residual
 
 
-def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
+def optimal_extraction(
+    data2D, errs2D, extractionlimits, binparameters, axdict
+):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -832,7 +874,9 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
         # pixels are included in their entirety.
         loextlim = extractionlimits[0][i]
         hiextlim = extractionlimits[1][i]
-        ax = axdict["saxis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        ax = axdict["saxis"][
+            int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))
+        ]
 
         # Use the extraction limits to define the data column for this wavelength element.
         col = col[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
@@ -978,7 +1022,9 @@ def printmoffparams(moffparams, imgstart, datascale):
     sys.stdout.write("         B = " + str(moffparams[4]) + "\n")
     sys.stdout.write("         m = " + str(moffparams[5]) + "\n\n")
     sys.stdout.write(
-        " >>> Profile scaling factor used for fitting: " + str(datascale) + "\n"
+        " >>> Profile scaling factor used for fitting: "
+        + str(datascale)
+        + "\n"
     )
     sys.stdout.write(
         " >>> Plot of median spatial profile presents the orginal unscaled profile.\n"
@@ -1028,7 +1074,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             masked_data2D,
             aspect="auto",
             vmin=0,
-            vmax=np.nanmedian(masked_data2D) + (0.5 * np.nanstd(masked_data2D)),
+            vmax=np.nanmedian(masked_data2D)
+            + (0.5 * np.nanstd(masked_data2D)),
             origin="lower",
             cmap=cmap,
             extent=[
@@ -1055,7 +1102,9 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             axdict["saxis"][-1] + axdict["imgstart"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
-        ax.set_xlim(axdict["wavstart"], axdict["wavstart"] + len(axdict["waxis"]))
+        ax.set_xlim(
+            axdict["wavstart"], axdict["wavstart"] + len(axdict["waxis"])
+        )
 
         ax.set_xlabel("Dispersion Axis, Pixels")
 
@@ -1079,7 +1128,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             "HighCut",
             1.0,
             np.nanmax(masked_data2D),
-            valinit=np.nanmedian(masked_data2D) + (3.0 * np.nanstd(masked_data2D)),
+            valinit=np.nanmedian(masked_data2D)
+            + (3.0 * np.nanstd(masked_data2D)),
             valstep=0.001 * np.nanmax(masked_data2D),
         )
 
@@ -1140,7 +1190,11 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
         datacol = fdict["data"][ii]
         colrange = np.array(range(len(datacol)))
         skypix = datacol[
-            np.where(np.logical_or(colrange < bglowext[ii], colrange > bghighext[ii]))
+            np.where(
+                np.logical_or(
+                    colrange < bglowext[ii], colrange > bghighext[ii]
+                )
+            )
         ]
 
         # Kill MOTES if there isn't enough background sky to perform sky subtraction. Should
@@ -1150,7 +1204,9 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             sys.stdout.write(
                 "     -BG_FWHM_MULTIPLIER in motesparams.txt is probably too large.\n"
             )
-            sys.stdout.write("     Please reduce -BG_FWHM_MULTIPLIER and try again.\n")
+            sys.stdout.write(
+                "     Please reduce -BG_FWHM_MULTIPLIER and try again.\n"
+            )
             sys.stdout.write(
                 "     -BG_FWHM_MULTIPLIER < "
                 + str(
@@ -1174,7 +1230,11 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             sys.exit()
 
         skyrange = colrange[
-            np.where(np.logical_or(colrange < bglowext[ii], colrange > bghighext[ii]))
+            np.where(
+                np.logical_or(
+                    colrange < bglowext[ii], colrange > bghighext[ii]
+                )
+            )
         ]
         if len(set(skypix)) == 1:
             continue
@@ -1192,14 +1252,18 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             skyrange = skyrange[loc]
 
         if pars["-SKYSUB_MODE"] == "MEDIAN":
-            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            bootsky = np.random.choice(
+                skypix, (len(skypix), 100), replace=True
+            )
             skysamp = np.nanmedian(bootsky, axis=0)
             skylevel = np.nanmean(skysamp)
             medsky.append(skylevel)
             skyerr = np.std(skysamp) / (99**0.5)
 
         if pars["-SKYSUB_MODE"] == "LINEAR":
-            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            bootsky = np.random.choice(
+                skypix, (len(skypix), 100), replace=True
+            )
             grads = []
             intercepts = []
             for jj in bootsky.T:
@@ -1220,7 +1284,9 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             ) ** 0.5
 
         if pars["-SKYSUB_MODE"] == "POLY2":
-            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            bootsky = np.random.choice(
+                skypix, (len(skypix), 100), replace=True
+            )
             grads = []
             intercepts = []
             quads = []
@@ -1238,16 +1304,27 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             skygraderr = np.std(grads) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
-            skylevel = (skyquad * colrange * colrange) + (skygrad * colrange) + skyint
+            skylevel = (
+                (skyquad * colrange * colrange) + (skygrad * colrange) + skyint
+            )
             medsky.append(skylevel)
             skyerr = (
-                (skyquaderr * skyquaderr * colrange * colrange * colrange * colrange)
+                (
+                    skyquaderr
+                    * skyquaderr
+                    * colrange
+                    * colrange
+                    * colrange
+                    * colrange
+                )
                 + (skygraderr * colrange * skygraderr * colrange)
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
         if pars["-SKYSUB_MODE"] == "POLY3":
-            bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
+            bootsky = np.random.choice(
+                skypix, (len(skypix), 100), replace=True
+            )
             grads = []
             intercepts = []
             quads = []
@@ -1288,7 +1365,14 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
                     * colrange
                     * colrange
                 )
-                + (skyquaderr * skyquaderr * colrange * colrange * colrange * colrange)
+                + (
+                    skyquaderr
+                    * skyquaderr
+                    * colrange
+                    * colrange
+                    * colrange
+                    * colrange
+                )
                 + (skygraderr * colrange * skygraderr * colrange)
                 + (skyinterr * skyinterr)
             ) ** 0.5

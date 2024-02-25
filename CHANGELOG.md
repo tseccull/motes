@@ -16,13 +16,14 @@ Updates by D. Kiersz
 - Pip installs required packages from `pyproject.toml` in a single step. Upgrade to Poetry will be done in the future, but the build system uses setuptools.
 - Remove instances of `shell: bash -l {0}` and use defaults in a particular runner environment. The Python environment is set up with `actions/setup-python@v5`, and the dependencies are installed in this environment.
 - Simplify the flake8 linting step by running one instance of flake8 with all the necessary flags, fed via `.flake8` as per https://flake8.pycqa.org/en/latest/user/configuration.html 
-- Flake8 `max-line-length` to 79, as per PEP8. However, resulting E501 error is currently ignored ignore linting fixes are issues.
+- Flake8 `max-line-length` to 79, as per PEP8.
 - Add explicit version requirements to dependences.
 - Reduce build variations from `matrix`.
 
 ### Fixed
 
 - README.md badge fix.
+- Formatting of scripts based on https://peps.python.org/pep-0008/. This relates to `max-line-length` mentioned previously.
 
 ## 0.4.6 2024-02-13
 Updates by T. Seccull & D. Kiersz

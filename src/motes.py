@@ -34,7 +34,9 @@ def motes():
 
     # Open and process each spectrum contained in the current directory.
     for i, file_2D in enumerate(sorted(glob.glob("./inputs/*.fits"))):
-        sys.stdout.write(("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n")
+        sys.stdout.write(
+            ("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n"
+        )
         sys.stdout.write(" >>> Beginning MOTES Processing\n")
 
         # Gather header metadata and the image data from the 2D image file.
@@ -99,7 +101,9 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
+        lowext, highext, fwhm, cent = common.extraction_limits(
+            moffparams, axesdict
+        )
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(lowext + axesdict["imgstart"]))
@@ -208,7 +212,9 @@ def motes():
                 width_multiplier=params["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+            extractionlimits.append(
+                [(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre]
+            )
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
@@ -266,9 +272,11 @@ def motes():
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
-                np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
+                np.array(range(axesdict["dispaxislen"]))
+                + axesdict["wavstart"],
                 finalextractionlims[0] + axesdict["imgstart"] - 1,
-                np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
+                np.array(range(axesdict["dispaxislen"]))
+                + axesdict["wavstart"],
                 finalextractionlims[1] + axesdict["imgstart"] + 1,
             ]
 
@@ -465,7 +473,10 @@ def save_fits(
         'IQ measured from median profile, "',
     )
 
-    head["HIERARCH SNR BIN LIMIT"] = pars["-SNR_BIN_LIM"], "maximum SNR per bin"
+    head["HIERARCH SNR BIN LIMIT"] = (
+        pars["-SNR_BIN_LIM"],
+        "maximum SNR per bin",
+    )
     head.add_blank(
         "Dispersion Binning and Spectrum Extraction",
         before="HIERARCH SNR BIN LIMIT",
@@ -500,13 +511,17 @@ def save_fits(
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavunit"]
+    head["HIERARCH EXTRACTED HDU ROW 0"] = (
+        "Wavelength Axis, " + hparams["wavunit"]
+    )
     head.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
     head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["fluxunit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["fluxunit"]
+    head["HIERARCH EXTRACTED HDU ROW 2"] = (
+        "Flux Uncertainty, " + hparams["fluxunit"]
+    )
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
@@ -539,12 +554,19 @@ def save_fits(
 
     hdulist = fits.HDUList(hdu_list)
     filenamelist = filename.split("_")
-    hdulist.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
+    hdulist.writeto(
+        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1]
+    )
     hdulist.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1] + "\n"
+        "_".join(filenamelist[0:-2])
+        + "_"
+        + "1D"
+        + "_"
+        + filenamelist[-1]
+        + "\n"
     )
     return None
 
@@ -614,7 +636,9 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
             width_multiplier=params["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+        extractionlimits.append(
+            [(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre]
+        )
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
