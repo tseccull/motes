@@ -18,6 +18,7 @@ Updates by D. Kiersz
 - Simplify the flake8 linting step by running one instance of flake8 with all the necessary flags, fed via `.flake8` as per https://flake8.pycqa.org/en/latest/user/configuration.html 
 - Flake8 `max-line-length` to 79, as per PEP8. However, resulting E501 error is currently ignored ignore linting fixes are issues.
 - Add explicit version requirements to dependences.
+- Reduce build variations from `matrix`.
 
 ### Fixed
 
