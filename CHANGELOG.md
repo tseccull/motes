@@ -19,6 +19,7 @@ Updates by D. Kiersz
 - Flake8 `max-line-length` to 79, as per PEP8.
 - Add explicit version requirements to dependences.
 - Reduce build variations from `matrix`.
+- Caching added to the CI build.
 
 ### Fixed
 
