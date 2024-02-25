@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools >= 42"]
+
+[project]
+name = "motes"
+version = "0.4.7"
+description = "A Modular, Optimised Tracer and Extractor of Spectra "
+readme = "README.md"
+authors = [
+    {name = "Tom Seccull", email = "tom.seccull@proton.me", role = "lead", github = "tseccull"},
+    {name = "Dominik Kiersz", email = "dakiersz.p8df5@passmail.com", role = "contributor", github = "DAKiersz"}]
+license = "GPL-3.0"
+requires-python = ">=3.9"
+keywords = ["spectroscopy", "astronomy", "science", "data", "analysis", "modular", "optimised", "tracer", "extractor"]
+dependencies = [
+    "matplotlib >= 3.8.3",
+    "numpy >= 1.26.4",
+    "astropy >= 6.0.0",
+    "scipy >= 1.12.0"]
+
+[project.optional-dependencies]
+lint = [
+    "pylint >= 3.0.4",
+    "flake8 >= 7.0.0",
+    "bandit >= 1.7.7",
+    "black >= 24.2.0"
+]
+
+[flake8]
+extend-ignore = E203, E501, W503
+per-file-ignores = src/motes/common.py: C901
+max-line-length = 79
+max-complexity = 10
+statistics = True
+show-source = True
+count = True
+exit-zero = True
+include = ./*.py
+exclude = __init__.py

@@ -4,6 +4,24 @@ This changelog follows the format described
 [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is 
 followed.
 
+## 0.4.7 2024-02-25
+Updates by D. Kiersz
+
+### Added
+
+- `pyproject.toml` file, as per https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
+
+### Changed
+
+- Pip installs required packages from `pyproject.toml` in a single step. Upgrade to Poetry will be done in the future.
+- Remove instances of `shell: bash -l {0}` and use defaults in a particular runner environment. The Python environment is set up with `actions/setup-python@v5`, and the dependencies are installed in this environment.
+- Simplify the flake8 linting step by running one instance of flake8 with all the necessary flags, fed via `pyproject.toml`.
+- Flake8 `max-line-length` to 79, as per PEP8. However,resulting E501 error is currently ignored ignore linting fixes are issues.
+
+### Fixed
+
+- README.md badge fix.
+
 ## 0.4.6 2024-02-13
 Updates by T. Seccull & D. Kiersz
 
