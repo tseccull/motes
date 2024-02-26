@@ -3,12 +3,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-   - pip>=24.0.0
-   - matplotlib>=3.8.3
-   - astropy>=6.0.0
-   - numpy>=1.26.4
-   - scipy>=1.12.0
-   - pylint>=3.1.0
-   - flake8>=7.0.0
-   - bandit>=1.7.7
-   - black>=24.2.0
+  - pip~=24.0.0
+  - matplotlib~=3.8.3
+  - astropy~=6.0.0
+  - numpy~=1.26.4
+  - scipy~=1.12.0
+  - pylint~=3.1.0
+  - flake8~=7.0.0
+  - bandit~=1.7.7
+  - black~=24.2.0
