@@ -1,11 +1,17 @@
-[build-system]
-requires = ["setuptools ~= 69.1.1"]
-
 [project]
 name = "motes"
 version = "0.4.7"
-description = "A Modular, Optimised Tracer and Extractor of Spectra "
-readme = "README.md"
+description = "A Modular, Optimised Tracer and Extractor of Spectra"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Astronomy"
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
 authors = [
     {name = "Tom Seccull", email = "tom.seccull@proton.me"},
     {name = "Dominik Kiersz", email = "dakiersz.p8df5@passmail.com"}]
@@ -13,7 +19,6 @@ keywords = ["spectroscopy", "astronomy", "science", "data", "analysis", "modular
 requires-python = ">=3.9.0"
 dependencies = [
     'pip ~= 24.0.0',
-    'setuptools ~= 69.1.1',
     'matplotlib ~= 3.8.3',
     'astropy ~= 6.0.0',
     'numpy ~= 1.26.4',
@@ -26,6 +31,9 @@ dev = ['pylint ~= 3.1.0',
     'bandit ~= 1.7.7',
     'black ~= 24.2.0'
 ]
+
+[project.urls]
+Repository = "https://github.com/tseccull/motes"
 
 [tool.pylint]
 max-line-length = 127
