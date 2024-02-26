@@ -10,7 +10,7 @@ authors = [
     {name = "Tom Seccull", email = "tom.seccull@proton.me"},
     {name = "Dominik Kiersz", email = "dakiersz.p8df5@passmail.com"}]
 keywords = ["spectroscopy", "astronomy", "science", "data", "analysis", "modular", "optimised", "tracer", "extractor"]
-requires-python = "~=3.9.0"
+requires-python = ">=3.9.0"
 dependencies = [
     'pip ~= 24.0.0',
     'setuptools ~= 69.1.1',
@@ -29,7 +29,6 @@ dev = ['pylint ~= 3.1.0',
 
 [tool.pylint]
 max-line-length = 127
-disable = line-too-long
 fail-under = 8.0
 
 [tool.black]
