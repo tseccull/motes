@@ -1,0 +1,11 @@
+[flake8]
+ignores = E203, E501
+per-file-ignores = 
+    src/motes/common.py: C901
+max-line-length = 127
+max-complexity = 10
+statistics = true
+show-source = true
+count = true
+include = ./*.py
+exclude = __init__.py
