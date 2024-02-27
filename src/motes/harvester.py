@@ -195,7 +195,7 @@ def harvest_floyds(imgfilehdu, imgheader):
     sys.stdout.flush()
     headerdict = {
         "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": pixres,
+        "pixel_resolution": pixres,
         "exptime": imgheader["EXPTIME"],
         "inst": imgheader["INSTRUME"],
         "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
@@ -280,7 +280,7 @@ def harvest_fors2(imgfilehdu, imgheader):
     sys.stdout.flush()
     headerdict = {
         "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": pixres,
+        "pixel_resolution": pixres,
         "exptime": imgheader["HIERARCH ESO INS SHUT EXPTIME"],
         "inst": imgheader["INSTRUME"],
         "seeing": 0.5
@@ -384,7 +384,7 @@ def harvest_gmos(imgfilehdu, imgheader):
     sys.stdout.flush()
     headerdict = {
         "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": float(imgheader["PIXSCALE"]),
+        "pixel_resolution": float(imgheader["PIXSCALE"]),
         "exptime": imgheader["EXPTIME"],
         "seeing": seeing,
         "inst": imgheader["INSTRUME"],
@@ -400,7 +400,7 @@ def harvest_gmos(imgfilehdu, imgheader):
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixresolution"])
+        + str(headerdict["pixel_resolution"])
         + '"\n'
     )
 
@@ -480,7 +480,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
     sys.stdout.flush()
     headerdict = {
         "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": imgheader["CDELT2"],
+        "pixel_resolution": imgheader["CDELT2"],
         "exptime": imgheader["EXPTIME"],
         "seeing": 0.5
         * (
@@ -493,7 +493,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixresolution"])
+        + str(headerdict["pixel_resolution"])
         + '"\n'
     )
 
