@@ -201,12 +201,12 @@ def motes():
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
-            bin_lower_extraction_limit, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
+            bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_fwhm, moffat_center = common.extraction_limits(
                 bin_moffat_parameters,
                 width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
-            extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, HighExt, moffat_center])
+            extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
@@ -605,12 +605,12 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the
         # Moffat profile previously fitted to it.
-        bin_lower_extraction_limit, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
+        bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_fwhm, moffat_center = common.extraction_limits(
             bin_moffat_parameters,
             width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
-        extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, HighExt, moffat_center])
+        extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
