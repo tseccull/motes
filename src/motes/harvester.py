@@ -136,7 +136,7 @@ def data_harvest(reg_counter, filename_2D, region):
         "imgend": imgend,
         "dispaxislen": len(wavaxis),
         "waxis": wavaxis,
-        "wavstart": wavstart,
+        "wavelength_start": wavstart,
         "wavend": wavend,
     }
 
