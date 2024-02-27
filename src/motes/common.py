@@ -1040,7 +1040,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         ax2 = ax.twiny()
         ax2.plot(axdict["wavelength_axis"], data2D[0, :], alpha=0)
         ax2.set_xlim(axdict["wavelength_axis"][0], axdict["wavelength_axis"][-1])
-        ax2.set_xlabel("Wavelength, " + headparams["wavunit"])
+        ax2.set_xlabel("Wavelength, " + headparams["wavelength_unit"])
         ax.set_ylim(
             axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
             axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
