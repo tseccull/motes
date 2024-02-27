@@ -320,7 +320,7 @@ def motes():
             plt.grid(alpha=0.5, linestyle="dotted")
             plt.title("Extracted 1D Spectrum")
             plt.ylabel("Flux, " + header_parameters["flux_unit"])
-            plt.xlabel("Wavelength, " + header_parameters["wavunit"])
+            plt.xlabel("Wavelength, " + header_parameters["wavelength_unit"])
             plt.legend()
             plt.show()
 
@@ -425,13 +425,13 @@ def save_fits(
     )
     head["HIERARCH WAVL"] = (
         np.floor(axdict["wavelength_axis"][0]),
-        "lower limit of wav range, " + hparams["wavunit"],
+        "lower limit of wav range, " + hparams["wavelength_unit"],
     )
     head["HIERARCH WAVH"] = (
         np.ceil(axdict["wavelength_axis"][-1]),
-        "upper limit of wav range, " + hparams["wavunit"],
+        "upper limit of wav range, " + hparams["wavelength_unit"],
     )
-    head["HIERARCH WAVU"] = hparams["wavunit"], "Wavelength unit"
+    head["HIERARCH WAVU"] = hparams["wavelength_unit"], "Wavelength unit"
 
     head["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
     head.add_blank(
@@ -498,7 +498,7 @@ def save_fits(
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavunit"]
+    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavelength_unit"]
     head.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
