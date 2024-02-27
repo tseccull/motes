@@ -226,7 +226,7 @@ def motes():
                     header_parameters,
                 )
 
-        binpars = np.array(moffat_parameters_all_bins)
+        moffat_parameters_all_bins = np.array(moffat_parameters_all_bins)
         sys.stdout.write("     Fitting complete.\n")
 
         sys.stdout.write(" >>> Drawing extraction aperture limits. ")
@@ -290,7 +290,7 @@ def motes():
             frame_dict["data"],
             frame_dict["errs"],
             finalextractionlims,
-            binpars,
+            moffat_parameters_all_bins,
             axes_dict,
         )
 
@@ -340,7 +340,7 @@ def motes():
                 input_file_path,
                 moffat_profile_parameters,
                 frame_dict,
-                binpars,
+                moffat_parameters_all_bins,
                 finalextractionlims,
                 sky_bin_parameters,
                 sky_extraction_limits,
