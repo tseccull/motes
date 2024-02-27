@@ -389,18 +389,18 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
         for b in binparams:
             binlineloc = np.where(
                 np.logical_and(
-                    axdict["saxis"] > lowext - ((highext - lowext) * 0.2),
-                    axdict["saxis"] < highext + ((highext - lowext) * 0.2),
+                    axdict["spatial_axis"] > lowext - ((highext - lowext) * 0.2),
+                    axdict["spatial_axis"] < highext + ((highext - lowext) * 0.2),
                 )
             )
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[0] + axdict["wavelength_start"]
+                np.ones(len(axdict["spatial_axis"][binlineloc])) * b[0] + axdict["wavelength_start"]
             )
-            drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
+            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["imgstart"])
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[1] + axdict["wavelength_start"]
+                np.ones(len(axdict["spatial_axis"][binlineloc])) * b[1] + axdict["wavelength_start"]
             )
-            drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
+            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["imgstart"])
 
         show_img(
             data2D,
@@ -823,7 +823,7 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
         # pixels are included in their entirety.
         loextlim = extractionlimits[0][i]
         hiextlim = extractionlimits[1][i]
-        ax = axdict["saxis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        ax = axdict["spatial_axis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
 
         # Use the extraction limits to define the data column for this wavelength element.
         col = col[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
@@ -1025,8 +1025,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             extent=[
                 axdict["wavelength_start"],
                 axdict["wavelength_start"] + len(axdict["waxis"]),
-                axdict["saxis"][0] + axdict["imgstart"],
-                axdict["saxis"][-1] + axdict["imgstart"],
+                axdict["spatial_axis"][0] + axdict["imgstart"],
+                axdict["spatial_axis"][-1] + axdict["imgstart"],
             ],
         )
 
@@ -1042,8 +1042,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         ax2.set_xlim(axdict["waxis"][0], axdict["waxis"][-1])
         ax2.set_xlabel("Wavelength, " + headparams["wavunit"])
         ax.set_ylim(
-            axdict["saxis"][0] + axdict["imgstart"],
-            axdict["saxis"][-1] + axdict["imgstart"],
+            axdict["spatial_axis"][0] + axdict["imgstart"],
+            axdict["spatial_axis"][-1] + axdict["imgstart"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
         ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["waxis"]))
@@ -1125,8 +1125,8 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     for ii in range(colnum):
         if bglowext[ii] < 0:
             bglowext[ii] = 0
-        if bghighext[ii] > axdict["saxis"][-1]:
-            bghighext[ii] = axdict["saxis"][-1]
+        if bghighext[ii] > axdict["spatial_axis"][-1]:
+            bghighext[ii] = axdict["spatial_axis"][-1]
 
         datacol = fdict["data"][ii]
         colrange = np.array(range(len(datacol)))
