@@ -1024,7 +1024,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             cmap=cmap,
             extent=[
                 axdict["wavelength_start"],
-                axdict["wavelength_start"] + len(axdict["waxis"]),
+                axdict["wavelength_start"] + len(axdict["wavelength_axis"]),
                 axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
                 axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
             ],
@@ -1038,15 +1038,15 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
         )
         ax2 = ax.twiny()
-        ax2.plot(axdict["waxis"], data2D[0, :], alpha=0)
-        ax2.set_xlim(axdict["waxis"][0], axdict["waxis"][-1])
+        ax2.plot(axdict["wavelength_axis"], data2D[0, :], alpha=0)
+        ax2.set_xlim(axdict["wavelength_axis"][0], axdict["wavelength_axis"][-1])
         ax2.set_xlabel("Wavelength, " + headparams["wavunit"])
         ax.set_ylim(
             axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
             axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
-        ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["waxis"]))
+        ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["wavelength_axis"]))
 
         ax.set_xlabel("Dispersion Axis, Pixels")
 
