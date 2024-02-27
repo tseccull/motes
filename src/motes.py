@@ -146,7 +146,7 @@ def motes():
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
-            frame_dict, sky_bin_parameters, sky_extraction_limits = skyloc(
+            frame_dict, sky_bin_parameters, sky_extraction_limits = sky_locator(
                 frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
@@ -548,7 +548,7 @@ def save_fits(
     return None
 
 
-def skyloc(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters):
+def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
