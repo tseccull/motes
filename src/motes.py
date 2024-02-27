@@ -286,7 +286,7 @@ def motes():
         frame_dict["errs"] = frame_dict["errs"].T
         frame_dict["qual"] = frame_dict["qual"].T
 
-        optimal_1d_data, optimal_1d_errs, aperture_1d_data, aperrs1D = common.optimal_extraction(
+        optimal_1d_data, optimal_1d_errs, aperture_1d_data, aperture_1d_errs = common.optimal_extraction(
             frame_dict["data"],
             frame_dict["errs"],
             final_extraction_limits,
@@ -304,7 +304,7 @@ def motes():
             plt.errorbar(
                 axes_dict["waxis"],
                 aperture_1d_data,
-                yerr=aperrs1D,
+                yerr=aperture_1d_errs,
                 color="k",
                 marker=".",
                 label="Aperture Spectrum",
@@ -334,7 +334,7 @@ def motes():
                 optimal_1d_data,
                 optimal_1d_errs,
                 aperture_1d_data,
-                aperrs1D,
+                aperture_1d_errs,
                 input_file_primary_header,
                 motes_parameters,
                 input_file_path,
