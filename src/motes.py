@@ -211,8 +211,8 @@ def motes():
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
             # spectrum.
-            bin_moffat_parameters.append(bin[0] + axes_dict["wavelength_start"])
-            bin_moffat_parameters.append(bin[1] + axes_dict["wavelength_start"])
+            bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
+            bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
             moffat_parameters_all_bins.append(bin_moffat_parameters)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
@@ -614,8 +614,8 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
-        bin_moffat_parameters.append(bin[0] + axes_dict["wavelength_start"])
-        bin_moffat_parameters.append(bin[1] + axes_dict["wavelength_start"])
+        bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
+        bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
         skybin.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
