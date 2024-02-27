@@ -302,7 +302,7 @@ def motes():
             # DIAGNOSTICS, EXTRACTED SPECTRUM
             plt.figure(figsize=(9, 6))
             plt.errorbar(
-                axes_dict["waxis"],
+                axes_dict["wavelength_axis"],
                 aperture_1d_data,
                 yerr=aperture_1d_errs,
                 color="k",
@@ -310,7 +310,7 @@ def motes():
                 label="Aperture Spectrum",
             )
             plt.errorbar(
-                axes_dict["waxis"],
+                axes_dict["wavelength_axis"],
                 optimal_1d_data,
                 yerr=optimal_1d_errs,
                 color="r",
@@ -424,11 +424,11 @@ def save_fits(
         "upper limit of dispersion axis, pix",
     )
     head["HIERARCH WAVL"] = (
-        np.floor(axdict["waxis"][0]),
+        np.floor(axdict["wavelength_axis"][0]),
         "lower limit of wav range, " + hparams["wavunit"],
     )
     head["HIERARCH WAVH"] = (
-        np.ceil(axdict["waxis"][-1]),
+        np.ceil(axdict["wavelength_axis"][-1]),
         "upper limit of wav range, " + hparams["wavunit"],
     )
     head["HIERARCH WAVU"] = hparams["wavunit"], "Wavelength unit"
@@ -507,8 +507,8 @@ def save_fits(
     head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["flux_unit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
-    opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
-    apfluxhdu = fits.ImageHDU([axdict["waxis"], apflux, aperrs], header=head)
+    opfluxhdu = fits.PrimaryHDU([axdict["wavelength_axis"], opflux, operrs], header=head)
+    apfluxhdu = fits.ImageHDU([axdict["wavelength_axis"], apflux, aperrs], header=head)
     apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
