@@ -255,7 +255,7 @@ def motes():
         # wavelength element across the entire unbinned wavelength axis of the entire 2D spectrum
         # has its own extraction limits.
 
-        finalextractionlims = common.interpolate_extraction_lims(
+        final_extraction_limits = common.interpolate_extraction_lims(
             extraction_limits, axes_dict["dispersion_axis_length"]
         )
         sys.stdout.write("DONE.\n")
@@ -265,9 +265,9 @@ def motes():
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             draw_lines = [
                 np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-                finalextractionlims[0] + axes_dict["data_spatial_floor"] - 1,
+                final_extraction_limits[0] + axes_dict["data_spatial_floor"] - 1,
                 np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-                finalextractionlims[1] + axes_dict["data_spatial_floor"] + 1,
+                final_extraction_limits[1] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
@@ -289,12 +289,12 @@ def motes():
         opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
             frame_dict["data"],
             frame_dict["errs"],
-            finalextractionlims,
+            final_extraction_limits,
             moffat_parameters_all_bins,
             axes_dict,
         )
 
-        finalextractionlims = np.array(finalextractionlims)
+        final_extraction_limits = np.array(final_extraction_limits)
         sys.stdout.write("DONE.\n")
 
         # DIAGNOSTICS - Plot extracted spectrum.
@@ -341,7 +341,7 @@ def motes():
                 moffat_profile_parameters,
                 frame_dict,
                 moffat_parameters_all_bins,
-                finalextractionlims,
+                final_extraction_limits,
                 sky_bin_parameters,
                 sky_extraction_limits,
             )
