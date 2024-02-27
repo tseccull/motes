@@ -188,21 +188,21 @@ def motes():
 
             # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
             # spatial profile and return its parameters.
-            binmoffparams = common.moffat_least_squares(
+            bin_moffat_parameters = common.moffat_least_squares(
                 axes_dict["spatial_axis"],
                 bin_data * data_scaling_factor,
                 header_parameters["seeing"],
                 header_parameters["pixel_resolution"],
             )
 
-            binmoffparams[0] /= data_scaling_factor
-            binmoffparams[4] /= data_scaling_factor
-            binmoffparams[5] /= data_scaling_factor
+            bin_moffat_parameters[0] /= data_scaling_factor
+            bin_moffat_parameters[4] /= data_scaling_factor
+            bin_moffat_parameters[5] /= data_scaling_factor
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
             LowExt, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
-                binmoffparams,
+                bin_moffat_parameters,
                 width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
@@ -211,9 +211,9 @@ def motes():
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
             # spectrum.
-            binmoffparams.append(bin[0] + axes_dict["wavstart"])
-            binmoffparams.append(bin[1] + axes_dict["wavstart"])
-            moffat_parameters_all_bins.append(binmoffparams)
+            bin_moffat_parameters.append(bin[0] + axes_dict["wavstart"])
+            bin_moffat_parameters.append(bin[1] + axes_dict["wavstart"])
+            moffat_parameters_all_bins.append(bin_moffat_parameters)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
             if motes_parameters["-DIAG_PLOT_MOFFAT"]:
@@ -221,7 +221,7 @@ def motes():
                     axes_dict["spatial_axis"],
                     bin_data,
                     axes_dict["hi_resolution_spatial_axis"],
-                    binmoffparams,
+                    bin_moffat_parameters,
                     axes_dict["data_spatial_floor"],
                     header_parameters,
                 )
@@ -586,7 +586,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
         # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
         # spatial profile and return its parameters.
-        binmoffparams = common.moffat_least_squares(
+        bin_moffat_parameters = common.moffat_least_squares(
             axes_dict["spatial_axis"],
             bin_data * data_scaling_factor,
             header_parameters["seeing"],
@@ -599,14 +599,14 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         # get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after
         # the fitting.
-        binmoffparams[0] /= data_scaling_factor
-        binmoffparams[4] /= data_scaling_factor
-        binmoffparams[5] /= data_scaling_factor
+        bin_moffat_parameters[0] /= data_scaling_factor
+        bin_moffat_parameters[4] /= data_scaling_factor
+        bin_moffat_parameters[5] /= data_scaling_factor
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the
         # Moffat profile previously fitted to it.
         LowExt, HighExt, moffat_fwhm, moffat_center = common.extraction_limits(
-            binmoffparams,
+            bin_moffat_parameters,
             width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
@@ -614,9 +614,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
-        binmoffparams.append(bin[0] + axes_dict["wavstart"])
-        binmoffparams.append(bin[1] + axes_dict["wavstart"])
-        skybin.append(binmoffparams)
+        bin_moffat_parameters.append(bin[0] + axes_dict["wavstart"])
+        bin_moffat_parameters.append(bin[1] + axes_dict["wavstart"])
+        skybin.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
         if motes_parameters["-DIAG_PLOT_MOFFAT"]:
@@ -624,7 +624,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
                 axes_dict["spatial_axis"],
                 bin_data,
                 axes_dict["hi_resolution_spatial_axis"],
-                binmoffparams,
+                bin_moffat_parameters,
                 axes_dict["data_spatial_floor"],
                 header_parameters,
             )
