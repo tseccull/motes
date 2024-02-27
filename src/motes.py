@@ -236,7 +236,7 @@ def motes():
         # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels
         # fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-            drawlines = [
+            draw_lines = [
                 extraction_limits[0] + axes_dict["wavstart"],
                 extraction_limits[1] + axes_dict["data_spatial_floor"] - 1,
                 extraction_limits[0] + axes_dict["wavstart"],
@@ -247,7 +247,7 @@ def motes():
                 frame_dict["data"],
                 axes_dict,
                 header_parameters,
-                drawlines,
+                draw_lines,
                 "2D Spectrum Overplotted with Extraction Limits",
             )
 
@@ -263,7 +263,7 @@ def motes():
         # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-            drawlines = [
+            draw_lines = [
                 np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
                 finalextractionlims[0] + axes_dict["data_spatial_floor"] - 1,
                 np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
@@ -274,7 +274,7 @@ def motes():
                 frame_dict["data"],
                 axes_dict,
                 header_parameters,
-                drawlines,
+                draw_lines,
                 "2D Spectrum Overplotted with Full Extraction Limits",
             )
 
@@ -639,7 +639,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
+        draw_lines = [
             extraction_limits[0] + axes_dict["wavstart"],
             (extraction_limits[1]) + axes_dict["data_spatial_floor"],
             extraction_limits[0] + axes_dict["wavstart"],
@@ -650,7 +650,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             frame_dict["data"],
             axes_dict,
             header_parameters,
-            drawlines,
+            draw_lines,
             "2D Spectrum Overplotted with Target/Sky Boundaries",
         )
 
@@ -666,7 +666,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
+        draw_lines = [
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
@@ -677,7 +677,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             frame_dict["data"],
             axes_dict,
             header_parameters,
-            drawlines,
+            draw_lines,
             "2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
@@ -699,7 +699,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
+        draw_lines = [
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
@@ -710,7 +710,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             frame_dict["data"],
             axes_dict,
             header_parameters,
-            drawlines,
+            draw_lines,
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
