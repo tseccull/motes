@@ -199,7 +199,7 @@ def harvest_floyds(imgfilehdu, imgheader):
         "exptime": imgheader["EXPTIME"],
         "inst": imgheader["INSTRUME"],
         "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
-        "fluxunit": "electrons",
+        "flux_unit": "electrons",
         "wavunit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
     }
     sys.stdout.write("DONE.\n")
@@ -288,7 +288,7 @@ def harvest_fors2(imgfilehdu, imgheader):
             imgheader["HIERARCH ESO TEL AMBI FWHM START"]
             + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "fluxunit": imgheader["BUNIT"],
+        "flux_unit": imgheader["BUNIT"],
         "wavunit": "Angstroms",
     }
 
@@ -393,9 +393,9 @@ def harvest_gmos(imgfilehdu, imgheader):
 
     # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
     if "BUNIT" in scihead:
-        headerdict["fluxunit"] = scihead["BUNIT"]
+        headerdict["flux_unit"] = scihead["BUNIT"]
     else:
-        headerdict["fluxunit"] = "electrons"
+        headerdict["flux_unit"] = "electrons"
 
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
@@ -487,7 +487,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
             imgheader["HIERARCH ESO TEL AMBI FWHM START"]
             + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "fluxunit": imgheader["BUNIT"],
+        "flux_unit": imgheader["BUNIT"],
         "wavunit": "nm",
     }
     sys.stdout.write("DONE.\n")
