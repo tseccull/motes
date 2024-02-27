@@ -938,7 +938,7 @@ def plot_fitted_spatial_profile(
     plt.legend()
     plt.title("Spectrum Spatial Profile and Fitted Moffat Profile")
     plt.xlabel("Spatial Axis, Pixels")
-    plt.ylabel("Median Flux, " + headparams["fluxunit"])
+    plt.ylabel("Median Flux, " + headparams["flux_unit"])
     plt.show()
 
     return None
@@ -1035,7 +1035,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         cbar = fig.colorbar(s, cax=colax)
         cbar.ax.yaxis.set_offset_position("left")
         cbar.ax.set_ylabel(
-            "Pixel Flux, x10^" + str(power) + " " + headparams["fluxunit"]
+            "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
         )
         ax2 = ax.twiny()
         ax2.plot(axdict["waxis"], data2D[0, :], alpha=0)
@@ -1082,7 +1082,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
 
             s.set_clim(vmin, vmax)
             cbar.ax.set_ylabel(
-                "Pixel Flux, x10^" + str(power) + " " + headparams["fluxunit"]
+                "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
             )
             fig.canvas.draw_idle()
 
