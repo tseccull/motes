@@ -157,7 +157,6 @@ def motes():
             int(np.ceil(binning_region_spatial_ceiling)),
             axes_dict["dispersion_axis_length"],
             motes_parameters,
-            replace_crbp=bool(motes_parameters["-REPLACE_CRBP"]),
         )
 
         common.get_bins_output(
