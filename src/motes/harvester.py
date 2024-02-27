@@ -112,7 +112,7 @@ def data_harvest(reg_counter, filename_2D, region):
         + "-"
         + str(region[reg_counter][3])
         + " "
-        + head_dict["wavunit"]
+        + head_dict["wavelength_unit"]
         + ".\n"
         "     This range is equivalent to pixel columns "
         + str(wavstart)
@@ -200,7 +200,7 @@ def harvest_floyds(imgfilehdu, imgheader):
         "inst": imgheader["INSTRUME"],
         "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
         "flux_unit": "electrons",
-        "wavunit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
+        "wavelength_unit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
     }
     sys.stdout.write("DONE.\n")
 
@@ -289,7 +289,7 @@ def harvest_fors2(imgfilehdu, imgheader):
             + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
         ),
         "flux_unit": imgheader["BUNIT"],
-        "wavunit": "Angstroms",
+        "wavelength_unit": "Angstroms",
     }
 
     sys.stdout.write("DONE.\n")
@@ -388,7 +388,7 @@ def harvest_gmos(imgfilehdu, imgheader):
         "exptime": imgheader["EXPTIME"],
         "seeing": seeing,
         "inst": imgheader["INSTRUME"],
-        "wavunit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
+        "wavelength_unit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
     }
 
     # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
@@ -488,7 +488,7 @@ def harvest_xshoo(imgfilehdu, imgheader):
             + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
         ),
         "flux_unit": imgheader["BUNIT"],
-        "wavunit": "nm",
+        "wavelength_unit": "nm",
     }
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
