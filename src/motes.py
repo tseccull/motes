@@ -184,13 +184,13 @@ def motes():
             # the chip gaps if this is a GMOS spectrum.
             raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
             chip_gap_location = np.where(np.median(raw_bin_data, axis=0) != 1)
-            bindata = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
+            bin_data = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
 
             # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
             # spatial profile and return its parameters.
             binmoffparams = common.moffat_least_squares(
                 axes_dict["spatial_axis"],
-                bindata * data_scaling_factor,
+                bin_data * data_scaling_factor,
                 header_parameters["seeing"],
                 header_parameters["pixel_resolution"],
             )
@@ -219,7 +219,7 @@ def motes():
             if motes_parameters["-DIAG_PLOT_MOFFAT"]:
                 common.plot_fitted_spatial_profile(
                     axes_dict["spatial_axis"],
-                    bindata,
+                    bin_data,
                     axes_dict["hi_resolution_spatial_axis"],
                     binmoffparams,
                     axes_dict["data_spatial_floor"],
@@ -582,13 +582,13 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         # chip gaps if this is a GMOS spectrum.
         raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
         chip_gap_location = np.where(np.median(raw_bin_data, axis=0) != 1)
-        bindata = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
+        bin_data = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
 
         # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
         # spatial profile and return its parameters.
         binmoffparams = common.moffat_least_squares(
             axes_dict["spatial_axis"],
-            bindata * data_scaling_factor,
+            bin_data * data_scaling_factor,
             header_parameters["seeing"],
             header_parameters["pixel_resolution"],
         )
@@ -622,7 +622,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         if motes_parameters["-DIAG_PLOT_MOFFAT"]:
             common.plot_fitted_spatial_profile(
                 axes_dict["spatial_axis"],
-                bindata,
+                bin_data,
                 axes_dict["hi_resolution_spatial_axis"],
                 binmoffparams,
                 axes_dict["data_spatial_floor"],
