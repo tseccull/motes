@@ -211,8 +211,8 @@ def motes():
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
             # spectrum.
-            bin_moffat_parameters.append(bin[0] + axes_dict["wavstart"])
-            bin_moffat_parameters.append(bin[1] + axes_dict["wavstart"])
+            bin_moffat_parameters.append(bin[0] + axes_dict["wavelength_start"])
+            bin_moffat_parameters.append(bin[1] + axes_dict["wavelength_start"])
             moffat_parameters_all_bins.append(bin_moffat_parameters)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
@@ -237,9 +237,9 @@ def motes():
         # fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             draw_lines = [
-                extraction_limits[0] + axes_dict["wavstart"],
+                extraction_limits[0] + axes_dict["wavelength_start"],
                 extraction_limits[1] + axes_dict["data_spatial_floor"] - 1,
-                extraction_limits[0] + axes_dict["wavstart"],
+                extraction_limits[0] + axes_dict["wavelength_start"],
                 extraction_limits[2] + axes_dict["data_spatial_floor"] + 1,
             ]
 
@@ -264,9 +264,9 @@ def motes():
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             draw_lines = [
-                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
                 finalextractionlims[0] + axes_dict["data_spatial_floor"] - 1,
-                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
                 finalextractionlims[1] + axes_dict["data_spatial_floor"] + 1,
             ]
 
@@ -416,7 +416,7 @@ def save_fits(
         "upper limit of spatial axis, pix",
     )
     head["HIERARCH DISPPIXL"] = (
-        axdict["wavstart"],
+        axdict["wavelength_start"],
         "lower limit of dispersion axis, pix",
     )
     head["HIERARCH DISPPIXH"] = (
@@ -614,8 +614,8 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
-        bin_moffat_parameters.append(bin[0] + axes_dict["wavstart"])
-        bin_moffat_parameters.append(bin[1] + axes_dict["wavstart"])
+        bin_moffat_parameters.append(bin[0] + axes_dict["wavelength_start"])
+        bin_moffat_parameters.append(bin[1] + axes_dict["wavelength_start"])
         skybin.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
@@ -640,9 +640,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         draw_lines = [
-            extraction_limits[0] + axes_dict["wavstart"],
+            extraction_limits[0] + axes_dict["wavelength_start"],
             (extraction_limits[1]) + axes_dict["data_spatial_floor"],
-            extraction_limits[0] + axes_dict["wavstart"],
+            extraction_limits[0] + axes_dict["wavelength_start"],
             (extraction_limits[2]) + axes_dict["data_spatial_floor"],
         ]
 
@@ -667,9 +667,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         draw_lines = [
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
             (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
@@ -700,9 +700,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # ends of the wavelength axis.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         draw_lines = [
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
             (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavstart"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
             (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
         ]
 
