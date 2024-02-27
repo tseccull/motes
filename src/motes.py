@@ -176,7 +176,7 @@ def motes():
             " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
         )
 
-        extbin = []
+        moffat_parameters_all_bins = []
         extractionlimits = []
 
         for each_bin in bin_parameters:
@@ -213,7 +213,7 @@ def motes():
             # spectrum.
             binmoffparams.append(bin[0] + axes_dict["wavstart"])
             binmoffparams.append(bin[1] + axes_dict["wavstart"])
-            extbin.append(binmoffparams)
+            moffat_parameters_all_bins.append(binmoffparams)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
             if motes_parameters["-DIAG_PLOT_MOFFAT"]:
@@ -226,7 +226,7 @@ def motes():
                     header_parameters,
                 )
 
-        binpars = np.array(extbin)
+        binpars = np.array(moffat_parameters_all_bins)
         sys.stdout.write("     Fitting complete.\n")
 
         sys.stdout.write(" >>> Drawing extraction aperture limits. ")
