@@ -130,7 +130,7 @@ def data_harvest(reg_counter, filename_2D, region):
 
     axes_dict = {
         "spataxislen": len(spataxis),
-        "saxis": spataxis,
+        "spatial_axis": spataxis,
         "hrsaxis": hiresspataxis,
         "imgstart": imgstart,
         "imgend": imgend,
