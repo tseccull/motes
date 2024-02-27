@@ -319,7 +319,7 @@ def motes():
             )
             plt.grid(alpha=0.5, linestyle="dotted")
             plt.title("Extracted 1D Spectrum")
-            plt.ylabel("Flux, " + header_parameters["fluxunit"])
+            plt.ylabel("Flux, " + header_parameters["flux_unit"])
             plt.xlabel("Wavelength, " + header_parameters["wavunit"])
             plt.legend()
             plt.show()
@@ -503,8 +503,8 @@ def save_fits(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
-    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["fluxunit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["fluxunit"]
+    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["flux_unit"]
+    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["flux_unit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
