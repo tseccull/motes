@@ -177,7 +177,7 @@ def motes():
         )
 
         moffat_parameters_all_bins = []
-        extractionlimits = []
+        extraction_limits = []
 
         for each_bin in bin_parameters:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
@@ -206,7 +206,7 @@ def motes():
                 width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
+            extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
@@ -231,16 +231,16 @@ def motes():
 
         sys.stdout.write(" >>> Drawing extraction aperture limits. ")
         sys.stdout.flush()
-        extractionlimits = np.array(extractionlimits).T
+        extraction_limits = np.array(extraction_limits).T
 
         # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels
         # fully within the aperture are extracted.
         if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
             drawlines = [
-                extractionlimits[0] + axes_dict["wavstart"],
-                extractionlimits[1] + axes_dict["data_spatial_floor"] - 1,
-                extractionlimits[0] + axes_dict["wavstart"],
-                extractionlimits[2] + axes_dict["data_spatial_floor"] + 1,
+                extraction_limits[0] + axes_dict["wavstart"],
+                extraction_limits[1] + axes_dict["data_spatial_floor"] - 1,
+                extraction_limits[0] + axes_dict["wavstart"],
+                extraction_limits[2] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
@@ -256,7 +256,7 @@ def motes():
         # has its own extraction limits.
 
         finalextractionlims = common.interpolate_extraction_lims(
-            extractionlimits, axes_dict["dispersion_axis_length"]
+            extraction_limits, axes_dict["dispersion_axis_length"]
         )
         sys.stdout.write("DONE.\n")
 
@@ -576,7 +576,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     )
 
     skybin = []
-    extractionlimits = []
+    extraction_limits = []
     for each_bin in bin_parameters:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
@@ -610,7 +610,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
+        extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, LowExt, HighExt, moffat_center])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
@@ -635,15 +635,15 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
 
     sys.stdout.write(" >>> Drawing target/sky boundaries. ")
     sys.stdout.flush()
-    extractionlimits = np.array(extractionlimits).T
+    extraction_limits = np.array(extraction_limits).T
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         drawlines = [
-            extractionlimits[0] + axes_dict["wavstart"],
-            (extractionlimits[1]) + axes_dict["data_spatial_floor"],
-            extractionlimits[0] + axes_dict["wavstart"],
-            (extractionlimits[2]) + axes_dict["data_spatial_floor"],
+            extraction_limits[0] + axes_dict["wavstart"],
+            (extraction_limits[1]) + axes_dict["data_spatial_floor"],
+            extraction_limits[0] + axes_dict["wavstart"],
+            (extraction_limits[2]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
@@ -658,7 +658,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
     # extraction limits.
     skyextractionlims = common.interpolate_extraction_lims(
-        extractionlimits, axes_dict["dispersion_axis_length"]
+        extraction_limits, axes_dict["dispersion_axis_length"]
     )
 
     sys.stdout.write("DONE.\n")
