@@ -394,11 +394,11 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
                 )
             )
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[0] + axdict["wavstart"]
+                np.ones(len(axdict["saxis"][binlineloc])) * b[0] + axdict["wavelength_start"]
             )
             drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
             drawlines.append(
-                np.ones(len(axdict["saxis"][binlineloc])) * b[1] + axdict["wavstart"]
+                np.ones(len(axdict["saxis"][binlineloc])) * b[1] + axdict["wavelength_start"]
             )
             drawlines.append(axdict["saxis"][binlineloc] + axdict["imgstart"])
 
@@ -807,7 +807,7 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     # Loop through each dispersion element of the spectrum.
     for i, col in enumerate(data2D):
         # Identify the location of the current element in the original 2D spectrum
-        dpix = i + axdict["wavstart"]
+        dpix = i + axdict["wavelength_start"]
 
         # If the current element belongs in the next bin as defined by getbins, use the new bin's
         # parameters and increment the bin number.
@@ -1023,8 +1023,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             origin="lower",
             cmap=cmap,
             extent=[
-                axdict["wavstart"],
-                axdict["wavstart"] + len(axdict["waxis"]),
+                axdict["wavelength_start"],
+                axdict["wavelength_start"] + len(axdict["waxis"]),
                 axdict["saxis"][0] + axdict["imgstart"],
                 axdict["saxis"][-1] + axdict["imgstart"],
             ],
@@ -1046,7 +1046,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             axdict["saxis"][-1] + axdict["imgstart"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
-        ax.set_xlim(axdict["wavstart"], axdict["wavstart"] + len(axdict["waxis"]))
+        ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["waxis"]))
 
         ax.set_xlabel("Dispersion Axis, Pixels")
 
