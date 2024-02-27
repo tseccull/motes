@@ -129,7 +129,7 @@ def motes():
             int(np.ceil(binning_region_spatial_ceiling)),
             axes_dict["dispersion_axis_length"],
             motes_parameters,
-            sky=True,
+            has_sky=True,
         )
 
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
