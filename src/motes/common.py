@@ -396,11 +396,11 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
             drawlines.append(
                 np.ones(len(axdict["spatial_axis"][binlineloc])) * b[0] + axdict["wavelength_start"]
             )
-            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["imgstart"])
+            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["data_spatial_floor"])
             drawlines.append(
                 np.ones(len(axdict["spatial_axis"][binlineloc])) * b[1] + axdict["wavelength_start"]
             )
-            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["imgstart"])
+            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["data_spatial_floor"])
 
         show_img(
             data2D,
@@ -1025,8 +1025,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             extent=[
                 axdict["wavelength_start"],
                 axdict["wavelength_start"] + len(axdict["waxis"]),
-                axdict["spatial_axis"][0] + axdict["imgstart"],
-                axdict["spatial_axis"][-1] + axdict["imgstart"],
+                axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
+                axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
             ],
         )
 
@@ -1042,8 +1042,8 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         ax2.set_xlim(axdict["waxis"][0], axdict["waxis"][-1])
         ax2.set_xlabel("Wavelength, " + headparams["wavunit"])
         ax.set_ylim(
-            axdict["spatial_axis"][0] + axdict["imgstart"],
-            axdict["spatial_axis"][-1] + axdict["imgstart"],
+            axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
+            axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
         ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["waxis"]))
