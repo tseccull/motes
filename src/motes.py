@@ -182,9 +182,9 @@ def motes():
         for each_bin in bin_parameters:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
-            binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
-            chipgap = np.where(np.median(binimg, axis=0) != 1)
-            bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
+            raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
+            chipgap = np.where(np.median(raw_bin_data, axis=0) != 1)
+            bindata = np.nanmedian(raw_bin_data[:, chipgap[0]], axis=1)
 
             # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
             # spatial profile and return its parameters.
@@ -580,9 +580,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     for each_bin in bin_parameters:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
-        binimg = frame_dict["data"][:, each_bin[0] : each_bin[1]]
-        chipgap = np.where(np.median(binimg, axis=0) != 1)
-        bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
+        raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
+        chipgap = np.where(np.median(raw_bin_data, axis=0) != 1)
+        bindata = np.nanmedian(raw_bin_data[:, chipgap[0]], axis=1)
 
         # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
         # spatial profile and return its parameters.
