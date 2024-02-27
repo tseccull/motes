@@ -286,7 +286,7 @@ def motes():
         frame_dict["errs"] = frame_dict["errs"].T
         frame_dict["qual"] = frame_dict["qual"].T
 
-        opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
+        optimal_1d_data, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
             frame_dict["data"],
             frame_dict["errs"],
             final_extraction_limits,
@@ -311,7 +311,7 @@ def motes():
             )
             plt.errorbar(
                 axes_dict["waxis"],
-                opdata1D,
+                optimal_1d_data,
                 yerr=operrs1D,
                 color="r",
                 marker=".",
@@ -331,7 +331,7 @@ def motes():
             save_fits(
                 axes_dict,
                 header_parameters,
-                opdata1D,
+                optimal_1d_data,
                 operrs1D,
                 apdata1D,
                 aperrs1D,
