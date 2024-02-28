@@ -514,7 +514,7 @@ def save_fits(
     orig_2d_spec_hdu.header["EXTNAME"] = "ORIG_2D_SPEC"
     orig_2d_errs_hdu = fits.ImageHDU(frame_dict["original_errs"])
     orig_2d_errs_hdu.header["EXTNAME"] = "ORIG_2D_ERRS"
-    orig_2d_qual_hdu = fits.ImageHDU(frame_dict["ogqual"])
+    orig_2d_qual_hdu = fits.ImageHDU(frame_dict["original_qual"])
     orig_2d_qual_hdu.header["EXTNAME"] = "ORIG_2D_QUAL"
     binhdu = fits.ImageHDU(moffat_parameters_all_bins)
     binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
