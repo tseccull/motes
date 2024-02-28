@@ -22,12 +22,12 @@ def read_motes_parameter_file():
 
     # Read in MOTES parameter file line by line and filter out the empty lines.
     with open("motesparams.txt", "r", encoding="utf-8") as parameter_file:
-        parlines = parameter_file.read().splitlines()
-        parlines = filter(None, parlines)
+        parameter_lines = parameter_file.read().splitlines()
+        parameter_lines = filter(None, parameter_lines)
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
     # parameter's value follows its associated keyword.
-    lumpy_param_list = [x.split("=") for x in parlines if x[0] == "-"]
+    lumpy_param_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
     flat_param_list = [y for x in lumpy_param_list for y in x]
 
     # Convert all numerical values in the parameter list to floats.
