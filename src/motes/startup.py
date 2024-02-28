@@ -27,8 +27,8 @@ def read_motes_parameter_file():
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
     # parameter's value follows its associated keyword.
-    lumpy_param_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
-    flat_param_list = [y for x in lumpy_param_list for y in x]
+    lumpy_parameter_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
+    flat_param_list = [y for x in lumpy_parameter_list for y in x]
 
     # Convert all numerical values in the parameter list to floats.
     # If digit, convert to float. If not, leave as string.
