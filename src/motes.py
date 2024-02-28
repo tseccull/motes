@@ -491,8 +491,8 @@ def save_fits(
             motes_parameters["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction",
         )
-        skymodhdu = fits.ImageHDU(frame_dict["skymod"])
-        skymodhdu.header["EXTNAME"] = "2D_SKY"
+        sky_model_hdu = fits.ImageHDU(frame_dict["skymod"])
+        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
         skybinhdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
         skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
         sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
@@ -531,7 +531,7 @@ def save_fits(
     ]
 
     if motes_parameters["-SUBTRACT_SKY"]:
-        hdu_list.append(skymodhdu)
+        hdu_list.append(sky_model_hdu)
         hdu_list.append(skybinhdu)
         hdu_list.append(sky_extraction_limits)
 
