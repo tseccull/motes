@@ -68,7 +68,7 @@ def read_regions():
 
         with open("reg.txt", "r", encoding="utf-8") as region_file:
             region_lines = region_file.read().splitlines()
-            data_region = [[int(limit) for limit in x.split(",")] for x in region_lines]
+            data_regions = [[int(limit) for limit in x.split(",")] for x in region_lines]
         sys.stdout.write("DONE.\n")
 
     # Complain and quit MOTES if reg.txt isn't found.
@@ -83,4 +83,4 @@ def read_regions():
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 
-    return data_region
+    return data_regions
