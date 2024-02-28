@@ -359,7 +359,7 @@ def save_fits(
     optimal_1d_errs,
     aperture_1d_data,
     aperture_1d_errs,
-    head,
+    input_file_primary_header,
     pars,
     filename,
     moffpars,
@@ -384,7 +384,7 @@ def save_fits(
                                                extracted 1D spectrum.
         aperture_1d_errs (numpy.ndarray)               : An array containing the flux errors of the aperture
                                                extracted 1D spectrum.
-        head (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
+        input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
         pars (dict)                          : A dictionary containing the MOTES parameters.
         filename (str)                       : The filename of the 1D spectrum.
         moffpars (list)                      : A list containing the Moffat fit parameters.
@@ -401,93 +401,93 @@ def save_fits(
         None
     """
 
-    head["MOTES"] = "######## Extracted 1D Spectrum Metadata ########"
-    head.add_blank("", before="MOTES")
-    head["HIERARCH UTC EXT DATE"] = (
+    input_file_primary_header["MOTES"] = "######## Extracted 1D Spectrum Metadata ########"
+    input_file_primary_header.add_blank("", before="MOTES")
+    input_file_primary_header["HIERARCH UTC EXT DATE"] = (
         datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
         "file creation date",
     )
-    head["HIERARCH SPATPIXL"] = (
+    input_file_primary_header["HIERARCH SPATPIXL"] = (
         axes_dict["data_spatial_floor"],
         "lower limit of spatial axis, pix",
     )
-    head["HIERARCH SPATPIXH"] = (
+    input_file_primary_header["HIERARCH SPATPIXH"] = (
         axes_dict["imgend"],
         "upper limit of spatial axis, pix",
     )
-    head["HIERARCH DISPPIXL"] = (
+    input_file_primary_header["HIERARCH DISPPIXL"] = (
         axes_dict["wavelength_start"],
         "lower limit of dispersion axis, pix",
     )
-    head["HIERARCH DISPPIXH"] = (
+    input_file_primary_header["HIERARCH DISPPIXH"] = (
         axes_dict["wavend"],
         "upper limit of dispersion axis, pix",
     )
-    head["HIERARCH WAVL"] = (
+    input_file_primary_header["HIERARCH WAVL"] = (
         np.floor(axes_dict["wavelength_axis"][0]),
         "lower limit of wav range, " + header_parameters["wavelength_unit"],
     )
-    head["HIERARCH WAVH"] = (
+    input_file_primary_header["HIERARCH WAVH"] = (
         np.ceil(axes_dict["wavelength_axis"][-1]),
         "upper limit of wav range, " + header_parameters["wavelength_unit"],
     )
-    head["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
+    input_file_primary_header["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
 
-    head["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
-    head.add_blank(
+    input_file_primary_header["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
+    input_file_primary_header.add_blank(
         "Parameters fit to the median spatial profile of the spectrum",
         before="HIERARCH MOFF A",
     )
-    head["HIERARCH MOFF C"] = (
+    input_file_primary_header["HIERARCH MOFF C"] = (
         round(moffpars[1] + axes_dict["data_spatial_floor"], 5),
         "moffat profile center",
     )
-    head["HIERARCH MOFF ALPHA"] = (
+    input_file_primary_header["HIERARCH MOFF ALPHA"] = (
         round(moffpars[2], 5),
         "moffat profile alpha value",
     )
-    head["HIERARCH MOFF BETA"] = (
+    input_file_primary_header["HIERARCH MOFF BETA"] = (
         round(moffpars[3], 5),
         "moffat profile beta value",
     )
-    head["HIERARCH MOFF BACK"] = (
+    input_file_primary_header["HIERARCH MOFF BACK"] = (
         round(moffpars[4], 5),
         "moffat profile background level",
     )
-    head["HIERARCH MOFF GRAD"] = (
+    input_file_primary_header["HIERARCH MOFF GRAD"] = (
         round(moffpars[5], 5),
         "moffat profile background slope",
     )
-    head["HIERARCH IQ"] = (
+    input_file_primary_header["HIERARCH IQ"] = (
         round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2),
         'IQ measured from median profile, "',
     )
 
-    head["HIERARCH SNR BIN LIMIT"] = pars["-SNR_BIN_LIM"], "maximum SNR per bin"
-    head.add_blank(
+    input_file_primary_header["HIERARCH SNR BIN LIMIT"] = pars["-SNR_BIN_LIM"], "maximum SNR per bin"
+    input_file_primary_header.add_blank(
         "Dispersion Binning and Spectrum Extraction",
         before="HIERARCH SNR BIN LIMIT",
     )
-    head["HIERARCH COL BIN LIMIT"] = (
+    input_file_primary_header["HIERARCH COL BIN LIMIT"] = (
         int(pars["-COL_BIN_LIM"]),
         "minimum number of columns per bin",
     )
-    head["HIERARCH FWHM MULTIPLIER"] = (
+    input_file_primary_header["HIERARCH FWHM MULTIPLIER"] = (
         pars["-FWHM_MULTIPLIER"],
         "FWHM used to define the extraction limits",
     )
-    head["HIERARCH INTERP KIND"] = (
+    input_file_primary_header["HIERARCH INTERP KIND"] = (
         pars["-INTERP_KIND"],
         "interpolation mode used",
     )
 
     if pars["-SUBTRACT_SKY"]:
-        head["HIERARCH SKYSUB FWHM MULT"] = (
+        input_file_primary_header["HIERARCH SKYSUB FWHM MULT"] = (
             pars["-BG_FWHM_MULTIPLIER"],
             "FWHM multiplier for defining background",
         )
-        head.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
-        head["HIERARCH SKYSUB SNR BIN LIM"] = (
+        input_file_primary_header.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
+        input_file_primary_header["HIERARCH SKYSUB SNR BIN LIM"] = (
             pars["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction",
         )
@@ -498,17 +498,17 @@ def save_fits(
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
-    head.add_blank(
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
+    input_file_primary_header.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
-    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + header_parameters["flux_unit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
-    head["EXTNAME"] = "OPTI_1D_SPEC"
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + header_parameters["flux_unit"]
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
+    input_file_primary_header["EXTNAME"] = "OPTI_1D_SPEC"
 
-    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=head)
-    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=head)
+    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=input_file_primary_header)
+    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=input_file_primary_header)
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
