@@ -21,8 +21,8 @@ def read_motes_parameter_file():
     sys.stdout.flush()
 
     # Read in MOTES parameter file line by line and filter out the empty lines.
-    with open("motesparams.txt", "r", encoding="utf-8") as parfile:
-        parlines = parfile.read().splitlines()
+    with open("motesparams.txt", "r", encoding="utf-8") as parameter_file:
+        parlines = parameter_file.read().splitlines()
         parlines = filter(None, parlines)
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
