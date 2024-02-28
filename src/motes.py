@@ -361,7 +361,7 @@ def save_fits(
     aperture_1d_errs,
     input_file_primary_header,
     motes_parameters,
-    filename,
+    input_file_path,
     moffpars,
     fdict,
     bpars,
@@ -386,7 +386,7 @@ def save_fits(
                                                extracted 1D spectrum.
         input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
         motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
-        filename (str)                       : The filename of the 1D spectrum.
+        input_file_path (str)                       : The filename of the 1D spectrum.
         moffpars (list)                      : A list containing the Moffat fit parameters.
         fdict (dict)                         : A dictionary containing the original 2D spectrum
                                                data and error frames.
@@ -536,7 +536,7 @@ def save_fits(
         hdu_list.append(skyextractionlims)
 
     hdulist = fits.HDUList(hdu_list)
-    filenamelist = filename.split("_")
+    filenamelist = input_file_path.split("_")
     hdulist.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
     hdulist.close()
 
