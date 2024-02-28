@@ -514,8 +514,8 @@ def save_fits(
     orig_2d_spec_hdu.header["EXTNAME"] = "ORIG_2D_SPEC"
     orig_2d_errs_hdu = fits.ImageHDU(frame_dict["original_errs"])
     orig_2d_errs_hdu.header["EXTNAME"] = "ORIG_2D_ERRS"
-    qual2Dhdu = fits.ImageHDU(frame_dict["ogqual"])
-    qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
+    orig_2d_qual_hdu = fits.ImageHDU(frame_dict["ogqual"])
+    orig_2d_qual_hdu.header["EXTNAME"] = "ORIG_2D_QUAL"
     binhdu = fits.ImageHDU(moffat_parameters_all_bins)
     binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
     extraction_limits = fits.ImageHDU(extraction_limits)
@@ -525,7 +525,7 @@ def save_fits(
         aperture_1d_datahdu,
         orig_2d_spec_hdu,
         orig_2d_errs_hdu,
-        qual2Dhdu,
+        orig_2d_qual_hdu,
         binhdu,
         extraction_limits,
     ]
