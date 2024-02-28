@@ -66,8 +66,8 @@ def read_regions():
         sys.stdout.write(" >>> reg.txt file found. Reading reg.txt. ")
         sys.stdout.flush()
 
-        with open("reg.txt", "r", encoding="utf-8") as reg:
-            reg = reg.read().splitlines()
+        with open("reg.txt", "r", encoding="utf-8") as region_file:
+            reg = region_file.read().splitlines()
             intregion = [[int(lim) for lim in x.split(",")] for x in reg]
         sys.stdout.write("DONE.\n")
 
