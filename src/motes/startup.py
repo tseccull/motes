@@ -14,7 +14,7 @@ def read_motes_parameter_file():
         None
 
     Returns:
-        pars (dict) : a dictionary containing the parameters read in from motesparams.txt.
+        parameter_dict (dict) : a dictionary containing the parameters read in from motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")
@@ -37,11 +37,11 @@ def read_motes_parameter_file():
     ]
 
     # Assign parameters and their associated keywords to a dictionary.
-    pars = dict(zip(parameter_list[::2], parameter_list[1::2]))
+    parameter_dict = dict(zip(parameter_list[::2], parameter_list[1::2]))
 
     sys.stdout.write("DONE.\n")
 
-    return pars
+    return parameter_dict
 
 
 def read_regions():
