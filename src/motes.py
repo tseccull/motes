@@ -366,7 +366,7 @@ def save_fits(
     frame_dict,
     moffat_parameters_all_bins,
     extraction_limits,
-    sbpars,
+    moffat_parameters_all_sky_bins,
     skyextractionlims,
 ):
     """
@@ -392,7 +392,7 @@ def save_fits(
                                                data and error frames.
         moffat_parameters_all_bins (numpy.ndarray)                : A dictionary containing the binning parameters.
         extraction_limits (numpy.ndarray)       : An array containing the extraction limits.
-        sbpars (numpy.ndarray)               : An array containing the binning parameters for the
+        moffat_parameters_all_sky_bins (numpy.ndarray)               : An array containing the binning parameters for the
                                                sky extraction.
         skyextractionlims (list)             : A list containing the extraction limits for the sky
                                                extraction.
@@ -493,7 +493,7 @@ def save_fits(
         )
         skymodhdu = fits.ImageHDU(frame_dict["skymod"])
         skymodhdu.header["EXTNAME"] = "2D_SKY"
-        skybinhdu = fits.ImageHDU(sbpars)
+        skybinhdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
         skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
