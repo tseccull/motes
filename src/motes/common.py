@@ -1293,9 +1293,9 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
 
     medsky = np.array(medsky)
     if pars["-SKYSUB_MODE"] == "MEDIAN":
-        fdict["skymod"] = np.tile(medsky, (np.shape(fdict["data"])[1], 1))
+        fdict["sky_model"] = np.tile(medsky, (np.shape(fdict["data"])[1], 1))
     else:
-        fdict["skymod"] = medsky
+        fdict["sky_model"] = medsky
 
     fdict["data"] = fdict["data"].T
     fdict["errs"] = fdict["errs"].T
