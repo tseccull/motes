@@ -367,7 +367,7 @@ def save_fits(
     moffat_parameters_all_bins,
     extraction_limits,
     moffat_parameters_all_sky_bins,
-    skyextractionlims,
+    sky_extraction_limits,
 ):
     """
     This function saves the extracted spectrum and intermediate products in a single, newly
@@ -394,7 +394,7 @@ def save_fits(
         extraction_limits (numpy.ndarray)       : An array containing the extraction limits.
         moffat_parameters_all_sky_bins (numpy.ndarray)               : An array containing the binning parameters for the
                                                sky extraction.
-        skyextractionlims (list)             : A list containing the extraction limits for the sky
+        sky_extraction_limits (list)             : A list containing the extraction limits for the sky
                                                extraction.
 
     Returns:
@@ -495,8 +495,8 @@ def save_fits(
         skymodhdu.header["EXTNAME"] = "2D_SKY"
         skybinhdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
         skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
-        skyextractionlims = fits.ImageHDU(skyextractionlims)
-        skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
+        sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
+        sky_extraction_limits.header["EXTNAME"] = "SKY_EXT_LIMS"
 
     input_file_primary_header["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
     input_file_primary_header.add_blank(
@@ -533,7 +533,7 @@ def save_fits(
     if motes_parameters["-SUBTRACT_SKY"]:
         hdu_list.append(skymodhdu)
         hdu_list.append(skybinhdu)
-        hdu_list.append(skyextractionlims)
+        hdu_list.append(sky_extraction_limits)
 
     hdulist = fits.HDUList(hdu_list)
     filenamelist = input_file_path.split("_")
@@ -568,7 +568,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         frame_dict (dict)         : A dictionary containing the 2D spectrum and its associated
                                    errors and quality arrays.
         skybin (list)            : A list containing bins for the sky background.
-        skyextractionlims (list) : A list containing the extraction limits for the sky background.
+        sky_extraction_limits (list) : A list containing the extraction limits for the sky background.
     """
 
     sys.stdout.write(
@@ -657,7 +657,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     # Interpolate the extraction limits calculated for each median bin such that each wavelength
     # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
     # extraction limits.
-    skyextractionlims = common.interpolate_extraction_lims(
+    sky_extraction_limits = common.interpolate_extraction_lims(
         extraction_limits, axes_dict["dispersion_axis_length"]
     )
 
@@ -668,9 +668,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         draw_lines = [
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
+            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
+            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
@@ -685,8 +685,8 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     sys.stdout.flush()
 
     frame_dict = common.subtract_sky(
-        skyextractionlims[0],
-        skyextractionlims[1],
+        sky_extraction_limits[0],
+        sky_extraction_limits[1],
         frame_dict,
         axes_dict,
         motes_parameters,
@@ -701,9 +701,9 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
         draw_lines = [
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (skyextractionlims[0]) + axes_dict["data_spatial_floor"],
+            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
             np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (skyextractionlims[1]) + axes_dict["data_spatial_floor"],
+            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
@@ -714,7 +714,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
-    return frame_dict, skybin, skyextractionlims
+    return frame_dict, skybin, sky_extraction_limits
 
 
 if __name__ == "__main__":
