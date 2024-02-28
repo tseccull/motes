@@ -32,12 +32,12 @@ def read_motes_parameter_file():
 
     # Convert all numerical values in the parameter list to floats.
     # If digit, convert to float. If not, leave as string.
-    paramlist = [
+    parameter_list = [
         float(i) if i.replace(".", "", 1).isdigit() else i for i in flat_parameter_list
     ]
 
     # Assign parameters and their associated keywords to a dictionary.
-    pars = dict(zip(paramlist[::2], paramlist[1::2]))
+    pars = dict(zip(parameter_list[::2], parameter_list[1::2]))
 
     sys.stdout.write("DONE.\n")
 
