@@ -567,7 +567,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     Returns:
         frame_dict (dict)         : A dictionary containing the 2D spectrum and its associated
                                    errors and quality arrays.
-        skybin (list)            : A list containing bins for the sky background.
+        moffat_parameters_all_sky_bins (list)            : A list containing bins for the sky background.
         sky_extraction_limits (list) : A list containing the extraction limits for the sky background.
     """
 
@@ -575,7 +575,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
     )
 
-    skybin = []
+    moffat_parameters_all_sky_bins = []
     extraction_limits = []
     for each_bin in bin_parameters:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
@@ -616,7 +616,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
         bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
         bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
-        skybin.append(bin_moffat_parameters)
+        moffat_parameters_all_sky_bins.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
         if motes_parameters["-DIAG_PLOT_MOFFAT"]:
@@ -629,7 +629,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
                 header_parameters,
             )
 
-    skybin = np.array(skybin)
+    moffat_parameters_all_sky_bins = np.array(moffat_parameters_all_sky_bins)
 
     sys.stdout.write("     Fitting complete.\n")
 
@@ -714,7 +714,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
-    return frame_dict, skybin, sky_extraction_limits
+    return frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits
 
 
 if __name__ == "__main__":
