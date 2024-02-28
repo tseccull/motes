@@ -125,7 +125,7 @@ def data_harvest(reg_counter, filename_2D, region):
         "data": datasliced,
         "errs": errssliced,
         "qual": qualsliced,
-        "ogqual": ogimgqual,
+        "original_qual": ogimgqual,
     }
 
     axes_dict = {
