@@ -363,7 +363,7 @@ def save_fits(
     motes_parameters,
     input_file_path,
     moffat_profile_parameters,
-    fdict,
+    frame_dict,
     bpars,
     extractionlims,
     sbpars,
@@ -388,7 +388,7 @@ def save_fits(
         motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
         input_file_path (str)                       : The filename of the 1D spectrum.
         moffat_profile_parameters (list)                      : A list containing the Moffat fit parameters.
-        fdict (dict)                         : A dictionary containing the original 2D spectrum
+        frame_dict (dict)                         : A dictionary containing the original 2D spectrum
                                                data and error frames.
         bpars (numpy.ndarray)                : A dictionary containing the binning parameters.
         extractionlims (numpy.ndarray)       : An array containing the extraction limits.
@@ -491,7 +491,7 @@ def save_fits(
             motes_parameters["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction",
         )
-        skymodhdu = fits.ImageHDU(fdict["skymod"])
+        skymodhdu = fits.ImageHDU(frame_dict["skymod"])
         skymodhdu.header["EXTNAME"] = "2D_SKY"
         skybinhdu = fits.ImageHDU(sbpars)
         skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
@@ -510,11 +510,11 @@ def save_fits(
     optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=input_file_primary_header)
     aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=input_file_primary_header)
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
-    spec2Dhdu = fits.ImageHDU(fdict["original_data"])
+    spec2Dhdu = fits.ImageHDU(frame_dict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
-    errs2Dhdu = fits.ImageHDU(fdict["original_errs"])
+    errs2Dhdu = fits.ImageHDU(frame_dict["original_errs"])
     errs2Dhdu.header["EXTNAME"] = "ORIG_2D_ERRS"
-    qual2Dhdu = fits.ImageHDU(fdict["ogqual"])
+    qual2Dhdu = fits.ImageHDU(frame_dict["ogqual"])
     qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
     binhdu = fits.ImageHDU(bpars)
     binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
