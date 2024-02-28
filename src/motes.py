@@ -362,7 +362,7 @@ def save_fits(
     input_file_primary_header,
     motes_parameters,
     input_file_path,
-    moffpars,
+    moffat_profile_parameters,
     fdict,
     bpars,
     extractionlims,
@@ -387,7 +387,7 @@ def save_fits(
         input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
         motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
         input_file_path (str)                       : The filename of the 1D spectrum.
-        moffpars (list)                      : A list containing the Moffat fit parameters.
+        moffat_profile_parameters (list)                      : A list containing the Moffat fit parameters.
         fdict (dict)                         : A dictionary containing the original 2D spectrum
                                                data and error frames.
         bpars (numpy.ndarray)                : A dictionary containing the binning parameters.
@@ -433,29 +433,29 @@ def save_fits(
     )
     input_file_primary_header["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
 
-    input_file_primary_header["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
+    input_file_primary_header["HIERARCH MOFF A"] = round(moffat_profile_parameters[0], 5), "moffat profile amplitude"
     input_file_primary_header.add_blank(
         "Parameters fit to the median spatial profile of the spectrum",
         before="HIERARCH MOFF A",
     )
     input_file_primary_header["HIERARCH MOFF C"] = (
-        round(moffpars[1] + axes_dict["data_spatial_floor"], 5),
+        round(moffat_profile_parameters[1] + axes_dict["data_spatial_floor"], 5),
         "moffat profile center",
     )
     input_file_primary_header["HIERARCH MOFF ALPHA"] = (
-        round(moffpars[2], 5),
+        round(moffat_profile_parameters[2], 5),
         "moffat profile alpha value",
     )
     input_file_primary_header["HIERARCH MOFF BETA"] = (
-        round(moffpars[3], 5),
+        round(moffat_profile_parameters[3], 5),
         "moffat profile beta value",
     )
     input_file_primary_header["HIERARCH MOFF BACK"] = (
-        round(moffpars[4], 5),
+        round(moffat_profile_parameters[4], 5),
         "moffat profile background level",
     )
     input_file_primary_header["HIERARCH MOFF GRAD"] = (
-        round(moffpars[5], 5),
+        round(moffat_profile_parameters[5], 5),
         "moffat profile background slope",
     )
     input_file_primary_header["HIERARCH IQ"] = (
