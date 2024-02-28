@@ -356,7 +356,7 @@ def save_fits(
     axes_dict,
     header_parameters,
     optimal_1d_data,
-    operrs,
+    optimal_1d_errs,
     apflux,
     aperrs,
     head,
@@ -378,7 +378,7 @@ def save_fits(
         header_parameters (dict)                       : A dictionary containing the header information.
         optimal_1d_data (numpy.ndarray)               : An array containing the flux values of the optimally
                                                extracted 1D spectrum.
-        operrs (numpy.ndarray)               : An array containing the flux errors of the optimally
+        optimal_1d_errs (numpy.ndarray)               : An array containing the flux errors of the optimally
                                                extracted 1D spectrum.
         apflux (numpy.ndarray)               : An array containing the flux values of the aperture
                                                extracted 1D spectrum.
@@ -507,7 +507,7 @@ def save_fits(
     head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
-    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, operrs], header=head)
+    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=head)
     apfluxhdu = fits.ImageHDU([axes_dict["wavelength_axis"], apflux, aperrs], header=head)
     apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
