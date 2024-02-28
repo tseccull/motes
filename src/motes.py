@@ -354,7 +354,7 @@ def motes():
 
 def save_fits(
     axes_dict,
-    hparams,
+    header_parameters,
     opflux,
     operrs,
     apflux,
@@ -375,7 +375,7 @@ def save_fits(
 
     Args:
         axes_dict (dict)                        : A dictionary containing the axes information.
-        hparams (dict)                       : A dictionary containing the header information.
+        header_parameters (dict)                       : A dictionary containing the header information.
         opflux (numpy.ndarray)               : An array containing the flux values of the optimally
                                                extracted 1D spectrum.
         operrs (numpy.ndarray)               : An array containing the flux errors of the optimally
@@ -425,13 +425,13 @@ def save_fits(
     )
     head["HIERARCH WAVL"] = (
         np.floor(axes_dict["wavelength_axis"][0]),
-        "lower limit of wav range, " + hparams["wavelength_unit"],
+        "lower limit of wav range, " + header_parameters["wavelength_unit"],
     )
     head["HIERARCH WAVH"] = (
         np.ceil(axes_dict["wavelength_axis"][-1]),
-        "upper limit of wav range, " + hparams["wavelength_unit"],
+        "upper limit of wav range, " + header_parameters["wavelength_unit"],
     )
-    head["HIERARCH WAVU"] = hparams["wavelength_unit"], "Wavelength unit"
+    head["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
 
     head["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
     head.add_blank(
@@ -459,7 +459,7 @@ def save_fits(
         "moffat profile background slope",
     )
     head["HIERARCH IQ"] = (
-        round(hparams["seeing"] * hparams["pixel_resolution"], 2),
+        round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2),
         'IQ measured from median profile, "',
     )
 
@@ -498,13 +498,13 @@ def save_fits(
         skyextractionlims = fits.ImageHDU(skyextractionlims)
         skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavelength_unit"]
+    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
     head.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
-    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["flux_unit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["flux_unit"]
+    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + header_parameters["flux_unit"]
+    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     opfluxhdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], opflux, operrs], header=head)
