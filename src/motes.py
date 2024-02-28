@@ -357,7 +357,7 @@ def save_fits(
     header_parameters,
     optimal_1d_data,
     optimal_1d_errs,
-    apflux,
+    aperture_1d_data,
     aperrs,
     head,
     pars,
@@ -380,7 +380,7 @@ def save_fits(
                                                extracted 1D spectrum.
         optimal_1d_errs (numpy.ndarray)               : An array containing the flux errors of the optimally
                                                extracted 1D spectrum.
-        apflux (numpy.ndarray)               : An array containing the flux values of the aperture
+        aperture_1d_data (numpy.ndarray)               : An array containing the flux values of the aperture
                                                extracted 1D spectrum.
         aperrs (numpy.ndarray)               : An array containing the flux errors of the aperture
                                                extracted 1D spectrum.
@@ -508,8 +508,8 @@ def save_fits(
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=head)
-    apfluxhdu = fits.ImageHDU([axes_dict["wavelength_axis"], apflux, aperrs], header=head)
-    apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
+    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperrs], header=head)
+    aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
     errs2Dhdu = fits.ImageHDU(fdict["original_errs"])
@@ -522,7 +522,7 @@ def save_fits(
     extractionlims.header["EXTNAME"] = "EXT_LIMS"
     hdu_list = [
         optimal_1d_datahdu,
-        apfluxhdu,
+        aperture_1d_datahdu,
         spec2Dhdu,
         errs2Dhdu,
         qual2Dhdu,
