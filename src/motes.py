@@ -360,7 +360,7 @@ def save_fits(
     aperture_1d_data,
     aperture_1d_errs,
     input_file_primary_header,
-    pars,
+    motes_parameters,
     filename,
     moffpars,
     fdict,
@@ -385,7 +385,7 @@ def save_fits(
         aperture_1d_errs (numpy.ndarray)               : An array containing the flux errors of the aperture
                                                extracted 1D spectrum.
         input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
-        pars (dict)                          : A dictionary containing the MOTES parameters.
+        motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
         filename (str)                       : The filename of the 1D spectrum.
         moffpars (list)                      : A list containing the Moffat fit parameters.
         fdict (dict)                         : A dictionary containing the original 2D spectrum
@@ -463,32 +463,32 @@ def save_fits(
         'IQ measured from median profile, "',
     )
 
-    input_file_primary_header["HIERARCH SNR BIN LIMIT"] = pars["-SNR_BIN_LIM"], "maximum SNR per bin"
+    input_file_primary_header["HIERARCH SNR BIN LIMIT"] = motes_parameters["-SNR_BIN_LIM"], "maximum SNR per bin"
     input_file_primary_header.add_blank(
         "Dispersion Binning and Spectrum Extraction",
         before="HIERARCH SNR BIN LIMIT",
     )
     input_file_primary_header["HIERARCH COL BIN LIMIT"] = (
-        int(pars["-COL_BIN_LIM"]),
+        int(motes_parameters["-COL_BIN_LIM"]),
         "minimum number of columns per bin",
     )
     input_file_primary_header["HIERARCH FWHM MULTIPLIER"] = (
-        pars["-FWHM_MULTIPLIER"],
+        motes_parameters["-FWHM_MULTIPLIER"],
         "FWHM used to define the extraction limits",
     )
     input_file_primary_header["HIERARCH INTERP KIND"] = (
-        pars["-INTERP_KIND"],
+        motes_parameters["-INTERP_KIND"],
         "interpolation mode used",
     )
 
-    if pars["-SUBTRACT_SKY"]:
+    if motes_parameters["-SUBTRACT_SKY"]:
         input_file_primary_header["HIERARCH SKYSUB FWHM MULT"] = (
-            pars["-BG_FWHM_MULTIPLIER"],
+            motes_parameters["-BG_FWHM_MULTIPLIER"],
             "FWHM multiplier for defining background",
         )
         input_file_primary_header.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
         input_file_primary_header["HIERARCH SKYSUB SNR BIN LIM"] = (
-            pars["-SKY_SNR_BIN_LIM"],
+            motes_parameters["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction",
         )
         skymodhdu = fits.ImageHDU(fdict["skymod"])
@@ -530,7 +530,7 @@ def save_fits(
         extractionlims,
     ]
 
-    if pars["-SUBTRACT_SKY"]:
+    if motes_parameters["-SUBTRACT_SKY"]:
         hdu_list.append(skymodhdu)
         hdu_list.append(skybinhdu)
         hdu_list.append(skyextractionlims)
