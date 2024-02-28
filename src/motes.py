@@ -30,7 +30,7 @@ def motes():
     """
     # Run startup functions
     motes_parameters = startup.read_motes_parameter_file()  # Import parameters from file to dict
-    data_region = startup.read_regions()  # Search for, and read in, reg.txt
+    data_regions = startup.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
     for i, input_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):
@@ -42,7 +42,7 @@ def motes():
             " >>> Gathering image frames and header data from input file.\n"
         )
         header_parameters, frame_dict, axes_dict, input_file_primary_header = harvester.data_harvest(
-            i, input_file_path, data_region
+            i, input_file_path, data_regions
         )
         # Make backup copies of the original data and error frames.
         frame_dict["original_data"] = copy.deepcopy(frame_dict["data"])
