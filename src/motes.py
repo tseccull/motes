@@ -365,7 +365,7 @@ def save_fits(
     moffat_profile_parameters,
     frame_dict,
     moffat_parameters_all_bins,
-    extractionlims,
+    extraction_limits,
     sbpars,
     skyextractionlims,
 ):
@@ -391,7 +391,7 @@ def save_fits(
         frame_dict (dict)                         : A dictionary containing the original 2D spectrum
                                                data and error frames.
         moffat_parameters_all_bins (numpy.ndarray)                : A dictionary containing the binning parameters.
-        extractionlims (numpy.ndarray)       : An array containing the extraction limits.
+        extraction_limits (numpy.ndarray)       : An array containing the extraction limits.
         sbpars (numpy.ndarray)               : An array containing the binning parameters for the
                                                sky extraction.
         skyextractionlims (list)             : A list containing the extraction limits for the sky
@@ -518,8 +518,8 @@ def save_fits(
     qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
     binhdu = fits.ImageHDU(moffat_parameters_all_bins)
     binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
-    extractionlims = fits.ImageHDU(extractionlims)
-    extractionlims.header["EXTNAME"] = "EXT_LIMS"
+    extraction_limits = fits.ImageHDU(extraction_limits)
+    extraction_limits.header["EXTNAME"] = "EXT_LIMS"
     hdu_list = [
         optimal_1d_datahdu,
         aperture_1d_datahdu,
@@ -527,7 +527,7 @@ def save_fits(
         errs2Dhdu,
         qual2Dhdu,
         binhdu,
-        extractionlims,
+        extraction_limits,
     ]
 
     if motes_parameters["-SUBTRACT_SKY"]:
