@@ -353,7 +353,7 @@ def motes():
 
 
 def save_fits(
-    axdict,
+    axes_dict,
     hparams,
     opflux,
     operrs,
@@ -374,7 +374,7 @@ def save_fits(
     constructed, FITS file.
 
     Args:
-        axdict (dict)                        : A dictionary containing the axes information.
+        axes_dict (dict)                        : A dictionary containing the axes information.
         hparams (dict)                       : A dictionary containing the header information.
         opflux (numpy.ndarray)               : An array containing the flux values of the optimally
                                                extracted 1D spectrum.
@@ -408,27 +408,27 @@ def save_fits(
         "file creation date",
     )
     head["HIERARCH SPATPIXL"] = (
-        axdict["data_spatial_floor"],
+        axes_dict["data_spatial_floor"],
         "lower limit of spatial axis, pix",
     )
     head["HIERARCH SPATPIXH"] = (
-        axdict["imgend"],
+        axes_dict["imgend"],
         "upper limit of spatial axis, pix",
     )
     head["HIERARCH DISPPIXL"] = (
-        axdict["wavelength_start"],
+        axes_dict["wavelength_start"],
         "lower limit of dispersion axis, pix",
     )
     head["HIERARCH DISPPIXH"] = (
-        axdict["wavend"],
+        axes_dict["wavend"],
         "upper limit of dispersion axis, pix",
     )
     head["HIERARCH WAVL"] = (
-        np.floor(axdict["wavelength_axis"][0]),
+        np.floor(axes_dict["wavelength_axis"][0]),
         "lower limit of wav range, " + hparams["wavelength_unit"],
     )
     head["HIERARCH WAVH"] = (
-        np.ceil(axdict["wavelength_axis"][-1]),
+        np.ceil(axes_dict["wavelength_axis"][-1]),
         "upper limit of wav range, " + hparams["wavelength_unit"],
     )
     head["HIERARCH WAVU"] = hparams["wavelength_unit"], "Wavelength unit"
@@ -439,7 +439,7 @@ def save_fits(
         before="HIERARCH MOFF A",
     )
     head["HIERARCH MOFF C"] = (
-        round(moffpars[1] + axdict["data_spatial_floor"], 5),
+        round(moffpars[1] + axes_dict["data_spatial_floor"], 5),
         "moffat profile center",
     )
     head["HIERARCH MOFF ALPHA"] = (
@@ -507,8 +507,8 @@ def save_fits(
     head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["flux_unit"]
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
-    opfluxhdu = fits.PrimaryHDU([axdict["wavelength_axis"], opflux, operrs], header=head)
-    apfluxhdu = fits.ImageHDU([axdict["wavelength_axis"], apflux, aperrs], header=head)
+    opfluxhdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], opflux, operrs], header=head)
+    apfluxhdu = fits.ImageHDU([axes_dict["wavelength_axis"], apflux, aperrs], header=head)
     apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
