@@ -510,8 +510,8 @@ def save_fits(
     optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=input_file_primary_header)
     aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=input_file_primary_header)
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
-    spec2Dhdu = fits.ImageHDU(frame_dict["original_data"])
-    spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
+    orig_2d_spec_hdu = fits.ImageHDU(frame_dict["original_data"])
+    orig_2d_spec_hdu.header["EXTNAME"] = "ORIG_2D_SPEC"
     errs2Dhdu = fits.ImageHDU(frame_dict["original_errs"])
     errs2Dhdu.header["EXTNAME"] = "ORIG_2D_ERRS"
     qual2Dhdu = fits.ImageHDU(frame_dict["ogqual"])
@@ -523,7 +523,7 @@ def save_fits(
     hdu_list = [
         optimal_1d_datahdu,
         aperture_1d_datahdu,
-        spec2Dhdu,
+        orig_2d_spec_hdu,
         errs2Dhdu,
         qual2Dhdu,
         binhdu,
