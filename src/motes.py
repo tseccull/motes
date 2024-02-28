@@ -493,8 +493,8 @@ def save_fits(
         )
         sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
         sky_model_hdu.header["EXTNAME"] = "2D_SKY"
-        skybinhdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
-        skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
+        sky_bin_hdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
+        sky_bin_hdu.header["EXTNAME"] = "SKY_BIN_PARS"
         sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
         sky_extraction_limits.header["EXTNAME"] = "SKY_EXT_LIMS"
 
@@ -532,7 +532,7 @@ def save_fits(
 
     if motes_parameters["-SUBTRACT_SKY"]:
         hdu_list.append(sky_model_hdu)
-        hdu_list.append(skybinhdu)
+        hdu_list.append(sky_bin_hdu)
         hdu_list.append(sky_extraction_limits)
 
     hdulist = fits.HDUList(hdu_list)
