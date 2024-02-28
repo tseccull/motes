@@ -535,10 +535,10 @@ def save_fits(
         hdu_list.append(sky_bin_hdu)
         hdu_list.append(sky_extraction_limits)
 
-    hdulist = fits.HDUList(hdu_list)
+    fits_hdu_list = fits.HDUList(hdu_list)
     filenamelist = input_file_path.split("_")
-    hdulist.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
-    hdulist.close()
+    fits_hdu_list.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
+    fits_hdu_list.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
