@@ -358,7 +358,7 @@ def save_fits(
     optimal_1d_data,
     optimal_1d_errs,
     aperture_1d_data,
-    aperrs,
+    aperture_1d_errs,
     head,
     pars,
     filename,
@@ -382,7 +382,7 @@ def save_fits(
                                                extracted 1D spectrum.
         aperture_1d_data (numpy.ndarray)               : An array containing the flux values of the aperture
                                                extracted 1D spectrum.
-        aperrs (numpy.ndarray)               : An array containing the flux errors of the aperture
+        aperture_1d_errs (numpy.ndarray)               : An array containing the flux errors of the aperture
                                                extracted 1D spectrum.
         head (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
         pars (dict)                          : A dictionary containing the MOTES parameters.
@@ -508,7 +508,7 @@ def save_fits(
     head["EXTNAME"] = "OPTI_1D_SPEC"
 
     optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=head)
-    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperrs], header=head)
+    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=head)
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     spec2Dhdu = fits.ImageHDU(fdict["original_data"])
     spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
