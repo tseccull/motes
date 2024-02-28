@@ -56,7 +56,7 @@ def read_regions():
         None
 
     Returns:
-        intregion (list) : A list for each file contains a list of integers that define the
+        data_region (list) : A list for each file contains a list of integers that define the
                            boundaries of the region of the 2D spectum that will be used for the
                            extraction.
     """
@@ -68,7 +68,7 @@ def read_regions():
 
         with open("reg.txt", "r", encoding="utf-8") as region_file:
             region_lines = region_file.read().splitlines()
-            data_region = [[int(lim) for lim in x.split(",")] for x in region_lines]
+            data_region = [[int(limit) for limit in x.split(",")] for x in region_lines]
         sys.stdout.write("DONE.\n")
 
     # Complain and quit MOTES if reg.txt isn't found.
