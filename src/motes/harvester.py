@@ -92,18 +92,18 @@ def data_harvest(region_counter, input_file_path, data_regions):
         )
         sys.exit()
 
-    wavslice = np.where(
+    wavelength_slice = np.where(
         np.logical_and(
             wavelength_axis >= data_regions[region_counter][2], wavelength_axis <= data_regions[region_counter][3]
         )
     )
-    wavstart = wavslice[0][0]
-    wavend = wavslice[0][-1]
-    wavelength_axis = wavelength_axis[wavslice]
+    wavstart = wavelength_slice[0][0]
+    wavend = wavelength_slice[0][-1]
+    wavelength_axis = wavelength_axis[wavelength_slice]
 
-    data_sliced = np.squeeze(data_sliced[:, wavslice])
-    errs_sliced = np.squeeze(errs_sliced[:, wavslice])
-    qual_sliced = np.squeeze(qual_sliced[:, wavslice])
+    data_sliced = np.squeeze(data_sliced[:, wavelength_slice])
+    errs_sliced = np.squeeze(errs_sliced[:, wavelength_slice])
+    qual_sliced = np.squeeze(qual_sliced[:, wavelength_slice])
 
     sys.stdout.write(
         " >>> 2D spectrum sliced on dispersion axis based on user defined limits:\n"
