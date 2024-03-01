@@ -54,7 +54,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
             qual,
             original_qual,
             header_dict,
-            wavaxis,
+            wavelength_axis,
         ) = instrument_dict[
             inst
         ](input_fits_hdu, input_file_primary_header)
@@ -83,7 +83,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
     hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
-    if data_regions[region_counter][2] < wavaxis[0] or data_regions[region_counter][3] > wavaxis[-1]:
+    if data_regions[region_counter][2] < wavelength_axis[0] or data_regions[region_counter][3] > wavelength_axis[-1]:
         sys.stdout.write(
             " >>> User defined wavelength limit(s) are outside native wavelength range\n"
             '     Make sure "-LOW_WAV_SLICE" > lower limit of wavelength axis\n'
@@ -94,12 +94,12 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     wavslice = np.where(
         np.logical_and(
-            wavaxis >= data_regions[region_counter][2], wavaxis <= data_regions[region_counter][3]
+            wavelength_axis >= data_regions[region_counter][2], wavelength_axis <= data_regions[region_counter][3]
         )
     )
     wavstart = wavslice[0][0]
     wavend = wavslice[0][-1]
-    wavaxis = wavaxis[wavslice]
+    wavelength_axis = wavelength_axis[wavslice]
 
     datasliced = np.squeeze(datasliced[:, wavslice])
     errssliced = np.squeeze(errssliced[:, wavslice])
@@ -117,7 +117,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "     This range is equivalent to pixel columns "
         + str(wavstart)
         + "-"
-        + str(wavstart + len(wavaxis))
+        + str(wavstart + len(wavelength_axis))
         + "\n"
     )
 
@@ -134,8 +134,8 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "hi_resolution_spatial_axis": hiresspataxis,
         "data_spatial_floor": imgstart,
         "imgend": imgend,
-        "dispersion_axis_length": len(wavaxis),
-        "wavelength_axis": wavaxis,
+        "dispersion_axis_length": len(wavelength_axis),
+        "wavelength_axis": wavelength_axis,
         "wavelength_start": wavstart,
         "wavend": wavend,
     }
@@ -205,11 +205,11 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
     sys.stdout.write("DONE.\n")
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
+    wavelength_axis = common.make_wav_axis(
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavaxis
+    return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
 def harvest_fors2(input_fits_hduhdu, imgheader):
@@ -232,7 +232,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
                                     In the case of FORS2 this frame is set to all zeros (see
                                     qual above).
         headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame and error frame.
@@ -295,11 +295,11 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     sys.stdout.write("DONE.\n")
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
+    wavelength_axis = common.make_wav_axis(
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavaxis
+    return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
 def harvest_gmos(input_fits_hduhdu, imgheader):
@@ -317,7 +317,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
         qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science
@@ -405,7 +405,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     )
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
+    wavelength_axis = common.make_wav_axis(
         scihead["CRVAL1"], scihead["CD1_1"], scihead["NAXIS1"]
     )
 
@@ -432,7 +432,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     data[chipgapmap == 1] = 1.0
     errs[chipgapmap == 1] = 1.0
 
-    return data, errs, qual, original_qual, headerdict, wavaxis
+    return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
 def harvest_xshoo(input_fits_hduhdu, imgheader):
@@ -450,7 +450,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
         qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     print(type(input_fits_hduhdu))
@@ -498,8 +498,8 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     )
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
+    wavelength_axis = common.make_wav_axis(
         imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavaxis
+    return data, errs, qual, original_qual, headerdict, wavelength_axis
