@@ -23,7 +23,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         data_regions (list)     : A list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
-        head_dict (dict)  : A dictionary containing parameters and metadata read from the header of
+        header_dict (dict)  : A dictionary containing parameters and metadata read from the header of
                             the image file.
         frame_dict (dict) : A dictionary containing the 2D data frames read from the image file.
         axes_dict (dict)  : A dictionary containing the spatial and spectral axis arrays associated
@@ -53,7 +53,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
             imgerrs,
             imgqual,
             ogimgqual,
-            head_dict,
+            header_dict,
             wavaxis,
         ) = instrument_dict[
             inst
@@ -112,7 +112,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         + "-"
         + str(data_regions[region_counter][3])
         + " "
-        + head_dict["wavelength_unit"]
+        + header_dict["wavelength_unit"]
         + ".\n"
         "     This range is equivalent to pixel columns "
         + str(wavstart)
@@ -140,7 +140,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "wavend": wavend,
     }
 
-    return head_dict, frame_dict, axes_dict, input_file_primary_header
+    return header_dict, frame_dict, axes_dict, input_file_primary_header
 
 
 def harvest_floyds(imgfilehdu, imgheader):
