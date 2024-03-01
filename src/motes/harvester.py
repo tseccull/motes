@@ -65,10 +65,10 @@ def data_harvest(region_counter, input_file_path, data_regions):
     data_spatial_ceiling = int(data_shape[0] - data_regions[region_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
-    datasliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
+    data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
     errssliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
     qualsliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
-    dataslicedshape = np.shape(datasliced)
+    dataslicedshape = np.shape(data_sliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
         "     New spatial axis covers pixel rows "
@@ -101,7 +101,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     wavend = wavslice[0][-1]
     wavelength_axis = wavelength_axis[wavslice]
 
-    datasliced = np.squeeze(datasliced[:, wavslice])
+    data_sliced = np.squeeze(data_sliced[:, wavslice])
     errssliced = np.squeeze(errssliced[:, wavslice])
     qualsliced = np.squeeze(qualsliced[:, wavslice])
 
@@ -122,7 +122,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     )
 
     frame_dict = {
-        "data": datasliced,
+        "data": data_sliced,
         "errs": errssliced,
         "qual": qualsliced,
         "original_qual": original_qual,
