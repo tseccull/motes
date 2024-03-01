@@ -9,7 +9,7 @@ import sys
 import astropy.io.fits as fits
 import numpy as np
 
-from motes import common
+import motes.common as common
 
 
 def data_harvest(reg_counter, filename_2D, region):
