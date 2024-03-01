@@ -81,7 +81,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for
     # the purposes of plotting
     spatial_axis = np.linspace(0.0, float(data_sliced_shape[0] - 1), num=data_sliced_shape[0])
-    hiresspataxis = np.linspace(spatial_axis[0], spatial_axis[-1], num=len(spatial_axis) * 5)
+    hi_resolution_spatial_axis = np.linspace(spatial_axis[0], spatial_axis[-1], num=len(spatial_axis) * 5)
 
     if data_regions[region_counter][2] < wavelength_axis[0] or data_regions[region_counter][3] > wavelength_axis[-1]:
         sys.stdout.write(
@@ -131,7 +131,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     axes_dict = {
         "spataxislen": len(spatial_axis),
         "spatial_axis": spatial_axis,
-        "hi_resolution_spatial_axis": hiresspataxis,
+        "hi_resolution_spatial_axis": hi_resolution_spatial_axis,
         "data_spatial_floor": data_spatial_floor,
         "data_spatial_ceiling": data_spatial_ceiling,
         "dispersion_axis_length": len(wavelength_axis),
