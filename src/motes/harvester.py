@@ -68,7 +68,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
     errs_sliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
     qual_sliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
-    dataslicedshape = np.shape(data_sliced)
+    data_sliced_shape = np.shape(data_sliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
         "     New spatial axis covers pixel rows "
@@ -80,7 +80,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for
     # the purposes of plotting
-    spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
+    spataxis = np.linspace(0.0, float(data_sliced_shape[0] - 1), num=data_sliced_shape[0])
     hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
     if data_regions[region_counter][2] < wavelength_axis[0] or data_regions[region_counter][3] > wavelength_axis[-1]:
