@@ -49,7 +49,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         inst = input_file_primary_header["INSTRUME"]
         # Based on the value of inst, this calls one of the harvest_instrument functions.
         (
-            imgdata,
+            data,
             imgerrs,
             imgqual,
             ogimgqual,
@@ -60,12 +60,12 @@ def data_harvest(region_counter, input_file_path, data_regions):
         ](input_fits_hdu, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
-    imgshape = np.shape(imgdata)
+    imgshape = np.shape(data)
     imgstart = int(0 + data_regions[region_counter][0])
     imgend = int(imgshape[0] - data_regions[region_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
-    datasliced = imgdata[imgstart : imgend + 1, :]
+    datasliced = data[imgstart : imgend + 1, :]
     errssliced = imgerrs[imgstart : imgend + 1, :]
     qualsliced = imgqual[imgstart : imgend + 1, :]
     dataslicedshape = np.shape(datasliced)
@@ -154,7 +154,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame array
+        data (numpy.ndarray)   : the 2D data frame array
         imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the
                                     case of FLOYDS, no variance or uncertainty frame is provided,
                                     so one is constructed using the data along with read noise and
@@ -175,13 +175,13 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
     """
 
     # Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
-    imgdata = input_fits_hduhdu[0].data
+    data = input_fits_hduhdu[0].data
     imgerrs = np.sqrt(
-        imgdata
+        data
         + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
         + (imgheader["DARKCURR"] * imgheader["DARKCURR"])
     )
-    imgqual = np.ones(np.shape(imgdata))
+    imgqual = np.ones(np.shape(data))
     ogimgqual = copy.deepcopy(imgqual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec.
@@ -209,7 +209,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_fors2(input_fits_hduhdu, imgheader):
@@ -222,7 +222,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
+        data (numpy.ndarray)   : the 2D data frame
         imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FORS2 spectra are not provided with a qual frame, a blank
@@ -236,9 +236,9 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     """
 
     # Retrieve the data frame and error frame.
-    imgdata = input_fits_hduhdu[0].data
+    data = input_fits_hduhdu[0].data
     imgerrs = input_fits_hduhdu[1].data ** 0.5
-    imgqual = np.ones(np.shape(imgdata))
+    imgqual = np.ones(np.shape(data))
     ogimgqual = copy.deepcopy(imgqual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the
@@ -299,7 +299,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_gmos(input_fits_hduhdu, imgheader):
@@ -312,7 +312,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
+        data (numpy.ndarray)   : the 2D data frame
         imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
@@ -323,20 +323,20 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science
     # image frame, as some metadata is stored there instead of the primary header.
     scihead = input_fits_hduhdu["SCI"].header
-    imgdata = input_fits_hduhdu["SCI"].data
+    data = input_fits_hduhdu["SCI"].data
     imgerrs = input_fits_hduhdu["VAR"].data ** 0.5
     imgqual = input_fits_hduhdu["DQ"].data
     ogimgqual = copy.deepcopy(imgqual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as bad.
-    imgqual[np.where(imgdata + imgqual == 1)] = 0
+    imgqual[np.where(data + imgqual == 1)] = 0
     imgqual = 1 - imgqual
 
     # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual
     # frame.
-    imgqual[~np.isfinite(imgdata)] = 0
-    imgdata[~np.isfinite(imgdata)] = 1.0
+    imgqual[~np.isfinite(data)] = 0
+    data[~np.isfinite(data)] = 1.0
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
     # constraints used by Gemini.
@@ -413,7 +413,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     # pixels or trip up the bin definition stage. Chip gaps are identified as pixel columns which
     # are all zeros, and then three columns either side of the chip gaps are also flagged just to
     # be safe.
-    zerorows = [1 if all(x == 0) else 0 for x in imgdata.T]
+    zerorows = [1 if all(x == 0) else 0 for x in data.T]
     boundary_cols = 3
     zerorows = np.concatenate(
         [np.zeros(boundary_cols), zerorows, np.zeros(boundary_cols)]
@@ -428,11 +428,11 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
             for y, x in enumerate(zerorows[1:])
         ]
     zerorows = [1 if x > 0 else x for x in zerorows]
-    chipgapmap = np.tile(zerorows, (np.shape(imgdata)[0], 1))
-    imgdata[chipgapmap == 1] = 1.0
+    chipgapmap = np.tile(zerorows, (np.shape(data)[0], 1))
+    data[chipgapmap == 1] = 1.0
     imgerrs[chipgapmap == 1] = 1.0
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_xshoo(input_fits_hduhdu, imgheader):
@@ -445,7 +445,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
+        data (numpy.ndarray)   : the 2D data frame
         imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
@@ -457,7 +457,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     print(type(imgheader))
 
     # Retrieve the data frame, error frame, and qual frame.
-    imgdata = input_fits_hduhdu[0].data
+    data = input_fits_hduhdu[0].data
     imgerrs = input_fits_hduhdu[1].data
     imgqual = input_fits_hduhdu[2].data
     ogimgqual = copy.deepcopy(imgqual)
@@ -473,7 +473,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     imgqual[imgqual > 0] *= -1
     imgqual[imgqual == 0] = 1
     imgqual[imgqual < 0] = 0
-    imgqual[~np.isfinite(imgdata)] = 0
+    imgqual[~np.isfinite(data)] = 0
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
@@ -502,4 +502,4 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
