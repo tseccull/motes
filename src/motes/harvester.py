@@ -46,8 +46,8 @@ def data_harvest(region_counter, input_file_path, data_regions):
     # and quality frame (if the file has one).
     with fits.open(input_file_path) as input_fits_hdu:
         input_file_primary_header = input_fits_hdu[0].header
-        inst = input_file_primary_header["INSTRUME"]
-        # Based on the value of inst, this calls one of the harvest_instrument functions.
+        instrument = input_file_primary_header["INSTRUME"]
+        # Based on the value of instrument, this calls one of the harvest_instrument functions.
         (
             data,
             errs,
@@ -56,7 +56,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
             header_dict,
             wavelength_axis,
         ) = instrument_dict[
-            inst
+            instrument
         ](input_fits_hdu, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
@@ -197,7 +197,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         "object": imgheader["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixres,
         "exptime": imgheader["EXPTIME"],
-        "inst": imgheader["INSTRUME"],
+        "instrument": imgheader["INSTRUME"],
         "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
         "flux_unit": "electrons",
         "wavelength_unit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
@@ -282,7 +282,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
         "object": imgheader["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixres,
         "exptime": imgheader["HIERARCH ESO INS SHUT EXPTIME"],
-        "inst": imgheader["INSTRUME"],
+        "instrument": imgheader["INSTRUME"],
         "seeing": 0.5
         * (
             imgheader["HIERARCH ESO TEL AMBI FWHM START"]
@@ -387,7 +387,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
         "pixel_resolution": float(imgheader["PIXSCALE"]),
         "exptime": imgheader["EXPTIME"],
         "seeing": seeing,
-        "inst": imgheader["INSTRUME"],
+        "instrument": imgheader["INSTRUME"],
         "wavelength_unit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
     }
 
