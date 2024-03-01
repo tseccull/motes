@@ -60,9 +60,9 @@ def data_harvest(region_counter, input_file_path, data_regions):
         ](input_fits_hdu, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
-    imgshape = np.shape(data)
+    data_shape = np.shape(data)
     imgstart = int(0 + data_regions[region_counter][0])
-    imgend = int(imgshape[0] - data_regions[region_counter][1])
+    imgend = int(data_shape[0] - data_regions[region_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
     datasliced = data[imgstart : imgend + 1, :]
