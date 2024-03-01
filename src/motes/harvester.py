@@ -50,7 +50,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         # Based on the value of inst, this calls one of the harvest_instrument functions.
         (
             data,
-            imgerrs,
+            errs,
             imgqual,
             ogimgqual,
             header_dict,
@@ -66,7 +66,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     # Slice off the spatial rows outside the spatial region.
     datasliced = data[imgstart : imgend + 1, :]
-    errssliced = imgerrs[imgstart : imgend + 1, :]
+    errssliced = errs[imgstart : imgend + 1, :]
     qualsliced = imgqual[imgstart : imgend + 1, :]
     dataslicedshape = np.shape(datasliced)
     sys.stdout.write(
@@ -155,7 +155,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame array
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the
                                     case of FLOYDS, no variance or uncertainty frame is provided,
                                     so one is constructed using the data along with read noise and
                                     dark current metadata contained in the file header. This is why
@@ -176,7 +176,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
 
     # Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
     data = input_fits_hduhdu[0].data
-    imgerrs = np.sqrt(
+    errs = np.sqrt(
         data
         + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
         + (imgheader["DARKCURR"] * imgheader["DARKCURR"])
@@ -209,7 +209,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_fors2(input_fits_hduhdu, imgheader):
@@ -223,7 +223,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FORS2 spectra are not provided with a qual frame, a blank
                                     one (flagging all pixels as good; i.e. ==1) is created to
@@ -237,7 +237,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
 
     # Retrieve the data frame and error frame.
     data = input_fits_hduhdu[0].data
-    imgerrs = input_fits_hduhdu[1].data ** 0.5
+    errs = input_fits_hduhdu[1].data ** 0.5
     imgqual = np.ones(np.shape(data))
     ogimgqual = copy.deepcopy(imgqual) - 1
 
@@ -299,7 +299,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_gmos(input_fits_hduhdu, imgheader):
@@ -313,7 +313,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
@@ -324,7 +324,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     # image frame, as some metadata is stored there instead of the primary header.
     scihead = input_fits_hduhdu["SCI"].header
     data = input_fits_hduhdu["SCI"].data
-    imgerrs = input_fits_hduhdu["VAR"].data ** 0.5
+    errs = input_fits_hduhdu["VAR"].data ** 0.5
     imgqual = input_fits_hduhdu["DQ"].data
     ogimgqual = copy.deepcopy(imgqual)
 
@@ -430,9 +430,9 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     zerorows = [1 if x > 0 else x for x in zerorows]
     chipgapmap = np.tile(zerorows, (np.shape(data)[0], 1))
     data[chipgapmap == 1] = 1.0
-    imgerrs[chipgapmap == 1] = 1.0
+    errs[chipgapmap == 1] = 1.0
 
-    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_xshoo(input_fits_hduhdu, imgheader):
@@ -446,7 +446,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
@@ -458,7 +458,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
 
     # Retrieve the data frame, error frame, and qual frame.
     data = input_fits_hduhdu[0].data
-    imgerrs = input_fits_hduhdu[1].data
+    errs = input_fits_hduhdu[1].data
     imgqual = input_fits_hduhdu[2].data
     ogimgqual = copy.deepcopy(imgqual)
 
@@ -502,4 +502,4 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
     )
 
-    return data, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
