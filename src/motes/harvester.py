@@ -51,7 +51,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         (
             data,
             errs,
-            imgqual,
+            qual,
             ogimgqual,
             header_dict,
             wavaxis,
@@ -67,7 +67,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     # Slice off the spatial rows outside the spatial region.
     datasliced = data[imgstart : imgend + 1, :]
     errssliced = errs[imgstart : imgend + 1, :]
-    qualsliced = imgqual[imgstart : imgend + 1, :]
+    qualsliced = qual[imgstart : imgend + 1, :]
     dataslicedshape = np.shape(datasliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
@@ -163,7 +163,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
                                     MOTES, as the flux calibration spoils the construction of the
                                     error frame. Flux calibration should be applied after the
                                     spectrum is extracted if MOTES is used.
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FLOYDS spectra are not provided with a qual frame, a
                                     blank one (flagging all pixels as good; i.e. ==1) is created to
                                     ensure compatibility with MOTES.
@@ -181,8 +181,8 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
         + (imgheader["DARKCURR"] * imgheader["DARKCURR"])
     )
-    imgqual = np.ones(np.shape(data))
-    ogimgqual = copy.deepcopy(imgqual) - 1
+    qual = np.ones(np.shape(data))
+    ogimgqual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec.
     pixres = imgheader["PIXSCALE"]
@@ -209,7 +209,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_fors2(input_fits_hduhdu, imgheader):
@@ -224,13 +224,13 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     Returns:
         data (numpy.ndarray)   : the 2D data frame
         errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FORS2 spectra are not provided with a qual frame, a blank
                                     one (flagging all pixels as good; i.e. ==1) is created to
                                     ensure compatibility with MOTES.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
                                     In the case of FORS2 this frame is set to all zeros (see
-                                    imgqual above).
+                                    qual above).
         headerdict (dict)         : a dictionary containing the header information.
         wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
@@ -238,8 +238,8 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     # Retrieve the data frame and error frame.
     data = input_fits_hduhdu[0].data
     errs = input_fits_hduhdu[1].data ** 0.5
-    imgqual = np.ones(np.shape(data))
-    ogimgqual = copy.deepcopy(imgqual) - 1
+    qual = np.ones(np.shape(data))
+    ogimgqual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the
     # detector and the configuration of the collimator (high resolution or standard resolution).
@@ -299,7 +299,7 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_gmos(input_fits_hduhdu, imgheader):
@@ -314,7 +314,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     Returns:
         data (numpy.ndarray)   : the 2D data frame
         errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
         wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
@@ -325,17 +325,17 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     scihead = input_fits_hduhdu["SCI"].header
     data = input_fits_hduhdu["SCI"].data
     errs = input_fits_hduhdu["VAR"].data ** 0.5
-    imgqual = input_fits_hduhdu["DQ"].data
-    ogimgqual = copy.deepcopy(imgqual)
+    qual = input_fits_hduhdu["DQ"].data
+    ogimgqual = copy.deepcopy(qual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as bad.
-    imgqual[np.where(data + imgqual == 1)] = 0
-    imgqual = 1 - imgqual
+    qual[np.where(data + qual == 1)] = 0
+    qual = 1 - qual
 
     # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual
     # frame.
-    imgqual[~np.isfinite(data)] = 0
+    qual[~np.isfinite(data)] = 0
     data[~np.isfinite(data)] = 1.0
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
@@ -432,7 +432,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     data[chipgapmap == 1] = 1.0
     errs[chipgapmap == 1] = 1.0
 
-    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, ogimgqual, headerdict, wavaxis
 
 
 def harvest_xshoo(input_fits_hduhdu, imgheader):
@@ -447,7 +447,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     Returns:
         data (numpy.ndarray)   : the 2D data frame
         errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
         headerdict (dict)         : a dictionary containing the header information.
         wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
@@ -459,21 +459,21 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     # Retrieve the data frame, error frame, and qual frame.
     data = input_fits_hduhdu[0].data
     errs = input_fits_hduhdu[1].data
-    imgqual = input_fits_hduhdu[2].data
-    ogimgqual = copy.deepcopy(imgqual)
+    qual = input_fits_hduhdu[2].data
+    ogimgqual = copy.deepcopy(qual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Values flagged by the X-Shooter data reduction pipeline as interpolated are considered good.
-    imgqual[imgqual == 4194304] = 0
+    qual[qual == 4194304] = 0
 
     # If the bspline sky subtraction method has been used in the X-Shooter data reduction pipeline,
     # pixels flagged as outliers or inaccurate are considered good.
-    imgqual[imgqual == 8388608] = 0
-    imgqual[imgqual == 16777216] = 0
-    imgqual[imgqual > 0] *= -1
-    imgqual[imgqual == 0] = 1
-    imgqual[imgqual < 0] = 0
-    imgqual[~np.isfinite(data)] = 0
+    qual[qual == 8388608] = 0
+    qual[qual == 16777216] = 0
+    qual[qual > 0] *= -1
+    qual[qual == 0] = 1
+    qual[qual < 0] = 0
+    qual[~np.isfinite(data)] = 0
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
@@ -502,4 +502,4 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
         imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
     )
 
-    return data, errs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, ogimgqual, headerdict, wavaxis
