@@ -66,7 +66,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     # Slice off the spatial rows outside the spatial region.
     data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
-    errssliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
+    errs_sliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
     qualsliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
     dataslicedshape = np.shape(data_sliced)
     sys.stdout.write(
@@ -102,7 +102,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     wavelength_axis = wavelength_axis[wavslice]
 
     data_sliced = np.squeeze(data_sliced[:, wavslice])
-    errssliced = np.squeeze(errssliced[:, wavslice])
+    errs_sliced = np.squeeze(errs_sliced[:, wavslice])
     qualsliced = np.squeeze(qualsliced[:, wavslice])
 
     sys.stdout.write(
@@ -123,7 +123,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     frame_dict = {
         "data": data_sliced,
-        "errs": errssliced,
+        "errs": errs_sliced,
         "qual": qualsliced,
         "original_qual": original_qual,
     }
