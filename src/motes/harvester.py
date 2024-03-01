@@ -29,7 +29,7 @@ def data_harvest(reg_counter, filename_2D, data_regions):
         axes_dict (dict)  : A dictionary containing the spatial and spectral axis arrays associated
                             with the data frames, along with metadata used to define the boundaries
                             of the 2D data.
-        imghead (dict)    : A copy of the image file header; this is also a dictionary.
+        input_file_primary_header (dict)    : A copy of the image file header; this is also a dictionary.
     """
 
     # Create dictionary to tell data_harvest which instrument specific function to call.
@@ -45,8 +45,8 @@ def data_harvest(reg_counter, filename_2D, data_regions):
     # Open file containing the spectral data, then extract the header, image frame, error frame,
     # and quality frame (if the file has one).
     with fits.open(filename_2D) as imgfile:
-        imghead = imgfile[0].header
-        inst = imghead["INSTRUME"]
+        input_file_primary_header = imgfile[0].header
+        inst = input_file_primary_header["INSTRUME"]
         # Based on the value of inst, this calls one of the harvest_instrument functions.
         (
             imgdata,
@@ -57,7 +57,7 @@ def data_harvest(reg_counter, filename_2D, data_regions):
             wavaxis,
         ) = instrument_dict[
             inst
-        ](imgfile, imghead)
+        ](imgfile, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
     imgshape = np.shape(imgdata)
@@ -140,7 +140,7 @@ def data_harvest(reg_counter, filename_2D, data_regions):
         "wavend": wavend,
     }
 
-    return head_dict, frame_dict, axes_dict, imghead
+    return head_dict, frame_dict, axes_dict, input_file_primary_header
 
 
 def harvest_floyds(imgfilehdu, imgheader):
