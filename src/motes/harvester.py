@@ -12,14 +12,14 @@ import numpy as np
 import motes.common as common
 
 
-def data_harvest(reg_counter, filename_2D, data_regions):
+def data_harvest(reg_counter, input_file_path, data_regions):
     """Extract header metadata and data frames, and repackage them into dictionaries for use in the
        rest of MOTES.
 
     Args:
         reg_counter (int) : An integer noting which line in region is being called to define the
                             boundaries of the 2D data.
-        filename_2D (str) : The name of the data file.
+        input_file_path (str) : The name of the data file.
         data_regions (list)     : A list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
@@ -44,7 +44,7 @@ def data_harvest(reg_counter, filename_2D, data_regions):
 
     # Open file containing the spectral data, then extract the header, image frame, error frame,
     # and quality frame (if the file has one).
-    with fits.open(filename_2D) as imgfile:
+    with fits.open(input_file_path) as imgfile:
         input_file_primary_header = imgfile[0].header
         inst = input_file_primary_header["INSTRUME"]
         # Based on the value of inst, this calls one of the harvest_instrument functions.
