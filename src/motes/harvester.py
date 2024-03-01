@@ -67,7 +67,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     # Slice off the spatial rows outside the spatial region.
     data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
     errs_sliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
-    qualsliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
+    qual_sliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
     dataslicedshape = np.shape(data_sliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
@@ -103,7 +103,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     data_sliced = np.squeeze(data_sliced[:, wavslice])
     errs_sliced = np.squeeze(errs_sliced[:, wavslice])
-    qualsliced = np.squeeze(qualsliced[:, wavslice])
+    qual_sliced = np.squeeze(qual_sliced[:, wavslice])
 
     sys.stdout.write(
         " >>> 2D spectrum sliced on dispersion axis based on user defined limits:\n"
@@ -124,7 +124,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     frame_dict = {
         "data": data_sliced,
         "errs": errs_sliced,
-        "qual": qualsliced,
+        "qual": qual_sliced,
         "original_qual": original_qual,
     }
 
