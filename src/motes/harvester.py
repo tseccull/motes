@@ -44,8 +44,8 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     # Open file containing the spectral data, then extract the header, image frame, error frame,
     # and quality frame (if the file has one).
-    with fits.open(input_file_path) as imgfile:
-        input_file_primary_header = imgfile[0].header
+    with fits.open(input_file_path) as input_fits_hdu:
+        input_file_primary_header = input_fits_hdu[0].header
         inst = input_file_primary_header["INSTRUME"]
         # Based on the value of inst, this calls one of the harvest_instrument functions.
         (
@@ -57,7 +57,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
             wavaxis,
         ) = instrument_dict[
             inst
-        ](imgfile, input_file_primary_header)
+        ](input_fits_hdu, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
     imgshape = np.shape(imgdata)
@@ -143,13 +143,13 @@ def data_harvest(region_counter, input_file_path, data_regions):
     return header_dict, frame_dict, axes_dict, input_file_primary_header
 
 
-def harvest_floyds(imgfilehdu, imgheader):
+def harvest_floyds(input_fits_hduhdu, imgheader):
     """
     Harvest the header and data from a FLOYDS spectrum. Please note that this spectrum must not be
     flux calibrated, to ensure that a reliable ERR frame is made.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
@@ -175,7 +175,7 @@ def harvest_floyds(imgfilehdu, imgheader):
     """
 
     # Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
-    imgdata = imgfilehdu[0].data
+    imgdata = input_fits_hduhdu[0].data
     imgerrs = np.sqrt(
         imgdata
         + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
@@ -212,12 +212,12 @@ def harvest_floyds(imgfilehdu, imgheader):
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
-def harvest_fors2(imgfilehdu, imgheader):
+def harvest_fors2(input_fits_hduhdu, imgheader):
     """
     Harvest the header and data from a FORS2 spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
@@ -236,8 +236,8 @@ def harvest_fors2(imgfilehdu, imgheader):
     """
 
     # Retrieve the data frame and error frame.
-    imgdata = imgfilehdu[0].data
-    imgerrs = imgfilehdu[1].data ** 0.5
+    imgdata = input_fits_hduhdu[0].data
+    imgerrs = input_fits_hduhdu[1].data ** 0.5
     imgqual = np.ones(np.shape(imgdata))
     ogimgqual = copy.deepcopy(imgqual) - 1
 
@@ -302,12 +302,12 @@ def harvest_fors2(imgfilehdu, imgheader):
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
-def harvest_gmos(imgfilehdu, imgheader):
+def harvest_gmos(input_fits_hduhdu, imgheader):
     """
     Harvest the header and data from a GMOS spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
@@ -322,10 +322,10 @@ def harvest_gmos(imgfilehdu, imgheader):
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science
     # image frame, as some metadata is stored there instead of the primary header.
-    scihead = imgfilehdu["SCI"].header
-    imgdata = imgfilehdu["SCI"].data
-    imgerrs = imgfilehdu["VAR"].data ** 0.5
-    imgqual = imgfilehdu["DQ"].data
+    scihead = input_fits_hduhdu["SCI"].header
+    imgdata = input_fits_hduhdu["SCI"].data
+    imgerrs = input_fits_hduhdu["VAR"].data ** 0.5
+    imgqual = input_fits_hduhdu["DQ"].data
     ogimgqual = copy.deepcopy(imgqual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
@@ -435,12 +435,12 @@ def harvest_gmos(imgfilehdu, imgheader):
     return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
 
 
-def harvest_xshoo(imgfilehdu, imgheader):
+def harvest_xshoo(input_fits_hduhdu, imgheader):
     """
     Harvest the header and data from an X-Shooter spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
         imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
 
@@ -453,13 +453,13 @@ def harvest_xshoo(imgfilehdu, imgheader):
         wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
-    print(type(imgfilehdu))
+    print(type(input_fits_hduhdu))
     print(type(imgheader))
 
     # Retrieve the data frame, error frame, and qual frame.
-    imgdata = imgfilehdu[0].data
-    imgerrs = imgfilehdu[1].data
-    imgqual = imgfilehdu[2].data
+    imgdata = input_fits_hduhdu[0].data
+    imgerrs = input_fits_hduhdu[1].data
+    imgqual = input_fits_hduhdu[2].data
     ogimgqual = copy.deepcopy(imgqual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
