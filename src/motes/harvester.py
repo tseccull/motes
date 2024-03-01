@@ -61,18 +61,18 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     # Slice all dataframes based on the input from reg.txt
     data_shape = np.shape(data)
-    imgstart = int(0 + data_regions[region_counter][0])
+    data_spatial_floor = int(0 + data_regions[region_counter][0])
     imgend = int(data_shape[0] - data_regions[region_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
-    datasliced = data[imgstart : imgend + 1, :]
-    errssliced = errs[imgstart : imgend + 1, :]
-    qualsliced = qual[imgstart : imgend + 1, :]
+    datasliced = data[data_spatial_floor : imgend + 1, :]
+    errssliced = errs[data_spatial_floor : imgend + 1, :]
+    qualsliced = qual[data_spatial_floor : imgend + 1, :]
     dataslicedshape = np.shape(datasliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
         "     New spatial axis covers pixel rows "
-        + str(imgstart)
+        + str(data_spatial_floor)
         + "-"
         + str(imgend)
         + ".\n"
@@ -132,7 +132,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "spataxislen": len(spataxis),
         "spatial_axis": spataxis,
         "hi_resolution_spatial_axis": hiresspataxis,
-        "data_spatial_floor": imgstart,
+        "data_spatial_floor": data_spatial_floor,
         "imgend": imgend,
         "dispersion_axis_length": len(wavelength_axis),
         "wavelength_axis": wavelength_axis,
