@@ -12,7 +12,7 @@ import numpy as np
 import motes.common as common
 
 
-def data_harvest(reg_counter, filename_2D, region):
+def data_harvest(reg_counter, filename_2D, data_regions):
     """Extract header metadata and data frames, and repackage them into dictionaries for use in the
        rest of MOTES.
 
@@ -20,7 +20,7 @@ def data_harvest(reg_counter, filename_2D, region):
         reg_counter (int) : An integer noting which line in region is being called to define the
                             boundaries of the 2D data.
         filename_2D (str) : The name of the data file.
-        region (list)     : A list of regions read in from reg.txt in startup.read_regions()
+        data_regions (list)     : A list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
         head_dict (dict)  : A dictionary containing parameters and metadata read from the header of
@@ -61,8 +61,8 @@ def data_harvest(reg_counter, filename_2D, region):
 
     # Slice all dataframes based on the input from reg.txt
     imgshape = np.shape(imgdata)
-    imgstart = int(0 + region[reg_counter][0])
-    imgend = int(imgshape[0] - region[reg_counter][1])
+    imgstart = int(0 + data_regions[reg_counter][0])
+    imgend = int(imgshape[0] - data_regions[reg_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
     datasliced = imgdata[imgstart : imgend + 1, :]
@@ -83,7 +83,7 @@ def data_harvest(reg_counter, filename_2D, region):
     spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
     hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
 
-    if region[reg_counter][2] < wavaxis[0] or region[reg_counter][3] > wavaxis[-1]:
+    if data_regions[reg_counter][2] < wavaxis[0] or data_regions[reg_counter][3] > wavaxis[-1]:
         sys.stdout.write(
             " >>> User defined wavelength limit(s) are outside native wavelength range\n"
             '     Make sure "-LOW_WAV_SLICE" > lower limit of wavelength axis\n'
@@ -94,7 +94,7 @@ def data_harvest(reg_counter, filename_2D, region):
 
     wavslice = np.where(
         np.logical_and(
-            wavaxis >= region[reg_counter][2], wavaxis <= region[reg_counter][3]
+            wavaxis >= data_regions[reg_counter][2], wavaxis <= data_regions[reg_counter][3]
         )
     )
     wavstart = wavslice[0][0]
@@ -108,9 +108,9 @@ def data_harvest(reg_counter, filename_2D, region):
     sys.stdout.write(
         " >>> 2D spectrum sliced on dispersion axis based on user defined limits:\n"
         "     New Wavelength range is "
-        + str(region[reg_counter][2])
+        + str(data_regions[reg_counter][2])
         + "-"
-        + str(region[reg_counter][3])
+        + str(data_regions[reg_counter][3])
         + " "
         + head_dict["wavelength_unit"]
         + ".\n"
