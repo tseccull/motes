@@ -170,7 +170,7 @@ def harvest_floyds(input_fits_hdu, primary_header):
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
                                     In the case of FLOYDS this frame is set to all ones (see
                                     above).
-        headerdict (dict)         : a dictionary containing the header information required by
+        header_dict (dict)         : a dictionary containing the header information required by
                                     MOTES.
     """
 
@@ -193,7 +193,7 @@ def harvest_floyds(input_fits_hdu, primary_header):
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
+    header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixel_resolution,
         "exptime": primary_header["EXPTIME"],
@@ -209,7 +209,7 @@ def harvest_floyds(input_fits_hdu, primary_header):
         primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavelength_axis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
 def harvest_fors2(input_fits_hdu, primary_header):
@@ -231,7 +231,7 @@ def harvest_fors2(input_fits_hdu, primary_header):
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
                                     In the case of FORS2 this frame is set to all zeros (see
                                     qual above).
-        headerdict (dict)         : a dictionary containing the header information.
+        header_dict (dict)         : a dictionary containing the header information.
         wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
@@ -278,7 +278,7 @@ def harvest_fors2(input_fits_hdu, primary_header):
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
+    header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixel_resolution,
         "exptime": primary_header["HIERARCH ESO INS SHUT EXPTIME"],
@@ -299,7 +299,7 @@ def harvest_fors2(input_fits_hdu, primary_header):
         primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavelength_axis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
 def harvest_gmos(input_fits_hdu, primary_header):
@@ -316,7 +316,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
         errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict)         : a dictionary containing the header information.
+        header_dict (dict)         : a dictionary containing the header information.
         wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
@@ -382,7 +382,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
+    header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": float(primary_header["PIXSCALE"]),
         "exptime": primary_header["EXPTIME"],
@@ -393,14 +393,14 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
     if "BUNIT" in scihead:
-        headerdict["flux_unit"] = scihead["BUNIT"]
+        header_dict["flux_unit"] = scihead["BUNIT"]
     else:
-        headerdict["flux_unit"] = "electrons"
+        header_dict["flux_unit"] = "electrons"
 
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixel_resolution"])
+        + str(header_dict["pixel_resolution"])
         + '"\n'
     )
 
@@ -432,7 +432,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
     data[chipgapmap == 1] = 1.0
     errs[chipgapmap == 1] = 1.0
 
-    return data, errs, qual, original_qual, headerdict, wavelength_axis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
 def harvest_xshoo(input_fits_hdu, primary_header):
@@ -449,7 +449,7 @@ def harvest_xshoo(input_fits_hdu, primary_header):
         errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
         qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
         original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict)         : a dictionary containing the header information.
+        header_dict (dict)         : a dictionary containing the header information.
         wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
@@ -478,7 +478,7 @@ def harvest_xshoo(input_fits_hdu, primary_header):
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
+    header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": primary_header["CDELT2"],
         "exptime": primary_header["EXPTIME"],
@@ -493,7 +493,7 @@ def harvest_xshoo(input_fits_hdu, primary_header):
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixel_resolution"])
+        + str(header_dict["pixel_resolution"])
         + '"\n'
     )
 
@@ -502,4 +502,4 @@ def harvest_xshoo(input_fits_hdu, primary_header):
         primary_header["CRVAL1"], primary_header["CDELT1"], primary_header["NAXIS1"]
     )
 
-    return data, errs, qual, original_qual, headerdict, wavelength_axis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
