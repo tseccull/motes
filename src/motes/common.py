@@ -48,7 +48,7 @@ def extraction_limits(moffat_parameters, width_multiplier=3.0):
     return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
 
 
-def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
+def extrapolate_extraction_limits(extlims, dispaxislen, shortend, longend):
     """
     Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
 
@@ -460,7 +460,7 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
             shortextraplim2,
             longextraplim1,
             longextraplim2,
-        ) = extrap_extraction_lims(
+        ) = extrapolate_extraction_limits(
             intermextlims,
             dispaxislen,
             extractionlims[0][0],
