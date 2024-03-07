@@ -322,7 +322,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science
     # image frame, as some metadata is stored there instead of the primary header.
-    scihead = input_fits_hdu["SCI"].header
+    science_header = input_fits_hdu["SCI"].header
     data = input_fits_hdu["SCI"].data
     errs = input_fits_hdu["VAR"].data ** 0.5
     qual = input_fits_hdu["DQ"].data
@@ -375,7 +375,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
     iq = primary_header["RAWIQ"]
 
     for i in WavTab:
-        if scihead["CRVAL1"] > i[0] and scihead["CRVAL1"] < i[1]:
+        if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
             seeing = float(IQTab[int(i[2])][int(IQ_dict[iq])])
             break
 
@@ -388,12 +388,12 @@ def harvest_gmos(input_fits_hdu, primary_header):
         "exptime": primary_header["EXPTIME"],
         "seeing": seeing,
         "instrument": primary_header["INSTRUME"],
-        "wavelength_unit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
+        "wavelength_unit": science_header["WAT1_001"].split(" ")[2].split("=")[1],
     }
 
     # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
-    if "BUNIT" in scihead:
-        header_dict["flux_unit"] = scihead["BUNIT"]
+    if "BUNIT" in science_header:
+        header_dict["flux_unit"] = science_header["BUNIT"]
     else:
         header_dict["flux_unit"] = "electrons"
 
@@ -406,7 +406,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     # Create the wavelength axis of the spectrum.
     wavelength_axis = common.make_wav_axis(
-        scihead["CRVAL1"], scihead["CD1_1"], scihead["NAXIS1"]
+        science_header["CRVAL1"], science_header["CD1_1"], science_header["NAXIS1"]
     )
 
     # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad
