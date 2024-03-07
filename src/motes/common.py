@@ -15,13 +15,13 @@ from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 
 
-def extraction_limits(moffparams, width_multiplier=3.0):
+def extraction_limits(moffat_parameters, width_multiplier=3.0):
     """
     Calculate the extraction limits from a Moffat profile based on the distance from the central
     peak as a multiple of FWHM.
 
     Args:
-        moffparams (list)                  : list containing the parameters of the Moffat profile
+        moffat_parameters (list)                  : list containing the parameters of the Moffat profile
                                              to be created and measured. The parameters are:
                                              [amplitude, location, scale, power].
         axesdict (dict)                    : dictionary containing the axes of the data frame 2D
@@ -36,19 +36,19 @@ def extraction_limits(moffparams, width_multiplier=3.0):
         upper_extraction_limit (numpy.float64) : the upper bound of the region to be extracted.
         fwhm (numpy.float64)                   : the Full Width at Half Maximum of the Moffat
                                                  profile.
-        moffparams[1] (numpy.float64)          : location of the center of the Moffat profile.
+        moffat_parameters[1] (numpy.float64)          : location of the center of the Moffat profile.
     """
 
     # Create a Moffat profile based on the input parameters.
-    fwhm = 2 * moffparams[2] * (((2 ** (1 / moffparams[3])) - 1) ** 0.5)
+    fwhm = 2 * moffat_parameters[2] * (((2 ** (1 / moffat_parameters[3])) - 1) ** 0.5)
 
     # Respectively define the upper and lower extraction limits at a distance above and below the
     # peak of the Moffat profile that equals the FWHM of the Moffat profile times a multiplying
     # factor.
-    lower_extraction_limit = moffparams[1] - (width_multiplier * fwhm)
-    upper_extraction_limit = moffparams[1] + (width_multiplier * fwhm)
+    lower_extraction_limit = moffat_parameters[1] - (width_multiplier * fwhm)
+    upper_extraction_limit = moffat_parameters[1] + (width_multiplier * fwhm)
 
-    return lower_extraction_limit, upper_extraction_limit, fwhm, moffparams[1]
+    return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
 
 
 def extrap_extraction_lims(extlims, dispaxislen, shortend, longend):
