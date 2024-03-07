@@ -143,7 +143,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
     return header_dict, frame_dict, axes_dict, input_file_primary_header
 
 
-def harvest_floyds(input_fits_hduhdu, imgheader):
+def harvest_floyds(input_fits_hduhdu, primary_header):
     """
     Harvest the header and data from a FLOYDS spectrum. Please note that this spectrum must not be
     flux calibrated, to ensure that a reliable ERR frame is made.
@@ -151,7 +151,7 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
     Args:
         input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame array
@@ -178,14 +178,14 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
     data = input_fits_hduhdu[0].data
     errs = np.sqrt(
         data
-        + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
-        + (imgheader["DARKCURR"] * imgheader["DARKCURR"])
+        + (primary_header["RDNOISE"] * primary_header["RDNOISE"])
+        + (primary_header["DARKCURR"] * primary_header["DARKCURR"])
     )
     qual = np.ones(np.shape(data))
     original_qual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec.
-    pixres = imgheader["PIXSCALE"]
+    pixres = primary_header["PIXSCALE"]
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: " + str(pixres).strip("0") + '"\n'
     )
@@ -194,32 +194,32 @@ def harvest_floyds(input_fits_hduhdu, imgheader):
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
     headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
+        "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixres,
-        "exptime": imgheader["EXPTIME"],
-        "instrument": imgheader["INSTRUME"],
-        "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
+        "exptime": primary_header["EXPTIME"],
+        "instrument": primary_header["INSTRUME"],
+        "seeing": primary_header["AGFWHM"],  # Grabs estimated FWHM from autoguider.
         "flux_unit": "electrons",
-        "wavelength_unit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
+        "wavelength_unit": primary_header["WAT2_001"].split(" ")[2].split("=")[1],
     }
     sys.stdout.write("DONE.\n")
 
     # Create the wavelength axis of the spectrum.
     wavelength_axis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
+        primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
     return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
-def harvest_fors2(input_fits_hduhdu, imgheader):
+def harvest_fors2(input_fits_hduhdu, primary_header):
     """
     Harvest the header and data from a FORS2 spectrum.
 
     Args:
         input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
@@ -245,23 +245,23 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     # detector and the configuration of the collimator (high resolution or standard resolution).
     # If the pixel resolution can't be determined, complain and quit MOTES.
     if (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
         pixres = 0.125
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
         pixres = 0.0632
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 2
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
         pixres = 0.25
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 2
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
         pixres = 0.125
     else:
@@ -279,16 +279,16 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
     headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
+        "object": primary_header["OBJECT"].replace(" ", "_"),
         "pixel_resolution": pixres,
-        "exptime": imgheader["HIERARCH ESO INS SHUT EXPTIME"],
-        "instrument": imgheader["INSTRUME"],
+        "exptime": primary_header["HIERARCH ESO INS SHUT EXPTIME"],
+        "instrument": primary_header["INSTRUME"],
         "seeing": 0.5
         * (
-            imgheader["HIERARCH ESO TEL AMBI FWHM START"]
-            + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
+            primary_header["HIERARCH ESO TEL AMBI FWHM START"]
+            + primary_header["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "flux_unit": imgheader["BUNIT"],
+        "flux_unit": primary_header["BUNIT"],
         "wavelength_unit": "Angstroms",
     }
 
@@ -296,20 +296,20 @@ def harvest_fors2(input_fits_hduhdu, imgheader):
 
     # Create the wavelength axis of the spectrum.
     wavelength_axis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
+        primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
     return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
-def harvest_gmos(input_fits_hduhdu, imgheader):
+def harvest_gmos(input_fits_hduhdu, primary_header):
     """
     Harvest the header and data from a GMOS spectrum.
 
     Args:
         input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
@@ -372,7 +372,7 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
         ]
     )
 
-    iq = imgheader["RAWIQ"]
+    iq = primary_header["RAWIQ"]
 
     for i in WavTab:
         if scihead["CRVAL1"] > i[0] and scihead["CRVAL1"] < i[1]:
@@ -383,11 +383,11 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
     headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixel_resolution": float(imgheader["PIXSCALE"]),
-        "exptime": imgheader["EXPTIME"],
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": float(primary_header["PIXSCALE"]),
+        "exptime": primary_header["EXPTIME"],
         "seeing": seeing,
-        "instrument": imgheader["INSTRUME"],
+        "instrument": primary_header["INSTRUME"],
         "wavelength_unit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
     }
 
@@ -435,14 +435,14 @@ def harvest_gmos(input_fits_hduhdu, imgheader):
     return data, errs, qual, original_qual, headerdict, wavelength_axis
 
 
-def harvest_xshoo(input_fits_hduhdu, imgheader):
+def harvest_xshoo(input_fits_hduhdu, primary_header):
     """
     Harvest the header and data from an X-Shooter spectrum.
 
     Args:
         input_fits_hduhdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
         data (numpy.ndarray)   : the 2D data frame
@@ -454,7 +454,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     """
 
     print(type(input_fits_hduhdu))
-    print(type(imgheader))
+    print(type(primary_header))
 
     # Retrieve the data frame, error frame, and qual frame.
     data = input_fits_hduhdu[0].data
@@ -479,15 +479,15 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
     headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixel_resolution": imgheader["CDELT2"],
-        "exptime": imgheader["EXPTIME"],
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": primary_header["CDELT2"],
+        "exptime": primary_header["EXPTIME"],
         "seeing": 0.5
         * (
-            imgheader["HIERARCH ESO TEL AMBI FWHM START"]
-            + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
+            primary_header["HIERARCH ESO TEL AMBI FWHM START"]
+            + primary_header["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "flux_unit": imgheader["BUNIT"],
+        "flux_unit": primary_header["BUNIT"],
         "wavelength_unit": "nm",
     }
     sys.stdout.write("DONE.\n")
@@ -499,7 +499,7 @@ def harvest_xshoo(input_fits_hduhdu, imgheader):
 
     # Create the wavelength axis of the spectrum.
     wavelength_axis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
+        primary_header["CRVAL1"], primary_header["CDELT1"], primary_header["NAXIS1"]
     )
 
     return data, errs, qual, original_qual, headerdict, wavelength_axis
