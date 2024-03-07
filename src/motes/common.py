@@ -48,7 +48,7 @@ def extraction_limits(moffat_parameters, width_multiplier=3.0):
     return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
 
 
-def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, short_end, longend):
+def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, short_end, long_end):
     """
     Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
 
@@ -58,7 +58,7 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
         dispersion_axis_length (int) : The length of the dispersion axis.
         short_end (int)    : The number of pixels at the short end of the dispersion axis to be
                             excluded from the extraction.
-        longend (int)     : The number of pixels at the long end of the dispersion axis to be
+        long_end (int)     : The number of pixels at the long end of the dispersion axis to be
                             excluded from the extraction.
 
     Returns:
@@ -72,8 +72,8 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
 
     short_extrap_lim1 = extraction_limits[0][0] - (short_extrap_grad1 * short_end)
     short_extrap_lim2 = extraction_limits[1][0] - (short_extrap_grad2 * short_end)
-    long_extrap_lim1 = extraction_limits[0][-1] + (long_extrap_grad1 * (dispersion_axis_length - longend))
-    long_extrap_lim2 = extraction_limits[1][-1] + (long_extrap_grad2 * (dispersion_axis_length - longend))
+    long_extrap_lim1 = extraction_limits[0][-1] + (long_extrap_grad1 * (dispersion_axis_length - long_end))
+    long_extrap_lim2 = extraction_limits[1][-1] + (long_extrap_grad2 * (dispersion_axis_length - long_end))
 
     return (
         short_extrap_lim1,
