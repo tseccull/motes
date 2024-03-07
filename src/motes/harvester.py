@@ -428,9 +428,9 @@ def harvest_gmos(input_fits_hdu, primary_header):
             for y, x in enumerate(zero_rows[1:])
         ]
     zero_rows = [1 if x > 0 else x for x in zero_rows]
-    chipgapmap = np.tile(zero_rows, (np.shape(data)[0], 1))
-    data[chipgapmap == 1] = 1.0
-    errs[chipgapmap == 1] = 1.0
+    chip_gap_map = np.tile(zero_rows, (np.shape(data)[0], 1))
+    data[chip_gap_map == 1] = 1.0
+    errs[chip_gap_map == 1] = 1.0
 
     return data, errs, qual, original_qual, header_dict, wavelength_axis
 
