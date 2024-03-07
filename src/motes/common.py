@@ -62,7 +62,7 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
                             excluded from the extraction.
 
     Returns:
-        pars (dict): A dictionary containing the parameters read in from motesparams.txt.
+        parameters (dict): A dictionary containing the parameters read in from motesparams.txt.
 
     """
     short_extrap_grad1 = extrap_grad(extraction_limits[0], [0, 150, 300])
