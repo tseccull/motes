@@ -350,7 +350,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
         "UNKNOWN": 3,
     }
 
-    WavTab = np.array(
+    wavelength_table = np.array(
         [
             [0000.0, 4000.0, 0],
             [4000.0, 5500.0, 1],
@@ -374,7 +374,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     iq = primary_header["RAWIQ"]
 
-    for i in WavTab:
+    for i in wavelength_table:
         if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
             seeing = float(IQTab[int(i[2])][int(iq_dict[iq])])
             break
