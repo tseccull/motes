@@ -24,9 +24,6 @@ def extraction_limits(moffat_parameters, width_multiplier=3.0):
         moffat_parameters (list)                  : list containing the parameters of the Moffat profile
                                              to be created and measured. The parameters are:
                                              [amplitude, location, scale, power].
-        axesdict (dict)                    : dictionary containing the axes of the data frame 2D
-                                             spectrum. Here only the length of the spatial axis is
-                                             retrieved.
         width_multiplier (float, optional) : defines the distance from the center of the spatial
                                              profile at which to set the extraction limits, in
                                              multiples of the FWHM. Defaults to 3.0.
