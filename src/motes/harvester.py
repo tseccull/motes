@@ -185,9 +185,9 @@ def harvest_floyds(input_fits_hdu, primary_header):
     original_qual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec.
-    pixres = primary_header["PIXSCALE"]
+    pixel_resolution = primary_header["PIXSCALE"]
     sys.stdout.write(
-        " >>> Spatial pixel resolution determined: " + str(pixres).strip("0") + '"\n'
+        " >>> Spatial pixel resolution determined: " + str(pixel_resolution).strip("0") + '"\n'
     )
 
     # Put header information into a dictionary
@@ -195,7 +195,7 @@ def harvest_floyds(input_fits_hdu, primary_header):
     sys.stdout.flush()
     headerdict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
-        "pixel_resolution": pixres,
+        "pixel_resolution": pixel_resolution,
         "exptime": primary_header["EXPTIME"],
         "instrument": primary_header["INSTRUME"],
         "seeing": primary_header["AGFWHM"],  # Grabs estimated FWHM from autoguider.
@@ -248,22 +248,22 @@ def harvest_fors2(input_fits_hdu, primary_header):
         primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
         and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
-        pixres = 0.125
+        pixel_resolution = 0.125
     elif (
         primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
         and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
-        pixres = 0.0632
+        pixel_resolution = 0.0632
     elif (
         primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
         and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
-        pixres = 0.25
+        pixel_resolution = 0.25
     elif (
         primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
         and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
-        pixres = 0.125
+        pixel_resolution = 0.125
     else:
         sys.stdout.write("FAILED.\n")
         sys.stdout.write(
@@ -273,14 +273,14 @@ def harvest_fors2(input_fits_hdu, primary_header):
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 
-    sys.stdout.write(" >>> Spatial pixel resolution determined: " + str(pixres) + '"\n')
+    sys.stdout.write(" >>> Spatial pixel resolution determined: " + str(pixel_resolution) + '"\n')
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
     headerdict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
-        "pixel_resolution": pixres,
+        "pixel_resolution": pixel_resolution,
         "exptime": primary_header["HIERARCH ESO INS SHUT EXPTIME"],
         "instrument": primary_header["INSTRUME"],
         "seeing": 0.5
