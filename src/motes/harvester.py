@@ -341,7 +341,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
     # constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
-    IQ_dict = {
+    iq_dict = {
         "20-percentile": 0,
         "70-percentile": 1,
         "85-percentile": 2,
@@ -376,7 +376,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     for i in WavTab:
         if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
-            seeing = float(IQTab[int(i[2])][int(IQ_dict[iq])])
+            seeing = float(IQTab[int(i[2])][int(iq_dict[iq])])
             break
 
     # Put header information into a dictionary
