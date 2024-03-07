@@ -48,12 +48,12 @@ def extraction_limits(moffat_parameters, width_multiplier=3.0):
     return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
 
 
-def extrapolate_extraction_limits(extlims, dispaxislen, shortend, longend):
+def extrapolate_extraction_limits(extraction_limits, dispaxislen, shortend, longend):
     """
     Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
 
     Args:
-        extlims (list)    : A list containing the lower and upper extraction limits for each
+        extraction_limits (list)    : A list containing the lower and upper extraction limits for each
                             spatial pixel.
         dispaxislen (int) : The length of the dispersion axis.
         shortend (int)    : The number of pixels at the short end of the dispersion axis to be
@@ -65,15 +65,15 @@ def extrapolate_extraction_limits(extlims, dispaxislen, shortend, longend):
         pars (dict): A dictionary containing the parameters read in from motesparams.txt.
 
     """
-    short_extrap_grad1 = extrap_grad(extlims[0], [0, 150, 300])
-    short_extrap_grad2 = extrap_grad(extlims[1], [0, 150, 300])
-    long_extrap_grad1 = extrap_grad(extlims[0], [-300, -150, -1])
-    long_extrap_grad2 = extrap_grad(extlims[1], [-300, -150, -1])
+    short_extrap_grad1 = extrap_grad(extraction_limits[0], [0, 150, 300])
+    short_extrap_grad2 = extrap_grad(extraction_limits[1], [0, 150, 300])
+    long_extrap_grad1 = extrap_grad(extraction_limits[0], [-300, -150, -1])
+    long_extrap_grad2 = extrap_grad(extraction_limits[1], [-300, -150, -1])
 
-    short_extrap_lim1 = extlims[0][0] - (short_extrap_grad1 * shortend)
-    short_extrap_lim2 = extlims[1][0] - (short_extrap_grad2 * shortend)
-    long_extrap_lim1 = extlims[0][-1] + (long_extrap_grad1 * (dispaxislen - longend))
-    long_extrap_lim2 = extlims[1][-1] + (long_extrap_grad2 * (dispaxislen - longend))
+    short_extrap_lim1 = extraction_limits[0][0] - (short_extrap_grad1 * shortend)
+    short_extrap_lim2 = extraction_limits[1][0] - (short_extrap_grad2 * shortend)
+    long_extrap_lim1 = extraction_limits[0][-1] + (long_extrap_grad1 * (dispaxislen - longend))
+    long_extrap_lim2 = extraction_limits[1][-1] + (long_extrap_grad2 * (dispaxislen - longend))
 
     return (
         short_extrap_lim1,
