@@ -97,7 +97,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
             wavelength_axis >= data_regions[region_counter][2], wavelength_axis <= data_regions[region_counter][3]
         )
     )
-    wavstart = wavelength_slice[0][0]
+    wavelength_start = wavelength_slice[0][0]
     wavend = wavelength_slice[0][-1]
     wavelength_axis = wavelength_axis[wavelength_slice]
 
@@ -115,9 +115,9 @@ def data_harvest(region_counter, input_file_path, data_regions):
         + header_dict["wavelength_unit"]
         + ".\n"
         "     This range is equivalent to pixel columns "
-        + str(wavstart)
+        + str(wavelength_start)
         + "-"
-        + str(wavstart + len(wavelength_axis))
+        + str(wavelength_start + len(wavelength_axis))
         + "\n"
     )
 
@@ -136,7 +136,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "data_spatial_ceiling": data_spatial_ceiling,
         "dispersion_axis_length": len(wavelength_axis),
         "wavelength_axis": wavelength_axis,
-        "wavelength_start": wavstart,
+        "wavelength_start": wavelength_start,
         "wavend": wavend,
     }
 
