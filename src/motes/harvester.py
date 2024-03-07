@@ -361,7 +361,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
         ]
     )
 
-    IQTab = np.array(
+    iq_table = np.array(
         [
             [0.6, 0.90, 1.20, 2.00],
             [0.6, 0.85, 1.10, 1.90],
@@ -376,7 +376,7 @@ def harvest_gmos(input_fits_hdu, primary_header):
 
     for i in wavelength_table:
         if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
-            seeing = float(IQTab[int(i[2])][int(iq_dict[iq])])
+            seeing = float(iq_table[int(i[2])][int(iq_dict[iq])])
             break
 
     # Put header information into a dictionary
