@@ -98,7 +98,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         )
     )
     wavelength_start = wavelength_slice[0][0]
-    wavend = wavelength_slice[0][-1]
+    wavelength_end = wavelength_slice[0][-1]
     wavelength_axis = wavelength_axis[wavelength_slice]
 
     data_sliced = np.squeeze(data_sliced[:, wavelength_slice])
@@ -137,7 +137,7 @@ def data_harvest(region_counter, input_file_path, data_regions):
         "dispersion_axis_length": len(wavelength_axis),
         "wavelength_axis": wavelength_axis,
         "wavelength_start": wavelength_start,
-        "wavend": wavend,
+        "wavelength_end": wavelength_end,
     }
 
     return header_dict, frame_dict, axes_dict, input_file_primary_header
