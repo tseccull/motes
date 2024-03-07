@@ -413,22 +413,22 @@ def harvest_gmos(input_fits_hdu, primary_header):
     # pixels or trip up the bin definition stage. Chip gaps are identified as pixel columns which
     # are all zeros, and then three columns either side of the chip gaps are also flagged just to
     # be safe.
-    zerorows = [1 if all(x == 0) else 0 for x in data.T]
+    zero_rows = [1 if all(x == 0) else 0 for x in data.T]
     boundary_cols = 3
-    zerorows = np.concatenate(
-        [np.zeros(boundary_cols), zerorows, np.zeros(boundary_cols)]
+    zero_rows = np.concatenate(
+        [np.zeros(boundary_cols), zero_rows, np.zeros(boundary_cols)]
     )
     for n in reversed(range(boundary_cols)):
-        zerorows = [
-            1 if x == 0 and zerorows[y + 1] == 1 else x
-            for y, x in enumerate(zerorows[:-1])
+        zero_rows = [
+            1 if x == 0 and zero_rows[y + 1] == 1 else x
+            for y, x in enumerate(zero_rows[:-1])
         ]
-        zerorows = [
-            1 if x == 0 and zerorows[y - 1] == 1 else x
-            for y, x in enumerate(zerorows[1:])
+        zero_rows = [
+            1 if x == 0 and zero_rows[y - 1] == 1 else x
+            for y, x in enumerate(zero_rows[1:])
         ]
-    zerorows = [1 if x > 0 else x for x in zerorows]
-    chipgapmap = np.tile(zerorows, (np.shape(data)[0], 1))
+    zero_rows = [1 if x > 0 else x for x in zero_rows]
+    chipgapmap = np.tile(zero_rows, (np.shape(data)[0], 1))
     data[chipgapmap == 1] = 1.0
     errs[chipgapmap == 1] = 1.0
 
