@@ -65,15 +65,15 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
         parameters (dict): A dictionary containing the parameters read in from motesparams.txt.
 
     """
-    short_extrap_grad1 = extrap_grad(extraction_limits[0], [0, 150, 300])
-    short_extrap_grad2 = extrap_grad(extraction_limits[1], [0, 150, 300])
-    long_extrap_grad1 = extrap_grad(extraction_limits[0], [-300, -150, -1])
-    long_extrap_grad2 = extrap_grad(extraction_limits[1], [-300, -150, -1])
+    extrapolation_gradient_short_1 = extrap_grad(extraction_limits[0], [0, 150, 300])
+    extrapolation_gradient_short_2 = extrap_grad(extraction_limits[1], [0, 150, 300])
+    extrapolation_gradient_long_1 = extrap_grad(extraction_limits[0], [-300, -150, -1])
+    extrapolation_gradient_long_2 = extrap_grad(extraction_limits[1], [-300, -150, -1])
 
-    short_extrap_lim1 = extraction_limits[0][0] - (short_extrap_grad1 * short_end)
-    short_extrap_lim2 = extraction_limits[1][0] - (short_extrap_grad2 * short_end)
-    long_extrap_lim1 = extraction_limits[0][-1] + (long_extrap_grad1 * (dispersion_axis_length - long_end))
-    long_extrap_lim2 = extraction_limits[1][-1] + (long_extrap_grad2 * (dispersion_axis_length - long_end))
+    short_extrap_lim1 = extraction_limits[0][0] - (extrapolation_gradient_short_1 * short_end)
+    short_extrap_lim2 = extraction_limits[1][0] - (extrapolation_gradient_short_2 * short_end)
+    long_extrap_lim1 = extraction_limits[0][-1] + (extrapolation_gradient_long_1 * (dispersion_axis_length - long_end))
+    long_extrap_lim2 = extraction_limits[1][-1] + (extrapolation_gradient_long_2 * (dispersion_axis_length - long_end))
 
     return (
         short_extrap_lim1,
