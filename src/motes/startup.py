@@ -6,7 +6,7 @@ import os
 import sys
 
 
-def read_parfile():
+def read_motes_parameter_file():
     """
     Import parameters from motesparams.txt parameter file into a dictionary.
 
@@ -14,34 +14,34 @@ def read_parfile():
         None
 
     Returns:
-        pars (dict) : a dictionary containing the parameters read in from motesparams.txt.
+        parameter_dict (dict) : a dictionary containing the parameters read in from motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")
     sys.stdout.flush()
 
     # Read in MOTES parameter file line by line and filter out the empty lines.
-    with open("motesparams.txt", "r", encoding="utf-8") as parfile:
-        parlines = parfile.read().splitlines()
-        parlines = filter(None, parlines)
+    with open("motesparams.txt", "r", encoding="utf-8") as parameter_file:
+        parameter_lines = parameter_file.read().splitlines()
+        parameter_lines = filter(None, parameter_lines)
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
     # parameter's value follows its associated keyword.
-    lumpy_param_list = [x.split("=") for x in parlines if x[0] == "-"]
-    flat_param_list = [y for x in lumpy_param_list for y in x]
+    lumpy_parameter_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
+    flat_parameter_list = [y for x in lumpy_parameter_list for y in x]
 
     # Convert all numerical values in the parameter list to floats.
     # If digit, convert to float. If not, leave as string.
-    paramlist = [
-        float(i) if i.replace(".", "", 1).isdigit() else i for i in flat_param_list
+    parameter_list = [
+        float(i) if i.replace(".", "", 1).isdigit() else i for i in flat_parameter_list
     ]
 
     # Assign parameters and their associated keywords to a dictionary.
-    pars = dict(zip(paramlist[::2], paramlist[1::2]))
+    parameter_dict = dict(zip(parameter_list[::2], parameter_list[1::2]))
 
     sys.stdout.write("DONE.\n")
 
-    return pars
+    return parameter_dict
 
 
 def read_regions():
@@ -56,7 +56,7 @@ def read_regions():
         None
 
     Returns:
-        intregion (list) : A list for each file contains a list of integers that define the
+        data_region (list) : A list for each file contains a list of integers that define the
                            boundaries of the region of the 2D spectum that will be used for the
                            extraction.
     """
@@ -66,9 +66,9 @@ def read_regions():
         sys.stdout.write(" >>> reg.txt file found. Reading reg.txt. ")
         sys.stdout.flush()
 
-        with open("reg.txt", "r", encoding="utf-8") as reg:
-            reg = reg.read().splitlines()
-            intregion = [[int(lim) for lim in x.split(",")] for x in reg]
+        with open("reg.txt", "r", encoding="utf-8") as region_file:
+            region_lines = region_file.read().splitlines()
+            data_regions = [[int(limit) for limit in x.split(",")] for x in region_lines]
         sys.stdout.write("DONE.\n")
 
     # Complain and quit MOTES if reg.txt isn't found.
@@ -83,4 +83,4 @@ def read_regions():
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 
-    return intregion
+    return data_regions
