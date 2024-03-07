@@ -414,11 +414,11 @@ def harvest_gmos(input_fits_hdu, primary_header):
     # are all zeros, and then three columns either side of the chip gaps are also flagged just to
     # be safe.
     zero_rows = [1 if all(x == 0) else 0 for x in data.T]
-    boundary_cols = 3
+    boundary_columns = 3
     zero_rows = np.concatenate(
-        [np.zeros(boundary_cols), zero_rows, np.zeros(boundary_cols)]
+        [np.zeros(boundary_columns), zero_rows, np.zeros(boundary_columns)]
     )
-    for n in reversed(range(boundary_cols)):
+    for n in reversed(range(boundary_columns)):
         zero_rows = [
             1 if x == 0 and zero_rows[y + 1] == 1 else x
             for y, x in enumerate(zero_rows[:-1])
