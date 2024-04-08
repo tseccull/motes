@@ -137,10 +137,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
     larger bins. This function works from the centre of the input 2D spectrum outward to the ends
-    in order to ensure a good start for the binning process. If replace_cbrp is set to "True",
-    flagged bad pixels will be replaced with appropriate values using a method described by the ESO
-    X-Shooter pipeline. Modigliani et al. (2010)  Proc. SPIE, 7737, 28
-    https://doi.org/10.1117/12.857211
+    in order to ensure a good start for the binning process.
 
     Args:
         fdict (dict)                  : Dictionary containing all the data, error, and quality
