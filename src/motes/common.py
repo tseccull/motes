@@ -181,11 +181,11 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     # Start at the centre of the dispersion axis and start binning towards the short wavelength end
     # of the spectrum.
     while x - width > 0:
-        snrestimate = 0.0
+        snr_estimate = 0.0
 
         # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_SNR),
         # add one more pixel column to the bin.
-        while snrestimate <= minimum_SNR:
+        while snr_estimate <= minimum_SNR:
             width += 1
 
             # Stop the loop once the short wavelength end of the spectrum os reached.
@@ -219,9 +219,9 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             )
 
             # Estimate the S/N
-            snrestimate = signal / rssnoise
+            snr_estimate = signal / rssnoise
 
-        bin_locations.append([int(x - width), int(x), snrestimate])
+        bin_locations.append([int(x - width), int(x), snr_estimate])
 
         x -= width
         width = 0
@@ -231,11 +231,11 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     # Repeat the same process as above, starting at the centre of the dispersion axis, but moving
     # outward toward the longer wavelength end of the 2D spectrum.
     while x + width < dispersion_axis_length:
-        snrestimate = 0.0
+        snr_estimate = 0.0
 
         # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_SNR),
         # add one more pixel column to the bin.
-        while snrestimate <= minimum_SNR:
+        while snr_estimate <= minimum_SNR:
             width += 1
 
             # Stop the loop once the long wavelength end of the spectrum is reached.
@@ -272,9 +272,9 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             )
 
             # Estimate the S/N
-            snrestimate = signal / rssnoise
+            snr_estimate = signal / rssnoise
 
-        bin_locations.append([int(x), int(x + width), snrestimate])
+        bin_locations.append([int(x), int(x + width), snr_estimate])
 
         x += width
         width = 0
