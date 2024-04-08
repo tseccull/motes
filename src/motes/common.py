@@ -211,9 +211,9 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             # flux in the bin. Errors are taken from the spectrum's error frame.
             data_columns = frame_dict["data"][:, int(x - width) : int(x)]
             errs_columns = frame_dict["errs"][:, int(x - width) : int(x)]
-            bindatacol = np.nansum(data_columns, axis=1)
+            binned_data_columns = np.nansum(data_columns, axis=1)
             binerrscol = np.sqrt(np.nansum(np.power(errs_columns, 2), axis=1))
-            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(spatial_hi_limit)])
+            signal = np.nansum(binned_data_columns[int(spatial_lo_limit) : int(spatial_hi_limit)])
             rssnoise = np.sqrt(
                 np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
@@ -259,14 +259,14 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
             # sum of the flux in the bin and the noise is the root sum square of the errors on the
             # flux in the bin. Errors are taken from the spectrum's error frame.
-            bindatacol = np.nansum(frame_dict["data"][:, int(x) : int(x + width)], axis=1)
+            binned_data_columns = np.nansum(frame_dict["data"][:, int(x) : int(x + width)], axis=1)
             binerrscol = np.sqrt(
                 np.nansum(
                     np.power(frame_dict["errs"][:, int(x) : int(x + width)], 2),
                     axis=1,
                 )
             )
-            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(spatial_hi_limit)])
+            signal = np.nansum(binned_data_columns[int(spatial_lo_limit) : int(spatial_hi_limit)])
             rssnoise = np.sqrt(
                 np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
