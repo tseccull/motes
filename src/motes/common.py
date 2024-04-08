@@ -154,7 +154,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
                                         False by default.
 
     Returns:
-        binlocations (list) : A list containing the details for each bin determined by get_bins.
+        bin_locations (list) : A list containing the details for each bin determined by get_bins.
                               The boundaries and S/N of each bin are recorded here.
         frame_dict (dict)        : Returns frame_dict.
     """
@@ -171,7 +171,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     # Start x at the central pixel column of the dispersion axis
     x = int(dispersion_axis_length / 2)
     width = 0
-    binlocations = []
+    bin_locations = []
 
     sys.stdout.write(
         " >>> Determining spectrum localisation bins on dispersion axis.\n"
@@ -221,7 +221,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             # Estimate the S/N
             snrestimate = signal / rssnoise
 
-        binlocations.append([int(x - width), int(x), snrestimate])
+        bin_locations.append([int(x - width), int(x), snrestimate])
 
         x -= width
         width = 0
@@ -274,15 +274,15 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             # Estimate the S/N
             snrestimate = signal / rssnoise
 
-        binlocations.append([int(x), int(x + width), snrestimate])
+        bin_locations.append([int(x), int(x + width), snrestimate])
 
         x += width
         width = 0
 
     # Sort out the bins into the correct order on the dispersion axis.
-    binlocations.sort(key=lambda x: x[0])
+    bin_locations.sort(key=lambda x: x[0])
 
-    return binlocations, frame_dict
+    return bin_locations, frame_dict
 
 
 def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
