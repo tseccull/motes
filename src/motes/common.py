@@ -352,7 +352,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
         dispersion_axis_length (float)            : Length of the dispersion axis of the unbinned 2D spectrum.
 
     Returns:
-        finalextlims (list)            : List containing the extraction limits for the unbinned 2D
+        final_extraction_limits (list)            : List containing the extraction limits for the unbinned 2D
                                          spectrum.
     """
 
@@ -360,7 +360,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
     # extraction limits across the unbinned spectrum to be a simple linear aperture that has the
     # same extraction limits as was determined for that one bin.
     if len(extraction_limits[0]) == 1:
-        finalextlims = [
+        final_extraction_limits = [
             np.repeat(extraction_limits[1][0], dispersion_axis_length),
             np.repeat(extraction_limits[2][0], dispersion_axis_length),
         ]
@@ -416,12 +416,12 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
             nextxaxis, nextextlims[1], kind="linear", fill_value="extrapolate"
         )
 
-        finalextlims = [
+        final_extraction_limits = [
             interpnextlims1(np.array(range(dispersion_axis_length))),
             interpnextlims2(np.array(range(dispersion_axis_length))),
         ]
 
-    return finalextlims
+    return final_extraction_limits
 
 
 # Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to the
