@@ -209,9 +209,9 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
             # sum of the flux in the bin and the noise is the root sum square of the errors on the
             # flux in the bin. Errors are taken from the spectrum's error frame.
-            datacol = frame_dict["data"][:, int(x - width) : int(x)]
+            data_column = frame_dict["data"][:, int(x - width) : int(x)]
             errscol = frame_dict["errs"][:, int(x - width) : int(x)]
-            bindatacol = np.nansum(datacol, axis=1)
+            bindatacol = np.nansum(data_column, axis=1)
             binerrscol = np.sqrt(np.nansum(np.power(errscol, 2), axis=1))
             signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(spatial_hi_limit)])
             rssnoise = np.sqrt(
