@@ -285,7 +285,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     return bin_locations, frame_dict
 
 
-def get_bins_output(bin_parameters, parameters, lowext, highext, data2D, headparams, axdict):
+def get_bins_output(bin_parameters, parameters, spatial_lo_limit, highext, data2D, headparams, axdict):
     """
     Print and plot the output of get_bins.
 
@@ -293,7 +293,7 @@ def get_bins_output(bin_parameters, parameters, lowext, highext, data2D, headpar
         bin_parameters (list)       : A list containing the locations and S/N of each bin
         parameters (dict)          : A dictionary of parameters read in from the motesparams.txt
                                  configuration file.
-        lowext (int)           : lower limit of the spatial region measured for S/N in get_bins()
+        spatial_lo_limit (int)           : lower limit of the spatial region measured for S/N in get_bins()
         highext (int)          : upper limit of the spatial region measured for S/N in get_bins()
         data2D (numpy.ndarray) : 2D spectroscopic data
         headparams (dict)      : A dictionary of parameters full from the datafile header.
@@ -316,8 +316,8 @@ def get_bins_output(bin_parameters, parameters, lowext, highext, data2D, headpar
         for b in bin_parameters:
             binlineloc = np.where(
                 np.logical_and(
-                    axdict["spatial_axis"] > lowext - ((highext - lowext) * 0.2),
-                    axdict["spatial_axis"] < highext + ((highext - lowext) * 0.2),
+                    axdict["spatial_axis"] > spatial_lo_limit - ((highext - spatial_lo_limit) * 0.2),
+                    axdict["spatial_axis"] < highext + ((highext - spatial_lo_limit) * 0.2),
                 )
             )
             drawlines.append(
@@ -1021,7 +1021,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
     return None
 
 
-def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
+def subtract_sky(bgspatial_lo_limit, bghighext, fdict, axdict, pars, hpars):
     """
     Subtracts the sky background from the 2D image by defining bg regions using limits input to the
     function and then fitting a profile to the background column by column while masking cosmic
@@ -1029,7 +1029,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     produce a background subtracted 2D image.
 
     Args:
-        bglowext (numpy.ndarray)  : Lower limits of the background regions.
+        bgspatial_lo_limit (numpy.ndarray)  : Lower limits of the background regions.
         bghighext (numpy.ndarray) : Upper limits of the background regions.
         fdict (dict)              : A dictionary containing the 2D image.
         axdict (dict)             : A dictionary containing the axis information.
@@ -1046,19 +1046,19 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
     fdict["errs"] = fdict["errs"].T
 
     medsky = []
-    colnum = len(bglowext)
+    colnum = len(bgspatial_lo_limit)
 
     # Makes sure the limits are within the image.
     for ii in range(colnum):
-        if bglowext[ii] < 0:
-            bglowext[ii] = 0
+        if bgspatial_lo_limit[ii] < 0:
+            bgspatial_lo_limit[ii] = 0
         if bghighext[ii] > axdict["spatial_axis"][-1]:
             bghighext[ii] = axdict["spatial_axis"][-1]
 
         datacol = fdict["data"][ii]
         colrange = np.array(range(len(datacol)))
         skypix = datacol[
-            np.where(np.logical_or(colrange < bglowext[ii], colrange > bghighext[ii]))
+            np.where(np.logical_or(colrange < bgspatial_lo_limit[ii], colrange > bghighext[ii]))
         ]
 
         # Kill MOTES if there isn't enough background sky to perform sky subtraction. Should
@@ -1092,7 +1092,7 @@ def subtract_sky(bglowext, bghighext, fdict, axdict, pars, hpars):
             sys.exit()
 
         skyrange = colrange[
-            np.where(np.logical_or(colrange < bglowext[ii], colrange > bghighext[ii]))
+            np.where(np.logical_or(colrange < bgspatial_lo_limit[ii], colrange > bghighext[ii]))
         ]
         if len(set(skypix)) == 1:
             continue
