@@ -132,7 +132,7 @@ def filter_data(data_2D, errs_2D):
     return data_2D, errs_2D
 
 
-def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
+def get_bins(frame_dict, slow, shigh, dispaxislen, params, has_sky=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -140,7 +140,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
     in order to ensure a good start for the binning process.
 
     Args:
-        fdict (dict)                  : Dictionary containing all the data, error, and quality
+        frame_dict (dict)                  : Dictionary containing all the data, error, and quality
                                         frames.
         slow (int)                    : Lower spatial limit of the region where the S/N will be
                                         measured when defining the extent of a bin.
@@ -156,7 +156,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
     Returns:
         binlocations (list) : A list containing the details for each bin determined by get_bins.
                               The boundaries and S/N of each bin are recorded here.
-        fdict (dict)        : Returns fdict.
+        frame_dict (dict)        : Returns frame_dict.
     """
 
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
@@ -199,7 +199,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
                 list(
                     filter(
                         lambda x: x <= mincols,
-                        np.sum(fdict["qual"][:, int(x - width) : int(x)], axis=1),
+                        np.sum(frame_dict["qual"][:, int(x - width) : int(x)], axis=1),
                     )
                 )
             )
@@ -209,8 +209,8 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
             # sum of the flux in the bin and the noise is the root sum square of the errors on the
             # flux in the bin. Errors are taken from the spectrum's error frame.
-            datacol = fdict["data"][:, int(x - width) : int(x)]
-            errscol = fdict["errs"][:, int(x - width) : int(x)]
+            datacol = frame_dict["data"][:, int(x - width) : int(x)]
+            errscol = frame_dict["errs"][:, int(x - width) : int(x)]
             bindatacol = np.nansum(datacol, axis=1)
             binerrscol = np.sqrt(np.nansum(np.power(errscol, 2), axis=1))
             signal = np.nansum(bindatacol[int(slow) : int(shigh)])
@@ -249,7 +249,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
                 list(
                     filter(
                         lambda x: x <= mincols,
-                        np.sum(fdict["qual"][:, int(x) : int(x + width)], axis=1),
+                        np.sum(frame_dict["qual"][:, int(x) : int(x + width)], axis=1),
                     )
                 )
             )
@@ -259,10 +259,10 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
             # sum of the flux in the bin and the noise is the root sum square of the errors on the
             # flux in the bin. Errors are taken from the spectrum's error frame.
-            bindatacol = np.nansum(fdict["data"][:, int(x) : int(x + width)], axis=1)
+            bindatacol = np.nansum(frame_dict["data"][:, int(x) : int(x + width)], axis=1)
             binerrscol = np.sqrt(
                 np.nansum(
-                    np.power(fdict["errs"][:, int(x) : int(x + width)], 2),
+                    np.power(frame_dict["errs"][:, int(x) : int(x + width)], 2),
                     axis=1,
                 )
             )
@@ -282,7 +282,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
     # Sort out the bins into the correct order on the dispersion axis.
     binlocations.sort(key=lambda x: x[0])
 
-    return binlocations, fdict
+    return binlocations, frame_dict
 
 
 def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
