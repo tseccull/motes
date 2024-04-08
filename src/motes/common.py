@@ -132,7 +132,7 @@ def filter_data(data_2D, errs_2D):
     return data_2D, errs_2D
 
 
-def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_length, params, has_sky=False):
+def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_length, parameter_dict, has_sky=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -147,7 +147,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
         spatial_hi_limit (int)                   : Upper spatial limit of the region where the S/N will be
                                         measured when defining the extent of a bin.
         dispersion_axis_length (int)             : Length of the dispersion axis.
-        params (dict)                 : Dictionary of parameters ready in from the motesparams.txt
+        parameter_dict (dict)                 : Dictionary of parameters ready in from the motesparams.txt
                                         configuration file.
         has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
                                         yet or not, and to set the minSNR threshold accordingly.
@@ -160,13 +160,13 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     """
 
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
-    if params["-SUBTRACT_SKY"] and has_sky:
-        minSNR = params["-SKY_SNR_BIN_LIM"]
+    if parameter_dict["-SUBTRACT_SKY"] and has_sky:
+        minSNR = parameter_dict["-SKY_SNR_BIN_LIM"]
     else:
-        minSNR = params["-SNR_BIN_LIM"]
+        minSNR = parameter_dict["-SNR_BIN_LIM"]
 
     # Minimum columns for a bin
-    mincols = params["-COL_BIN_LIM"]
+    mincols = parameter_dict["-COL_BIN_LIM"]
 
     # Start x at the central pixel column of the dispersion axis
     x = int(dispersion_axis_length / 2)
