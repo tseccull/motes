@@ -159,14 +159,14 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
         frame_dict (dict)        : Returns frame_dict.
     """
 
-    # Take S/N threshold (minimum_SNR) and minimum number of columns per dispersion bin (mincols)
+    # Take S/N threshold (minimum_SNR) and minimum number of columns per dispersion bin (minimum_columns)
     if parameter_dict["-SUBTRACT_SKY"] and has_sky:
         minimum_SNR = parameter_dict["-SKY_SNR_BIN_LIM"]
     else:
         minimum_SNR = parameter_dict["-SNR_BIN_LIM"]
 
     # Minimum columns for a bin
-    mincols = parameter_dict["-COL_BIN_LIM"]
+    minimum_columns = parameter_dict["-COL_BIN_LIM"]
 
     # Start x at the central pixel column of the dispersion axis
     x = int(dispersion_axis_length / 2)
@@ -198,7 +198,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             shortrows = len(
                 list(
                     filter(
-                        lambda x: x <= mincols,
+                        lambda x: x <= minimum_columns,
                         np.sum(frame_dict["qual"][:, int(x - width) : int(x)], axis=1),
                     )
                 )
@@ -248,7 +248,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             shortrows = len(
                 list(
                     filter(
-                        lambda x: x <= mincols,
+                        lambda x: x <= minimum_columns,
                         np.sum(frame_dict["qual"][:, int(x) : int(x + width)], axis=1),
                     )
                 )
