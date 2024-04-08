@@ -404,16 +404,16 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
         extraction_limit_2 = np.append(extraction_limit_2, long_extrapolated_limit_2)
 
         new_extraction_limits = [extraction_limit_1, extraction_limit_2]
-        nextxaxis = np.insert(
+        interpolation_x_axis = np.insert(
             np.arange(extraction_limits[0][0], extraction_limits[0][-1]), 0, 0
         )
-        nextxaxis = np.append(nextxaxis, dispersion_axis_length)
+        interpolation_x_axis = np.append(interpolation_x_axis, dispersion_axis_length)
 
         interpnextlims1 = interp.interp1d(
-            nextxaxis, new_extraction_limits[0], kind="linear", fill_value="extrapolate"
+            interpolation_x_axis, new_extraction_limits[0], kind="linear", fill_value="extrapolate"
         )
         interpnextlims2 = interp.interp1d(
-            nextxaxis, new_extraction_limits[1], kind="linear", fill_value="extrapolate"
+            interpolation_x_axis, new_extraction_limits[1], kind="linear", fill_value="extrapolate"
         )
 
         final_extraction_limits = [
