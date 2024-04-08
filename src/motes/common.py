@@ -312,7 +312,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
 
     # DIAGNOSTICS - Plot boundary locations of localisation bins on the dispersion axis.
     if parameters["-DIAG_PLOT_BIN_LOC"]:
-        drawlines = []
+        draw_lines = []
         for b in bin_parameters:
             binlineloc = np.where(
                 np.logical_and(
@@ -320,20 +320,20 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
                     axes_dict["spatial_axis"] < spatial_hi_limit + ((spatial_hi_limit - spatial_lo_limit) * 0.2),
                 )
             )
-            drawlines.append(
+            draw_lines.append(
                 np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[0] + axes_dict["wavelength_start"]
             )
-            drawlines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
-            drawlines.append(
+            draw_lines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
+            draw_lines.append(
                 np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[1] + axes_dict["wavelength_start"]
             )
-            drawlines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
+            draw_lines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
 
         show_img(
             data_2D,
             axes_dict,
             header_parameters,
-            drawlines,
+            draw_lines,
             "2D Spectrum with Boundaries of Localisation Bins",
         )
 
