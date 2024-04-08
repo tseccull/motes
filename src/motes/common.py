@@ -388,7 +388,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
         (
             short_extrapolated_limit_1,
             short_extrapolated_limit_2,
-            longextraplim1,
+            long_extrapolated_limit_1,
             longextraplim2,
         ) = extrapolate_extraction_limits(
             intermediate_extraction_limits,
@@ -398,7 +398,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
         )
 
         extlim1 = np.insert(intermediate_extraction_limits[0], 0, short_extrapolated_limit_1)
-        extlim1 = np.append(extlim1, longextraplim1)
+        extlim1 = np.append(extlim1, long_extrapolated_limit_1)
 
         extlim2 = np.insert(intermediate_extraction_limits[1], 0, short_extrapolated_limit_2)
         extlim2 = np.append(extlim2, longextraplim2)
