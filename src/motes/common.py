@@ -369,7 +369,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
     # axis. Also extrapolate the extraction limits in a linear fashion at the ends of the
     # wavelength axis of the 2D spectrum so that the full wavelength axis is covered.
     else:
-        interpextract_1 = interp.interp1d(
+        interpolate_extraction_limits_1 = interp.interp1d(
             extraction_limits[0], extraction_limits[1], kind="linear"
         )
         interpextract_2 = interp.interp1d(
@@ -377,7 +377,7 @@ def interpolate_extraction_lims(extraction_limits, dispersion_axis_length):
         )
 
         intermextlims = [
-            interpextract_1(
+            interpolate_extraction_limits_1(
                 np.array(np.arange(extraction_limits[0][0], extraction_limits[0][-1]))
             ),
             interpextract_2(
