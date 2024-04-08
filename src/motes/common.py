@@ -132,7 +132,7 @@ def filter_data(data_2D, errs_2D):
     return data_2D, errs_2D
 
 
-def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params, has_sky=False):
+def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_length, params, has_sky=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -146,7 +146,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params
                                         measured when defining the extent of a bin.
         spatial_hi_limit (int)                   : Upper spatial limit of the region where the S/N will be
                                         measured when defining the extent of a bin.
-        dispaxislen (int)             : Length of the dispersion axis.
+        dispersion_axis_length (int)             : Length of the dispersion axis.
         params (dict)                 : Dictionary of parameters ready in from the motesparams.txt
                                         configuration file.
         has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
@@ -169,7 +169,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params
     mincols = params["-COL_BIN_LIM"]
 
     # Start x at the central pixel column of the dispersion axis
-    x = int(dispaxislen / 2)
+    x = int(dispersion_axis_length / 2)
     width = 0
     binlocations = []
 
@@ -226,11 +226,11 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params
         x -= width
         width = 0
 
-    x = int(dispaxislen / 2)
+    x = int(dispersion_axis_length / 2)
 
     # Repeat the same process as above, starting at the centre of the dispersion axis, but moving
     # outward toward the longer wavelength end of the 2D spectrum.
-    while x + width < dispaxislen:
+    while x + width < dispersion_axis_length:
         snrestimate = 0.0
 
         # If the S/N of the current bin has not yet reached the user-defined threshold (minSNR),
@@ -239,8 +239,8 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params
             width += 1
 
             # Stop the loop once the long wavelength end of the spectrum is reached.
-            if x + width > dispaxislen:
-                width = int(dispaxislen - x)
+            if x + width > dispersion_axis_length:
+                width = int(dispersion_axis_length - x)
                 break
 
             # If there aren't enough good pixels in each spatial column of the current bin,
