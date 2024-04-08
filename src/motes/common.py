@@ -132,7 +132,7 @@ def filter_data(data_2D, errs_2D):
     return data_2D, errs_2D
 
 
-def get_bins(frame_dict, spatial_lo_limit, shigh, dispaxislen, params, has_sky=False):
+def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispaxislen, params, has_sky=False):
     """
     Define the bins of data over which Moffat profiles will be fitted. Each bin is defined such
     that when summed it will have a given signal to noise (S/N). So lower S/N regions will have
@@ -144,7 +144,7 @@ def get_bins(frame_dict, spatial_lo_limit, shigh, dispaxislen, params, has_sky=F
                                         frames.
         spatial_lo_limit (int)                    : Lower spatial limit of the region where the S/N will be
                                         measured when defining the extent of a bin.
-        shigh (int)                   : Upper spatial limit of the region where the S/N will be
+        spatial_hi_limit (int)                   : Upper spatial limit of the region where the S/N will be
                                         measured when defining the extent of a bin.
         dispaxislen (int)             : Length of the dispersion axis.
         params (dict)                 : Dictionary of parameters ready in from the motesparams.txt
@@ -213,9 +213,9 @@ def get_bins(frame_dict, spatial_lo_limit, shigh, dispaxislen, params, has_sky=F
             errscol = frame_dict["errs"][:, int(x - width) : int(x)]
             bindatacol = np.nansum(datacol, axis=1)
             binerrscol = np.sqrt(np.nansum(np.power(errscol, 2), axis=1))
-            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(shigh)])
+            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(spatial_hi_limit)])
             rssnoise = np.sqrt(
-                np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(shigh)], 2))
+                np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
 
             # Estimate the S/N
@@ -266,9 +266,9 @@ def get_bins(frame_dict, spatial_lo_limit, shigh, dispaxislen, params, has_sky=F
                     axis=1,
                 )
             )
-            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(shigh)])
+            signal = np.nansum(bindatacol[int(spatial_lo_limit) : int(spatial_hi_limit)])
             rssnoise = np.sqrt(
-                np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(shigh)], 2))
+                np.nansum(np.power(binerrscol[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
 
             # Estimate the S/N
