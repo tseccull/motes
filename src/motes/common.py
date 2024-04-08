@@ -83,24 +83,24 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
     )
 
 
-def extrap_grad(data_array, median_lims):
+def extrap_grad(data_array, data_limits):
     """
     Given a range of data and limits to define a region of that data, calculate the region's
     gradient.
 
     Args:
         data_array (numpy.ndarray) : A 1D array of data.
-        median_lims (list)         : A list containing the limits of the region of data to be used
+        data_limits (list)         : A list containing the limits of the region of data to be used
                                      to calculate the gradient.
 
     Returns:
        gradient (int): The gradient of the region of data.
 
     """
-    median_of_y_points_x_to_y = np.median(data_array[median_lims[0] : median_lims[1]])
-    median_of_y_points_y_to_z = np.median(data_array[median_lims[1] : median_lims[2]])
-    median_of_x_points_x_to_y = np.median([median_lims[0], median_lims[1]])
-    median_of_x_points_y_to_z = np.median([median_lims[1], median_lims[2]])
+    median_of_y_points_x_to_y = np.median(data_array[data_limits[0] : data_limits[1]])
+    median_of_y_points_y_to_z = np.median(data_array[data_limits[1] : data_limits[2]])
+    median_of_x_points_x_to_y = np.median([data_limits[0], data_limits[1]])
+    median_of_x_points_y_to_z = np.median([data_limits[1], data_limits[2]])
 
     gradient = (median_of_y_points_x_to_y - median_of_y_points_y_to_z) / (
         median_of_x_points_x_to_y - median_of_x_points_y_to_z
