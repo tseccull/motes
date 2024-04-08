@@ -65,10 +65,10 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
         parameters (dict):
 
     """
-    extrapolation_gradient_short_1 = extrap_grad(extraction_limits[0], [0, 150, 300])
-    extrapolation_gradient_short_2 = extrap_grad(extraction_limits[1], [0, 150, 300])
-    extrapolation_gradient_long_1 = extrap_grad(extraction_limits[0], [-300, -150, -1])
-    extrapolation_gradient_long_2 = extrap_grad(extraction_limits[1], [-300, -150, -1])
+    extrapolation_gradient_short_1 = extrapolate_gradient(extraction_limits[0], [0, 150, 300])
+    extrapolation_gradient_short_2 = extrapolate_gradient(extraction_limits[1], [0, 150, 300])
+    extrapolation_gradient_long_1 = extrapolate_gradient(extraction_limits[0], [-300, -150, -1])
+    extrapolation_gradient_long_2 = extrapolate_gradient(extraction_limits[1], [-300, -150, -1])
 
     extrapolation_limit_short_1 = extraction_limits[0][0] - (extrapolation_gradient_short_1 * short_end)
     extrapolation_limit_short_2 = extraction_limits[1][0] - (extrapolation_gradient_short_2 * short_end)
@@ -83,7 +83,7 @@ def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, sho
     )
 
 
-def extrap_grad(data_array, data_limits):
+def extrapolate_gradient(data_array, data_limits):
     """
     Given a range of data and limits to define a region of that data, calculate the region's
     gradient.
