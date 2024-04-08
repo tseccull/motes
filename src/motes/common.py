@@ -285,7 +285,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     return bin_locations, frame_dict
 
 
-def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data2D, headparams, axdict):
+def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data_2D, headparams, axdict):
     """
     Print and plot the output of get_bins.
 
@@ -295,7 +295,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
                                  configuration file.
         spatial_lo_limit (int)           : lower limit of the spatial region measured for S/N in get_bins()
         spatial_hi_limit (int)          : upper limit of the spatial region measured for S/N in get_bins()
-        data2D (numpy.ndarray) : 2D spectroscopic data
+        data_2D (numpy.ndarray) : 2D spectroscopic data
         headparams (dict)      : A dictionary of parameters full from the datafile header.
         axdict (dict)          : A dictionary containing axes and axis metadata for the current
                                  extraction
@@ -330,7 +330,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
             drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["data_spatial_floor"])
 
         show_img(
-            data2D,
+            data_2D,
             axdict,
             headparams,
             drawlines,
