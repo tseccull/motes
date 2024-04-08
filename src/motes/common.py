@@ -195,7 +195,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
 
             # If there aren't enough good pixels in each spatial column of the current bin,
             # continue to the next iteration and add another pixel column to the bin.
-            shortrows = len(
+            short_rows = len(
                 list(
                     filter(
                         lambda x: x <= minimum_columns,
@@ -203,7 +203,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
                     )
                 )
             )
-            if shortrows > 0:
+            if short_rows > 0:
                 continue
 
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
@@ -245,7 +245,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
 
             # If there aren't enough good pixels in each spatial column of the current bin,
             # continue to the next iteration and add another pixel column to the bin.
-            shortrows = len(
+            short_rows = len(
                 list(
                     filter(
                         lambda x: x <= minimum_columns,
@@ -253,7 +253,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
                     )
                 )
             )
-            if shortrows > 0:
+            if short_rows > 0:
                 continue
 
             # Sum the bin in the dispersion direction and determine the S/N where the signal is the
