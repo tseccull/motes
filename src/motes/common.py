@@ -285,12 +285,12 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     return bin_locations, frame_dict
 
 
-def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdict):
+def get_bins_output(bin_parameters, params, lowext, highext, data2D, headparams, axdict):
     """
     Print and plot the output of get_bins.
 
     Args:
-        binparams (list)       : A list containing the locations and S/N of each bin
+        bin_parameters (list)       : A list containing the locations and S/N of each bin
         params (dict)          : A dictionary of parameters read in from the motesparams.txt
                                  configuration file.
         lowext (int)           : lower limit of the spatial region measured for S/N in get_bins()
@@ -306,14 +306,14 @@ def get_bins_output(binparams, params, lowext, highext, data2D, headparams, axdi
 
     sys.stdout.write(
         " >>> "
-        + str(len(binparams))
+        + str(len(bin_parameters))
         + " spectrum localisation bins determined on dispersion axis.\n"
     )
 
     # DIAGNOSTICS - Plot boundary locations of localisation bins on the dispersion axis.
     if params["-DIAG_PLOT_BIN_LOC"]:
         drawlines = []
-        for b in binparams:
+        for b in bin_parameters:
             binlineloc = np.where(
                 np.logical_and(
                     axdict["spatial_axis"] > lowext - ((highext - lowext) * 0.2),
