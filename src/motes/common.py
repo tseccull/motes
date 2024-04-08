@@ -109,27 +109,27 @@ def extrapolate_gradient(data_array, data_limits):
     return gradient
 
 
-def filter_data(data_2D, errs2D):
+def filter_data(data_2D, errs_2D):
     """
-    This function takes in the data_2D and errs2D and outputs frames where any NaN or Inf values are
+    This function takes in the data_2D and errs_2D and outputs frames where any NaN or Inf values are
     0.0 (this can be later filtered to a median of the column). This is used before the extraction
     procedures to ensure the S/N in the bin is numerical (required for optimal extraction).
 
     Args:
         data_2D (numpy.ndarray) : Original data_2D
-        errs2D (numpy.ndarray) : Original errs2D
+        errs_2D (numpy.ndarray) : Original errs_2D
 
     Returns:
         data_2D (numpy.ndarray) : Filtered data_2D
-        errs2D (numpy.ndarray) : Filtered errs2D
+        errs_2D (numpy.ndarray) : Filtered errs_2D
     """
 
-    errs2D[~np.isfinite(errs2D)] = 0.0
-    data_2D[~np.isfinite(errs2D)] = 0.0
+    errs_2D[~np.isfinite(errs_2D)] = 0.0
+    data_2D[~np.isfinite(errs_2D)] = 0.0
     data_2D[~np.isfinite(data_2D)] = 0.0
-    errs2D[~np.isfinite(data_2D)] = 0.0
+    errs_2D[~np.isfinite(data_2D)] = 0.0
 
-    return data_2D, errs2D
+    return data_2D, errs_2D
 
 
 def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False): # , replace_crbp=False):
