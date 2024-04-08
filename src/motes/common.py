@@ -340,7 +340,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
     return None
 
 
-def interpolate_extraction_lims(extractionlims, dispaxislen):
+def interpolate_extraction_lims(extraction_limits, dispaxislen):
     """
     Interpolate extraction limits over unbinned 2D spectrum to create the final extraction limits
     for the unbinned spectrum. Takes an input of extraction limits from the fitting of the binned
@@ -348,7 +348,7 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
     towards the ends of the spectral range.
 
     Args:
-        extractionlims (numpy.ndarray) : Extraction limits for each bin.
+        extraction_limits (numpy.ndarray) : Extraction limits for each bin.
         dispaxislen (float)            : Length of the dispersion axis of the unbinned 2D spectrum.
 
     Returns:
@@ -359,10 +359,10 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
     # If the 2D spectrum was so faint that only 1 dispersion bin could be determined, set the
     # extraction limits across the unbinned spectrum to be a simple linear aperture that has the
     # same extraction limits as was determined for that one bin.
-    if len(extractionlims[0]) == 1:
+    if len(extraction_limits[0]) == 1:
         finalextlims = [
-            np.repeat(extractionlims[1][0], dispaxislen),
-            np.repeat(extractionlims[2][0], dispaxislen),
+            np.repeat(extraction_limits[1][0], dispaxislen),
+            np.repeat(extraction_limits[2][0], dispaxislen),
         ]
 
     # Otherwise, interpolate the extraction limits form the bins across the unbinned wavelength
@@ -370,18 +370,18 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
     # wavelength axis of the 2D spectrum so that the full wavelength axis is covered.
     else:
         interpextract_1 = interp.interp1d(
-            extractionlims[0], extractionlims[1], kind="linear"
+            extraction_limits[0], extraction_limits[1], kind="linear"
         )
         interpextract_2 = interp.interp1d(
-            extractionlims[0], extractionlims[2], kind="linear"
+            extraction_limits[0], extraction_limits[2], kind="linear"
         )
 
         intermextlims = [
             interpextract_1(
-                np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))
+                np.array(np.arange(extraction_limits[0][0], extraction_limits[0][-1]))
             ),
             interpextract_2(
-                np.array(np.arange(extractionlims[0][0], extractionlims[0][-1]))
+                np.array(np.arange(extraction_limits[0][0], extraction_limits[0][-1]))
             ),
         ]
 
@@ -393,8 +393,8 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
         ) = extrapolate_extraction_limits(
             intermextlims,
             dispaxislen,
-            extractionlims[0][0],
-            extractionlims[0][-1],
+            extraction_limits[0][0],
+            extraction_limits[0][-1],
         )
 
         extlim1 = np.insert(intermextlims[0], 0, shortextraplim1)
@@ -405,7 +405,7 @@ def interpolate_extraction_lims(extractionlims, dispaxislen):
 
         nextextlims = [extlim1, extlim2]
         nextxaxis = np.insert(
-            np.arange(extractionlims[0][0], extractionlims[0][-1]), 0, 0
+            np.arange(extraction_limits[0][0], extraction_limits[0][-1]), 0, 0
         )
         nextxaxis = np.append(nextxaxis, dispaxislen)
 
