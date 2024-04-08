@@ -159,8 +159,7 @@ def get_bins(fdict, slow, shigh, dispaxislen, params, has_sky=False):
     Returns:
         binlocations (list) : A list containing the details for each bin determined by get_bins.
                               The boundaries and S/N of each bin are recorded here.
-        fdict (dict)        : Returns fdict with bad pixels replaced if replace_crbp=True. If
-                              replace_crbp=False, fdict is returned unchanged.
+        fdict (dict)        : Returns fdict.
     """
 
     # Take S/N threshold (minSNR) and minimum number of columns per dispersion bin (mincols)
