@@ -214,12 +214,12 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
             binned_data_columns = np.nansum(data_columns, axis=1)
             binned_errs_columns = np.sqrt(np.nansum(np.power(errs_columns, 2), axis=1))
             signal = np.nansum(binned_data_columns[int(spatial_lo_limit) : int(spatial_hi_limit)])
-            rssnoise = np.sqrt(
+            root_sum_square_noise = np.sqrt(
                 np.nansum(np.power(binned_errs_columns[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
 
             # Estimate the S/N
-            snr_estimate = signal / rssnoise
+            snr_estimate = signal / root_sum_square_noise
 
         bin_locations.append([int(x - width), int(x), snr_estimate])
 
@@ -267,12 +267,12 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
                 )
             )
             signal = np.nansum(binned_data_columns[int(spatial_lo_limit) : int(spatial_hi_limit)])
-            rssnoise = np.sqrt(
+            root_sum_square_noise = np.sqrt(
                 np.nansum(np.power(binned_errs_columns[int(spatial_lo_limit) : int(spatial_hi_limit)], 2))
             )
 
             # Estimate the S/N
-            snr_estimate = signal / rssnoise
+            snr_estimate = signal / root_sum_square_noise
 
         bin_locations.append([int(x), int(x + width), snr_estimate])
 
