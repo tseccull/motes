@@ -285,7 +285,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     return bin_locations, frame_dict
 
 
-def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data_2D, header_parameters, axdict):
+def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data_2D, header_parameters, axes_dict):
     """
     Print and plot the output of get_bins.
 
@@ -297,7 +297,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
         spatial_hi_limit (int)          : upper limit of the spatial region measured for S/N in get_bins()
         data_2D (numpy.ndarray) : 2D spectroscopic data
         header_parameters (dict)      : A dictionary of parameters full from the datafile header.
-        axdict (dict)          : A dictionary containing axes and axis metadata for the current
+        axes_dict (dict)          : A dictionary containing axes and axis metadata for the current
                                  extraction
 
     Returns:
@@ -316,22 +316,22 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
         for b in bin_parameters:
             binlineloc = np.where(
                 np.logical_and(
-                    axdict["spatial_axis"] > spatial_lo_limit - ((spatial_hi_limit - spatial_lo_limit) * 0.2),
-                    axdict["spatial_axis"] < spatial_hi_limit + ((spatial_hi_limit - spatial_lo_limit) * 0.2),
+                    axes_dict["spatial_axis"] > spatial_lo_limit - ((spatial_hi_limit - spatial_lo_limit) * 0.2),
+                    axes_dict["spatial_axis"] < spatial_hi_limit + ((spatial_hi_limit - spatial_lo_limit) * 0.2),
                 )
             )
             drawlines.append(
-                np.ones(len(axdict["spatial_axis"][binlineloc])) * b[0] + axdict["wavelength_start"]
+                np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[0] + axes_dict["wavelength_start"]
             )
-            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["data_spatial_floor"])
+            drawlines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
             drawlines.append(
-                np.ones(len(axdict["spatial_axis"][binlineloc])) * b[1] + axdict["wavelength_start"]
+                np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[1] + axes_dict["wavelength_start"]
             )
-            drawlines.append(axdict["spatial_axis"][binlineloc] + axdict["data_spatial_floor"])
+            drawlines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
 
         show_img(
             data_2D,
-            axdict,
+            axes_dict,
             header_parameters,
             drawlines,
             "2D Spectrum with Boundaries of Localisation Bins",
