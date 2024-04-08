@@ -314,20 +314,20 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
     if parameters["-DIAG_PLOT_BIN_LOC"]:
         draw_lines = []
         for b in bin_parameters:
-            binlineloc = np.where(
+            bin_line_location = np.where(
                 np.logical_and(
                     axes_dict["spatial_axis"] > spatial_lo_limit - ((spatial_hi_limit - spatial_lo_limit) * 0.2),
                     axes_dict["spatial_axis"] < spatial_hi_limit + ((spatial_hi_limit - spatial_lo_limit) * 0.2),
                 )
             )
             draw_lines.append(
-                np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[0] + axes_dict["wavelength_start"]
+                np.ones(len(axes_dict["spatial_axis"][bin_line_location])) * b[0] + axes_dict["wavelength_start"]
             )
-            draw_lines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
+            draw_lines.append(axes_dict["spatial_axis"][bin_line_location] + axes_dict["data_spatial_floor"])
             draw_lines.append(
-                np.ones(len(axes_dict["spatial_axis"][binlineloc])) * b[1] + axes_dict["wavelength_start"]
+                np.ones(len(axes_dict["spatial_axis"][bin_line_location])) * b[1] + axes_dict["wavelength_start"]
             )
-            draw_lines.append(axes_dict["spatial_axis"][binlineloc] + axes_dict["data_spatial_floor"])
+            draw_lines.append(axes_dict["spatial_axis"][bin_line_location] + axes_dict["data_spatial_floor"])
 
         show_img(
             data_2D,
