@@ -686,7 +686,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axdict):
+def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes_dict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -702,7 +702,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axdi
         extraction_limits (numpy.ndarray) : An array containing limits at each dispersion pixel
         bin_parameters (list)             : A list containing the bin limits across the dispersion
                                            axis, to enable slicing the data across dispersion axis.
-        axdict (dict)                    : A dictionary containing the spatial axis array and other
+        axes_dict (dict)                    : A dictionary containing the spatial axis array and other
                                            relevant information about the size and shape of the
                                            data frame
 
@@ -734,7 +734,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axdi
     # Loop through each dispersion element of the spectrum.
     for i, col in enumerate(data_2D):
         # Identify the location of the current element in the original 2D spectrum
-        dpix = i + axdict["wavelength_start"]
+        dpix = i + axes_dict["wavelength_start"]
 
         # If the current element belongs in the next bin as defined by getbins, use the new bin's
         # parameters and increment the bin number.
@@ -750,7 +750,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axdi
         # pixels are included in their entirety.
         loextlim = extraction_limits[0][i]
         hiextlim = extraction_limits[1][i]
-        ax = axdict["spatial_axis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        ax = axes_dict["spatial_axis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
 
         # Use the extraction limits to define the data column for this wavelength element.
         col = col[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
