@@ -567,12 +567,12 @@ def make_wav_axis(start, increment, length):
     return wavaxis
 
 
-def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
+def moffat(amplitude, c, alpha, beta, bglevel, bggrad, datarange):
     """
     Creates moffat profile added a linear sloped background based on input parameters
 
     Args:
-        amp (float64)             : amplitude of the Moffat profile
+        amplitude (float64)             : amplitude of the Moffat profile
         c (float64)               : location of the center/peak of the Moffat profile on the
                                     spatial axis.
         alpha (float64)           : he main parameter that defines the width of the Moffat profile.
@@ -588,7 +588,7 @@ def moffat(amp, c, alpha, beta, bglevel, bggrad, datarange):
                                             background flux.
     """
 
-    moffat = amp * (
+    moffat = amplitude * (
         (1 + (((datarange - c) * (datarange - c)) / (alpha * alpha))) ** -beta
     )
     moffat_background = moffat + bglevel + (datarange * bggrad)
