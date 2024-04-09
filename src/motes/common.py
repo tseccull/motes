@@ -708,7 +708,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
 
     Returns:
         optimal_1D_data (numpy.ndarray) : 1D array of the optimally extracted spectrum
-        optierrs1D (numpy.ndarray) : 1D array of the uncertainties of the optimally extracted
+        optimal_1D_errs (numpy.ndarray) : 1D array of the uncertainties of the optimally extracted
                                      spectrum
         aperdata1D (numpy.ndarray) : 1D array of the aperture extracted spectrum
         apererrs1D (numpy.ndarray) : 1D array of the uncertainties of the aperture extracted
@@ -723,7 +723,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
     optimal_1D_data = np.zeros(np.shape(data_2D)[0])
-    optierrs1D = np.zeros(np.shape(data_2D)[0])
+    optimal_1D_errs = np.zeros(np.shape(data_2D)[0])
     aperdata1D = np.zeros(np.shape(data_2D)[0])
     apererrs1D = np.zeros(np.shape(data_2D)[0])
 
@@ -815,9 +815,9 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
                 ((nprof * nprof) / var)[cosmic_mask]
             )
         optimal_1D_data[i] += fopt
-        optierrs1D[i] += np.sqrt(vopt)
+        optimal_1D_errs[i] += np.sqrt(vopt)
 
-    return optimal_1D_data, optierrs1D, aperdata1D, apererrs1D
+    return optimal_1D_data, optimal_1D_errs, aperdata1D, apererrs1D
 
 
 def plot_fitted_spatial_profile(
