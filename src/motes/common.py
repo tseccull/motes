@@ -596,7 +596,7 @@ def moffat(amplitude, center, alpha, beta, background_level, background_gradient
     return moffat_background
 
 
-def moffat_least_squares(r, col, seeing, pixres):
+def moffat_least_squares(r, col, seeing, pixel_resolution):
     """
     Takes a data column, spatial axis and seeing of the observation and fits a Moffat function to
     the column using a least squares method. Returns the best fit parameters of the Moffat
@@ -606,7 +606,7 @@ def moffat_least_squares(r, col, seeing, pixres):
         r (numpy.ndarray)   : spatial axis of the data being fit
         col (numpy.ndarray) : data being fitted
         seeing (float)      : estimated FWHM of the spatial profile
-        pixres (float)      : spatial resolution of each pixel in arcsec/pixel
+        pixel_resolution (float)      : spatial resolution of each pixel in arcsec/pixel
 
     Returns:
         param_list (list) : list of best fit output parameters returned by the least squares
@@ -622,7 +622,7 @@ def moffat_least_squares(r, col, seeing, pixres):
     x0 = [
         np.nanmedian(np.sort(col)[-3:]),
         np.argmax(col),
-        seeing / pixres,
+        seeing / pixel_resolution,
         4.765,
         0.0,
         np.median(np.concatenate((col[:5], col[-5:]))),
@@ -637,7 +637,7 @@ def moffat_least_squares(r, col, seeing, pixres):
             [
                 np.inf,
                 np.argmax(col) + 1,
-                (5 * seeing / pixres),
+                (5 * seeing / pixel_resolution),
                 5.0,
                 np.inf,
                 np.inf,
