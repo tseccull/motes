@@ -686,7 +686,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
+def optimal_extraction(data_2D, errs2D, extractionlimits, binparameters, axdict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -697,7 +697,7 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     the bin limits and within the extraction limits previously calculated.
 
     Args:
-        data2D (numpy.ndarray)           : Input data frame
+        data_2D (numpy.ndarray)           : Input data frame
         errs2D (numpy.ndarray)           : Input error frame
         extractionlimits (numpy.ndarray) : An array containing limits at each dispersion pixel
         binparameters (list)             : A list containing the bin limits across the dispersion
@@ -718,21 +718,21 @@ def optimal_extraction(data2D, errs2D, extractionlimits, binparameters, axdict):
     sys.stdout.write("Performing optimal extraction...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
-    data2D, errs2D = filter_data(data2D, np.abs(errs2D))
+    data_2D, errs2D = filter_data(data_2D, np.abs(errs2D))
 
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
-    optidata1D = np.zeros(np.shape(data2D)[0])
-    optierrs1D = np.zeros(np.shape(data2D)[0])
-    aperdata1D = np.zeros(np.shape(data2D)[0])
-    apererrs1D = np.zeros(np.shape(data2D)[0])
+    optidata1D = np.zeros(np.shape(data_2D)[0])
+    optierrs1D = np.zeros(np.shape(data_2D)[0])
+    aperdata1D = np.zeros(np.shape(data_2D)[0])
+    apererrs1D = np.zeros(np.shape(data_2D)[0])
 
     # Set up bin identification parameters for the following loop.
     bin_number = -1
     b = np.zeros(8)
 
     # Loop through each dispersion element of the spectrum.
-    for i, col in enumerate(data2D):
+    for i, col in enumerate(data_2D):
         # Identify the location of the current element in the original 2D spectrum
         dpix = i + axdict["wavelength_start"]
 
