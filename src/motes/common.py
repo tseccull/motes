@@ -527,23 +527,23 @@ def poly3_least_squares(r, col):
     return [res_lsq.x[0], res_lsq.x[1], res_lsq.x[2], res_lsq.x[3]]
 
 
-def poly3_resid(x, datarange, data):
+def poly3_resid(x, data_range, data):
     """
     Calculates residuals of a fitted third-order polynomial and the data for the
     Levenberg-Marquardt least squares method.
 
     Args:
         x (list)                  : A list containing the best fit parameters of the polynomial.
-        datarange (numpy.ndarray) : the spatial axis of the data column.
+        data_range (numpy.ndarray) : the spatial axis of the data column.
         data (numpy.ndarray)      : the data column.
 
     Returns:
         residual (numpy.ndarray) : The residuals of the fitted polynominal and the data.
     """
     residual = (
-        (x[0] * datarange * datarange * datarange)
-        + (x[1] * datarange * datarange)
-        + (x[2] * datarange)
+        (x[0] * data_range * data_range * data_range)
+        + (x[1] * data_range * data_range)
+        + (x[2] * data_range)
         + x[3]
         - data
     )
