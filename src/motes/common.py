@@ -686,7 +686,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2D, errs_2D, extraction_limits, binparameters, axdict):
+def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axdict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -700,7 +700,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, binparameters, axdic
         data_2D (numpy.ndarray)           : Input data frame
         errs_2D (numpy.ndarray)           : Input error frame
         extraction_limits (numpy.ndarray) : An array containing limits at each dispersion pixel
-        binparameters (list)             : A list containing the bin limits across the dispersion
+        bin_parameters (list)             : A list containing the bin limits across the dispersion
                                            axis, to enable slicing the data across dispersion axis.
         axdict (dict)                    : A dictionary containing the spatial axis array and other
                                            relevant information about the size and shape of the
@@ -739,11 +739,11 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, binparameters, axdic
         # If the current element belongs in the next bin as defined by getbins, use the new bin's
         # parameters and increment the bin number.
         if (
-            bin_number < len(binparameters) - 1
-            and dpix == binparameters[bin_number + 1][-2]
+            bin_number < len(bin_parameters) - 1
+            and dpix == bin_parameters[bin_number + 1][-2]
         ):
             bin_number += 1
-            b = binparameters[bin_number]
+            b = bin_parameters[bin_number]
 
         # Get the extraction limits for the current dispersion element and define the spatial axis.
         # Where the extraction limits include partial pixels on the edge of the aperture, those
