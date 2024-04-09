@@ -567,7 +567,7 @@ def make_wav_axis(start, increment, length):
     return wavaxis
 
 
-def moffat(amplitude, center, alpha, beta, background_level, background_gradient, datarange):
+def moffat(amplitude, center, alpha, beta, background_level, background_gradient, data_range):
     """
     Creates moffat profile added a linear sloped background based on input parameters
 
@@ -580,18 +580,18 @@ def moffat(amplitude, center, alpha, beta, background_level, background_gradient
                                     outer wings far from the profile's peak.
         background_level (float64)         : height of the linearly varying background
         background_gradient (float64)          : gradient of the linearly varying background
-        datarange (numpy.ndarray) : x axis of the Moffat profile.
+        data_range (numpy.ndarray) : x axis of the Moffat profile.
 
     Returns:
-        moffat_background (numpy.ndarray) : a moffat profile defined on the datarange axis using
+        moffat_background (numpy.ndarray) : a moffat profile defined on the data_range axis using
                                             the parameters input to the function, with added
                                             background flux.
     """
 
     moffat = amplitude * (
-        (1 + (((datarange - center) * (datarange - center)) / (alpha * alpha))) ** -beta
+        (1 + (((data_range - center) * (data_range - center)) / (alpha * alpha))) ** -beta
     )
-    moffat_background = moffat + background_level + (datarange * background_gradient)
+    moffat_background = moffat + background_level + (data_range * background_gradient)
 
     return moffat_background
 
