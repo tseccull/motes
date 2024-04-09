@@ -686,7 +686,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2D, errs2D, extractionlimits, binparameters, axdict):
+def optimal_extraction(data_2D, errs_2D, extractionlimits, binparameters, axdict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -698,7 +698,7 @@ def optimal_extraction(data_2D, errs2D, extractionlimits, binparameters, axdict)
 
     Args:
         data_2D (numpy.ndarray)           : Input data frame
-        errs2D (numpy.ndarray)           : Input error frame
+        errs_2D (numpy.ndarray)           : Input error frame
         extractionlimits (numpy.ndarray) : An array containing limits at each dispersion pixel
         binparameters (list)             : A list containing the bin limits across the dispersion
                                            axis, to enable slicing the data across dispersion axis.
@@ -718,7 +718,7 @@ def optimal_extraction(data_2D, errs2D, extractionlimits, binparameters, axdict)
     sys.stdout.write("Performing optimal extraction...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
-    data_2D, errs2D = filter_data(data_2D, np.abs(errs2D))
+    data_2D, errs_2D = filter_data(data_2D, np.abs(errs_2D))
 
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
@@ -757,7 +757,7 @@ def optimal_extraction(data_2D, errs2D, extractionlimits, binparameters, axdict)
 
         # Use the extraction limits to define the errs column for this wavelength element. Where
         # errs have a value of 0, set them to the median err value for the entire column.
-        err = errs2D[i]
+        err = errs_2D[i]
         err[np.where(err == 0)] = np.median(err)
         err = err[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
 
