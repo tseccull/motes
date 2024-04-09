@@ -686,7 +686,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2D, errs_2D, extractionlimits, binparameters, axdict):
+def optimal_extraction(data_2D, errs_2D, extraction_limits, binparameters, axdict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -699,7 +699,7 @@ def optimal_extraction(data_2D, errs_2D, extractionlimits, binparameters, axdict
     Args:
         data_2D (numpy.ndarray)           : Input data frame
         errs_2D (numpy.ndarray)           : Input error frame
-        extractionlimits (numpy.ndarray) : An array containing limits at each dispersion pixel
+        extraction_limits (numpy.ndarray) : An array containing limits at each dispersion pixel
         binparameters (list)             : A list containing the bin limits across the dispersion
                                            axis, to enable slicing the data across dispersion axis.
         axdict (dict)                    : A dictionary containing the spatial axis array and other
@@ -748,8 +748,8 @@ def optimal_extraction(data_2D, errs_2D, extractionlimits, binparameters, axdict
         # Get the extraction limits for the current dispersion element and define the spatial axis.
         # Where the extraction limits include partial pixels on the edge of the aperture, those
         # pixels are included in their entirety.
-        loextlim = extractionlimits[0][i]
-        hiextlim = extractionlimits[1][i]
+        loextlim = extraction_limits[0][i]
+        hiextlim = extraction_limits[1][i]
         ax = axdict["spatial_axis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
 
         # Use the extraction limits to define the data column for this wavelength element.
