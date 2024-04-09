@@ -448,20 +448,20 @@ def linear_least_squares(r, col):
     return [res_lsq.x[0], res_lsq.x[1]]
 
 
-def linear_resid(x, datarange, data):
+def linear_resid(x, data_range, data):
     """
     Calculate residuals of fitted linear profile and the data for the Levenberg-Marquardt least squares method.
 
     Args:
         x (list)                  : A list containing the best fit parameters of the linear
                                     profile.
-        datarange (numpy.ndarray) : the spatial axis of the data column.
+        data_range (numpy.ndarray) : the spatial axis of the data column.
         data (numpy.ndarray)      : the data column.
 
     Returns:
         residual (numpy.ndarray)  : The residuals of the fitted line and the data.
     """
-    residual = (x[0] * datarange) + x[1] - data
+    residual = (x[0] * data_range) + x[1] - data
     return residual
 
 
