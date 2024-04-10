@@ -1110,17 +1110,17 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             good_sky_axis = sky_axis[good_sky_pixels_location]
 
         if parameters["-SKYSUB_MODE"] == "MEDIAN":
-            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
-            skysamp = np.nanmedian(bootsky, axis=0)
+            bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
+            skysamp = np.nanmedian(bootstrapped_sky_pixels, axis=0)
             skylevel = np.nanmean(skysamp)
             sky_model.append(skylevel)
             skyerr = np.std(skysamp) / (99**0.5)
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
-            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
+            bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
-            for jj in bootsky.T:
+            for jj in bootstrapped_sky_pixels.T:
                 linpars = linear_least_squares(good_sky_axis, jj)
                 grads.append(linpars[0])
                 intercepts.append(linpars[1])
@@ -1138,11 +1138,11 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY2":
-            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
+            bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
             quads = []
-            for jj in bootsky.T:
+            for jj in bootstrapped_sky_pixels.T:
                 linpars = poly2_least_squares(good_sky_axis, jj)
                 quads.append(linpars[0])
                 grads.append(linpars[1])
@@ -1165,12 +1165,12 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY3":
-            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
+            bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
             quads = []
             trips = []
-            for jj in bootsky.T:
+            for jj in bootstrapped_sky_pixels.T:
                 linpars = poly3_least_squares(good_sky_axis, jj)
                 trips.append(linpars[0])
                 quads.append(linpars[1])
