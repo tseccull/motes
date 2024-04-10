@@ -784,10 +784,10 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         # PSF, none of its values are negative and positivity of the profile need not be enforced.
         profile = moffat(b[0], profile_center, b[2], b[3], 0.0, 0.0, ax)
         # Normalize the profile such that its sum equals unity.
-        nprof = profile / np.sum(profile)
+        normalized_profile = profile / np.sum(profile)
 
         # Step 7 of Horne 1986 - Cosmic ray masking with a conservative 5 sigmas.
-        value = np.abs((col - (f * nprof)) ** 2)
+        value = np.abs((col - (f * normalized_profile)) ** 2)
         sigma = 5
         condition = var * sigma**2
         # With invert, it gives False (ie. 0) if the above condition is satisfied which means to
@@ -808,11 +808,11 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
             fopt = 0.0
             vopt = 0.0
         else:
-            fopt = np.sum(((nprof * col) / var)[cosmic_mask]) / np.sum(
-                ((nprof * nprof) / var)[cosmic_mask]
+            fopt = np.sum(((normalized_profile * col) / var)[cosmic_mask]) / np.sum(
+                ((normalized_profile * normalized_profile) / var)[cosmic_mask]
             )
-            vopt = np.sum(nprof[cosmic_mask]) / np.sum(
-                ((nprof * nprof) / var)[cosmic_mask]
+            vopt = np.sum(normalized_profile[cosmic_mask]) / np.sum(
+                ((normalized_profile * normalized_profile) / var)[cosmic_mask]
             )
         optimal_1D_data[i] += fopt
         optimal_1D_errs[i] += np.sqrt(vopt)
