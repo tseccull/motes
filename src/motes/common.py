@@ -984,7 +984,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         fig.subplots_adjust(bottom=0.2)
         ax_vmin = plt.axes([0.1, 0.05, 0.8, 0.03])
         ax_vmax = plt.axes([0.1, 0.01, 0.8, 0.03])
-        smin = Slider(
+        slider_min = Slider(
             ax_vmin,
             "LowCut",
             0,
@@ -1003,8 +1003,8 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
 
         def update(val):
             vmax = smax.val
-            smin.valmax = vmax - 1
-            vmin = smin.val
+            slider_min.valmax = vmax - 1
+            vmin = slider_min.val
             smax.valmin = vmin + 1
 
             s.set_clim(vmin, vmax)
@@ -1013,7 +1013,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
             )
             fig.canvas.draw_idle()
 
-        smin.on_changed(update)
+        slider_min.on_changed(update)
         smax.on_changed(update)
 
         plt.show()
