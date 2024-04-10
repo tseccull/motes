@@ -1021,7 +1021,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
     return None
 
 
-def subtract_sky(background_spatial_lo_limit, bgspatial_hi_limit, fdict, axdict, pars, hpars):
+def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, fdict, axdict, pars, hpars):
     """
     Subtracts the sky background from the 2D image by defining bg regions using limits input to the
     function and then fitting a profile to the background column by column while masking cosmic
@@ -1030,7 +1030,7 @@ def subtract_sky(background_spatial_lo_limit, bgspatial_hi_limit, fdict, axdict,
 
     Args:
         background_spatial_lo_limit (numpy.ndarray)  : Lower limits of the background regions.
-        bgspatial_hi_limit (numpy.ndarray) : Upper limits of the background regions.
+        background_spatial_hi_limit (numpy.ndarray) : Upper limits of the background regions.
         fdict (dict)              : A dictionary containing the 2D image.
         axdict (dict)             : A dictionary containing the axis information.
         pars (dict)               : A dictionary containing MOTES parameters.
@@ -1052,13 +1052,13 @@ def subtract_sky(background_spatial_lo_limit, bgspatial_hi_limit, fdict, axdict,
     for ii in range(colnum):
         if background_spatial_lo_limit[ii] < 0:
             background_spatial_lo_limit[ii] = 0
-        if bgspatial_hi_limit[ii] > axdict["spatial_axis"][-1]:
-            bgspatial_hi_limit[ii] = axdict["spatial_axis"][-1]
+        if background_spatial_hi_limit[ii] > axdict["spatial_axis"][-1]:
+            background_spatial_hi_limit[ii] = axdict["spatial_axis"][-1]
 
         datacol = fdict["data"][ii]
         colrange = np.array(range(len(datacol)))
         skypix = datacol[
-            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > bgspatial_hi_limit[ii]))
+            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > background_spatial_hi_limit[ii]))
         ]
 
         # Kill MOTES if there isn't enough background sky to perform sky subtraction. Should
@@ -1092,7 +1092,7 @@ def subtract_sky(background_spatial_lo_limit, bgspatial_hi_limit, fdict, axdict,
             sys.exit()
 
         skyrange = colrange[
-            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > bgspatial_hi_limit[ii]))
+            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > background_spatial_hi_limit[ii]))
         ]
         if len(set(skypix)) == 1:
             continue
