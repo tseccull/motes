@@ -1099,11 +1099,11 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
 
         else:
             sky_pixels_median = np.nanmedian(sky_pixels)
-            stdpix = np.nanstd(sky_pixels)
+            sky_pixels_sigma = np.nanstd(sky_pixels)
             loc = np.where(
                 np.logical_and(
-                    sky_pixels > sky_pixels_median - (10 * stdpix),
-                    sky_pixels < sky_pixels_median + (10 * stdpix),
+                    sky_pixels > sky_pixels_median - (10 * sky_pixels_sigma),
+                    sky_pixels < sky_pixels_median + (10 * sky_pixels_sigma),
                 )
             )
             sky_pixels = sky_pixels[loc]
