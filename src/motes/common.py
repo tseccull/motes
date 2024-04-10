@@ -734,13 +734,13 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
     # Loop through each dispersion element of the spectrum.
     for i, col in enumerate(data_2D):
         # Identify the location of the current element in the original 2D spectrum
-        dpix = i + axes_dict["wavelength_start"]
+        og_column_location = i + axes_dict["wavelength_start"]
 
         # If the current element belongs in the next bin as defined by getbins, use the new bin's
         # parameters and increment the bin number.
         if (
             bin_number < len(bin_parameters) - 1
-            and dpix == bin_parameters[bin_number + 1][-2]
+            and og_column_location == bin_parameters[bin_number + 1][-2]
         ):
             bin_number += 1
             b = bin_parameters[bin_number]
