@@ -1055,9 +1055,9 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         if background_spatial_hi_limit[ii] > axes_dict["spatial_axis"][-1]:
             background_spatial_hi_limit[ii] = axes_dict["spatial_axis"][-1]
 
-        datacol = frame_dict["data"][ii]
-        colrange = np.array(range(len(datacol)))
-        skypix = datacol[
+        data_column = frame_dict["data"][ii]
+        colrange = np.array(range(len(data_column)))
+        skypix = data_column[
             np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > background_spatial_hi_limit[ii]))
         ]
 
