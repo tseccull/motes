@@ -905,13 +905,13 @@ def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     return None
 
 
-def show_img(data2D, axdict, headparams, drawlines, title):
+def show_img(data_2D, axdict, headparams, drawlines, title):
     """
     Takes an input image and line data to be drawn on that image and creates a figure to be shown
     on screen.
 
     Args:
-        data2D (numpy.ndarray) : The input image.
+        data_2D (numpy.ndarray) : The input image.
         axdict (dict)          : A dictionary containing the spatial and spectral axes of the input
                                  image.
         headparams (dict)      : A dictionary containing the header parameters of the input image.
@@ -931,15 +931,15 @@ def show_img(data2D, axdict, headparams, drawlines, title):
         warnings.simplefilter("ignore")
         warnings.warn("partition", UserWarning)
 
-        power = int(np.floor(np.log10(np.abs(np.nanmean(data2D)))))
-        data2D = copy.deepcopy(data2D) / 10**power
+        power = int(np.floor(np.log10(np.abs(np.nanmean(data_2D)))))
+        data_2D = copy.deepcopy(data_2D) / 10**power
 
         figwidth = 10.0
         fig = plt.figure(figsize=(figwidth, figwidth / 1.9))
         gs = gridspec.GridSpec(18, 33)
         ax = plt.subplot(gs[:, :32])
         colax = plt.subplot(gs[1:, 32])
-        masked_data2D = np.ma.masked_where(data2D == 0, data2D)
+        masked_data2D = np.ma.masked_where(data_2D == 0, data_2D)
         cmap = matplotlib.cm.inferno
         cmap.set_bad(color="red")
         s = ax.imshow(
@@ -965,7 +965,7 @@ def show_img(data2D, axdict, headparams, drawlines, title):
             "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
         )
         ax2 = ax.twiny()
-        ax2.plot(axdict["wavelength_axis"], data2D[0, :], alpha=0)
+        ax2.plot(axdict["wavelength_axis"], data_2D[0, :], alpha=0)
         ax2.set_xlim(axdict["wavelength_axis"][0], axdict["wavelength_axis"][-1])
         ax2.set_xlabel("Wavelength, " + headparams["wavelength_unit"])
         ax.set_ylim(
