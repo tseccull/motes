@@ -748,18 +748,18 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         # Get the extraction limits for the current dispersion element and define the spatial axis.
         # Where the extraction limits include partial pixels on the edge of the aperture, those
         # pixels are included in their entirety.
-        loextlim = extraction_limits[0][i]
+        lo_extraction_limit = extraction_limits[0][i]
         hiextlim = extraction_limits[1][i]
-        ax = axes_dict["spatial_axis"][int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        ax = axes_dict["spatial_axis"][int(np.floor(lo_extraction_limit)) : int(np.ceil(hiextlim + 1))]
 
         # Use the extraction limits to define the data column for this wavelength element.
-        col = col[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        col = col[int(np.floor(lo_extraction_limit)) : int(np.ceil(hiextlim + 1))]
 
         # Use the extraction limits to define the errs column for this wavelength element. Where
         # errs have a value of 0, set them to the median err value for the entire column.
         err = errs_2D[i]
         err[np.where(err == 0)] = np.median(err)
-        err = err[int(np.floor(loextlim)) : int(np.ceil(hiextlim + 1))]
+        err = err[int(np.floor(lo_extraction_limit)) : int(np.ceil(hiextlim + 1))]
 
         # Use the err column to get the variance column
         var = err * err
@@ -774,7 +774,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         # Step 5 of the Horne 1986 algorithm - Defining the spatial profile. Use the average value
         # of the extraction limits in the current column to estimate the location of the centre of
         # the peak of the spatial profile.
-        profcent = (hiextlim + loextlim) * 0.5
+        profcent = (hiextlim + lo_extraction_limit) * 0.5
 
         # Use the Moffat profile parameters for the current bin to make a moffat profile that
         # approximates the shape of the spectrum's spatial profile in the current column. The
