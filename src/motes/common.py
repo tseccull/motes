@@ -1114,7 +1114,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             median_sky_sample = np.nanmedian(bootstrapped_sky_pixels, axis=0)
             column_sky_model = np.nanmean(median_sky_sample)
             sky_model.append(column_sky_model)
-            skyerr = np.std(median_sky_sample) / (99**0.5)
+            sky_model_err = np.std(median_sky_sample) / (99**0.5)
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
@@ -1132,7 +1132,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skyinterr = np.std(intercepts) / (99**0.5)
             column_sky_model = (skygrad * column_axis) + skyint
             sky_model.append(column_sky_model)
-            skyerr = (
+            sky_model_err = (
                 (skygraderr * column_axis * skygraderr * column_axis)
                 + (skyinterr * skyinterr)
             ) ** 0.5
@@ -1158,7 +1158,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skyinterr = np.std(intercepts) / (99**0.5)
             column_sky_model = (skyquad * column_axis * column_axis) + (skygrad * column_axis) + skyint
             sky_model.append(column_sky_model)
-            skyerr = (
+            sky_model_err = (
                 (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
                 + (skygraderr * column_axis * skygraderr * column_axis)
                 + (skyinterr * skyinterr)
@@ -1195,7 +1195,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 + skyint
             )
             sky_model.append(column_sky_model)
-            skyerr = (
+            sky_model_err = (
                 (
                     skytriperr
                     * skytriperr
@@ -1212,7 +1212,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             ) ** 0.5
 
         frame_dict["data"][ii] -= column_sky_model
-        frame_dict["errs"][ii] = ((frame_dict["errs"][ii] ** 2) + (skyerr**2)) ** 0.5
+        frame_dict["errs"][ii] = ((frame_dict["errs"][ii] ** 2) + (sky_model_err**2)) ** 0.5
 
         sys.stdout.write(
             "     " + str(ii + 1) + "/" + str(number_of_columns) + " columns completed.\r"
