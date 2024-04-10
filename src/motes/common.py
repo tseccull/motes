@@ -905,14 +905,14 @@ def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     return None
 
 
-def show_img(data_2D, axdict, headparams, drawlines, title):
+def show_img(data_2D, axes_dict, headparams, drawlines, title):
     """
     Takes an input image and line data to be drawn on that image and creates a figure to be shown
     on screen.
 
     Args:
         data_2D (numpy.ndarray) : The input image.
-        axdict (dict)          : A dictionary containing the spatial and spectral axes of the input
+        axes_dict (dict)          : A dictionary containing the spatial and spectral axes of the input
                                  image.
         headparams (dict)      : A dictionary containing the header parameters of the input image.
         drawlines (list)       : A list of line data to be drawn on the input image.
@@ -950,10 +950,10 @@ def show_img(data_2D, axdict, headparams, drawlines, title):
             origin="lower",
             cmap=cmap,
             extent=[
-                axdict["wavelength_start"],
-                axdict["wavelength_start"] + len(axdict["wavelength_axis"]),
-                axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
-                axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
+                axes_dict["wavelength_start"],
+                axes_dict["wavelength_start"] + len(axes_dict["wavelength_axis"]),
+                axes_dict["spatial_axis"][0] + axes_dict["data_spatial_floor"],
+                axes_dict["spatial_axis"][-1] + axes_dict["data_spatial_floor"],
             ],
         )
 
@@ -965,15 +965,15 @@ def show_img(data_2D, axdict, headparams, drawlines, title):
             "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
         )
         ax2 = ax.twiny()
-        ax2.plot(axdict["wavelength_axis"], data_2D[0, :], alpha=0)
-        ax2.set_xlim(axdict["wavelength_axis"][0], axdict["wavelength_axis"][-1])
+        ax2.plot(axes_dict["wavelength_axis"], data_2D[0, :], alpha=0)
+        ax2.set_xlim(axes_dict["wavelength_axis"][0], axes_dict["wavelength_axis"][-1])
         ax2.set_xlabel("Wavelength, " + headparams["wavelength_unit"])
         ax.set_ylim(
-            axdict["spatial_axis"][0] + axdict["data_spatial_floor"],
-            axdict["spatial_axis"][-1] + axdict["data_spatial_floor"],
+            axes_dict["spatial_axis"][0] + axes_dict["data_spatial_floor"],
+            axes_dict["spatial_axis"][-1] + axes_dict["data_spatial_floor"],
         )
         ax.set_ylabel("Spatial Axis, Pixels")
-        ax.set_xlim(axdict["wavelength_start"], axdict["wavelength_start"] + len(axdict["wavelength_axis"]))
+        ax.set_xlim(axes_dict["wavelength_start"], axes_dict["wavelength_start"] + len(axes_dict["wavelength_axis"]))
 
         ax.set_xlabel("Dispersion Axis, Pixels")
 
