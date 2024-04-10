@@ -871,7 +871,7 @@ def plot_fitted_spatial_profile(
     return None
 
 
-def print_moffat_parameters(moffat_parameters, image_start, datascale):
+def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     """
     Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the
     original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to
@@ -882,7 +882,7 @@ def print_moffat_parameters(moffat_parameters, image_start, datascale):
         moffat_parameters (list) : The parameters of the fitted Moffat profile.
         image_start (int)    : The lower limit of the spatial axis after the original 2D spectrum was
                             cut down to the region defined in reg.txt.
-        datascale (float) : The multiplier used to scale the spatial profile so it could be fit
+        data_scale (float) : The multiplier used to scale the spatial profile so it could be fit
                             with a Moffat profile using scipy least_squares.
 
     Returns:
@@ -896,7 +896,7 @@ def print_moffat_parameters(moffat_parameters, image_start, datascale):
     sys.stdout.write("         B = " + str(moffat_parameters[4]) + "\n")
     sys.stdout.write("         m = " + str(moffat_parameters[5]) + "\n\n")
     sys.stdout.write(
-        " >>> Profile scaling factor used for fitting: " + str(datascale) + "\n"
+        " >>> Profile scaling factor used for fitting: " + str(data_scale) + "\n"
     )
     sys.stdout.write(
         " >>> Plot of median spatial profile presents the orginal unscaled profile.\n"
