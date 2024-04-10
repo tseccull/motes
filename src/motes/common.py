@@ -1021,7 +1021,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
     return None
 
 
-def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame_dict, axes_dict, parameters, hpars):
+def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame_dict, axes_dict, parameters, header_parameters):
     """
     Subtracts the sky background from the 2D image by defining bg regions using limits input to the
     function and then fitting a profile to the background column by column while masking cosmic
@@ -1034,7 +1034,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         frame_dict (dict)              : A dictionary containing the 2D image.
         axes_dict (dict)             : A dictionary containing the axis information.
         parameters (dict)               : A dictionary containing MOTES parameters.
-        hpars (dict)              : A dictionary containing header information.
+        header_parameters (dict)              : A dictionary containing header information.
 
     Returns:
         frame_dict (dict) : Dictionary containing the background subtracted 2D image.
@@ -1079,7 +1079,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                                 np.shape(frame_dict["data"])[1],
                             ]
                         )
-                        / (2 * hpars["seeing"]),
+                        / (2 * header_parameters["seeing"]),
                         1,
                     )
                 )
