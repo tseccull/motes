@@ -821,7 +821,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
 
 
 def plot_fitted_spatial_profile(
-    spatial_axis, bin_data, hiresspataxis, binmoffparams, imgstart, headparams
+    spatial_axis, bin_data, hi_resolution_spatial_axis, binmoffparams, imgstart, headparams
 ):
     """
     Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the
@@ -830,7 +830,7 @@ def plot_fitted_spatial_profile(
     Args:
         spatial_axis (numpy.ndarray)      : The spatial, or x, axis of the profile.
         bin_data (numpy.ndarray)       : The binned data that has been fitted with a Moffat profile.
-        hiresspataxis (numpy.ndarray) : The supersampled spatial axis used only for plotting
+        hi_resolution_spatial_axis (numpy.ndarray) : The supersampled spatial axis used only for plotting
                                         purposes.
         binmoffparams (list)          : Parameters defining the Moffat profiel that was fitted to
                                         bin_data.
@@ -845,7 +845,7 @@ def plot_fitted_spatial_profile(
 
     plt.figure(figsize=(7, 4.5))
     plt.plot(
-        hiresspataxis + imgstart,
+        hi_resolution_spatial_axis + imgstart,
         moffat(
             binmoffparams[0],
             binmoffparams[1],
@@ -853,7 +853,7 @@ def plot_fitted_spatial_profile(
             binmoffparams[3],
             binmoffparams[4],
             binmoffparams[5],
-            hiresspataxis,
+            hi_resolution_spatial_axis,
         ),
         color="r",
         linewidth=3,
