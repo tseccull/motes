@@ -1111,10 +1111,10 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
 
         if parameters["-SKYSUB_MODE"] == "MEDIAN":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
-            skysamp = np.nanmedian(bootstrapped_sky_pixels, axis=0)
-            skylevel = np.nanmean(skysamp)
+            median_sky_sample = np.nanmedian(bootstrapped_sky_pixels, axis=0)
+            skylevel = np.nanmean(median_sky_sample)
             sky_model.append(skylevel)
-            skyerr = np.std(skysamp) / (99**0.5)
+            skyerr = np.std(median_sky_sample) / (99**0.5)
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
