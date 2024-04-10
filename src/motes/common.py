@@ -938,7 +938,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         fig = plt.figure(figsize=(figwidth, figwidth / 1.9))
         gs = gridspec.GridSpec(18, 33)
         ax = plt.subplot(gs[:, :32])
-        colax = plt.subplot(gs[1:, 32])
+        color_axis = plt.subplot(gs[1:, 32])
         masked_data2D = np.ma.masked_where(data_2D == 0, data_2D)
         cmap = matplotlib.cm.inferno
         cmap.set_bad(color="red")
@@ -959,7 +959,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
 
         for i in range(int(len(draw_lines) / 2)):
             ax.plot(draw_lines[i * 2], draw_lines[(i * 2) + 1], color="white")
-        cbar = fig.colorbar(s, cax=colax)
+        cbar = fig.colorbar(s, cax=color_axis)
         cbar.ax.yaxis.set_offset_position("left")
         cbar.ax.set_ylabel(
             "Pixel Flux, x10^" + str(power) + " " + header_parameters["flux_unit"]
