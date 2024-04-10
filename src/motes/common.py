@@ -905,7 +905,7 @@ def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     return None
 
 
-def show_img(data_2D, axes_dict, headparams, drawlines, title):
+def show_img(data_2D, axes_dict, header_parameters, drawlines, title):
     """
     Takes an input image and line data to be drawn on that image and creates a figure to be shown
     on screen.
@@ -914,7 +914,7 @@ def show_img(data_2D, axes_dict, headparams, drawlines, title):
         data_2D (numpy.ndarray) : The input image.
         axes_dict (dict)          : A dictionary containing the spatial and spectral axes of the input
                                  image.
-        headparams (dict)      : A dictionary containing the header parameters of the input image.
+        header_parameters (dict)      : A dictionary containing the header parameters of the input image.
         drawlines (list)       : A list of line data to be drawn on the input image.
         title (str)            : The title of the figure.
 
@@ -962,12 +962,12 @@ def show_img(data_2D, axes_dict, headparams, drawlines, title):
         cbar = fig.colorbar(s, cax=colax)
         cbar.ax.yaxis.set_offset_position("left")
         cbar.ax.set_ylabel(
-            "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
+            "Pixel Flux, x10^" + str(power) + " " + header_parameters["flux_unit"]
         )
         ax2 = ax.twiny()
         ax2.plot(axes_dict["wavelength_axis"], data_2D[0, :], alpha=0)
         ax2.set_xlim(axes_dict["wavelength_axis"][0], axes_dict["wavelength_axis"][-1])
-        ax2.set_xlabel("Wavelength, " + headparams["wavelength_unit"])
+        ax2.set_xlabel("Wavelength, " + header_parameters["wavelength_unit"])
         ax.set_ylim(
             axes_dict["spatial_axis"][0] + axes_dict["data_spatial_floor"],
             axes_dict["spatial_axis"][-1] + axes_dict["data_spatial_floor"],
@@ -1009,7 +1009,7 @@ def show_img(data_2D, axes_dict, headparams, drawlines, title):
 
             s.set_clim(vmin, vmax)
             cbar.ax.set_ylabel(
-                "Pixel Flux, x10^" + str(power) + " " + headparams["flux_unit"]
+                "Pixel Flux, x10^" + str(power) + " " + header_parameters["flux_unit"]
             )
             fig.canvas.draw_idle()
 
