@@ -1106,18 +1106,18 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                     sky_pixels < sky_pixels_median + (10 * sky_pixels_sigma),
                 )
             )
-            sky_pixels = sky_pixels[good_sky_pixels_location]
+            good_sky_pixels = good_sky_pixels[good_sky_pixels_location]
             sky_axis = sky_axis[good_sky_pixels_location]
 
         if parameters["-SKYSUB_MODE"] == "MEDIAN":
-            bootsky = np.random.choice(sky_pixels, (len(sky_pixels), 100), replace=True)
+            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             skysamp = np.nanmedian(bootsky, axis=0)
             skylevel = np.nanmean(skysamp)
             sky_model.append(skylevel)
             skyerr = np.std(skysamp) / (99**0.5)
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
-            bootsky = np.random.choice(sky_pixels, (len(sky_pixels), 100), replace=True)
+            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
             for jj in bootsky.T:
@@ -1138,7 +1138,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY2":
-            bootsky = np.random.choice(sky_pixels, (len(sky_pixels), 100), replace=True)
+            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
             quads = []
@@ -1165,7 +1165,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY3":
-            bootsky = np.random.choice(sky_pixels, (len(sky_pixels), 100), replace=True)
+            bootsky = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             grads = []
             intercepts = []
             quads = []
