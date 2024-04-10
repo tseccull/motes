@@ -1046,10 +1046,10 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
     frame_dict["errs"] = frame_dict["errs"].T
 
     sky_model = []
-    colnum = len(background_spatial_lo_limit)
+    number_of_columns = len(background_spatial_lo_limit)
 
     # Makes sure the limits are within the image.
-    for ii in range(colnum):
+    for ii in range(number_of_columns):
         if background_spatial_lo_limit[ii] < 0:
             background_spatial_lo_limit[ii] = 0
         if background_spatial_hi_limit[ii] > axes_dict["spatial_axis"][-1]:
@@ -1215,7 +1215,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         frame_dict["errs"][ii] = ((frame_dict["errs"][ii] ** 2) + (skyerr**2)) ** 0.5
 
         sys.stdout.write(
-            "     " + str(ii + 1) + "/" + str(colnum) + " columns completed.\r"
+            "     " + str(ii + 1) + "/" + str(number_of_columns) + " columns completed.\r"
         )
 
     sky_model = np.array(sky_model)
