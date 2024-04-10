@@ -1091,7 +1091,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sys.stdout.write("     Terminating MOTES.\n")
             sys.exit()
 
-        skyrange = column_axis[
+        sky_axis = column_axis[
             np.where(np.logical_or(column_axis < background_spatial_lo_limit[ii], column_axis > background_spatial_hi_limit[ii]))
         ]
         if len(set(sky_pixels)) == 1:
@@ -1107,7 +1107,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 )
             )
             sky_pixels = sky_pixels[loc]
-            skyrange = skyrange[loc]
+            sky_axis = sky_axis[loc]
 
         if parameters["-SKYSUB_MODE"] == "MEDIAN":
             bootsky = np.random.choice(sky_pixels, (len(sky_pixels), 100), replace=True)
@@ -1121,7 +1121,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             grads = []
             intercepts = []
             for jj in bootsky.T:
-                linpars = linear_least_squares(skyrange, jj)
+                linpars = linear_least_squares(sky_axis, jj)
                 grads.append(linpars[0])
                 intercepts.append(linpars[1])
             intercepts = np.array(intercepts)
@@ -1143,7 +1143,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             intercepts = []
             quads = []
             for jj in bootsky.T:
-                linpars = poly2_least_squares(skyrange, jj)
+                linpars = poly2_least_squares(sky_axis, jj)
                 quads.append(linpars[0])
                 grads.append(linpars[1])
                 intercepts.append(linpars[2])
@@ -1171,7 +1171,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             quads = []
             trips = []
             for jj in bootsky.T:
-                linpars = poly3_least_squares(skyrange, jj)
+                linpars = poly3_least_squares(sky_axis, jj)
                 trips.append(linpars[0])
                 quads.append(linpars[1])
                 grads.append(linpars[2])
