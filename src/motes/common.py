@@ -871,7 +871,7 @@ def plot_fitted_spatial_profile(
     return None
 
 
-def print_moffat_parameters(moffparams, imgstart, datascale):
+def print_moffat_parameters(moffat_parameters, imgstart, datascale):
     """
     Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the
     original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to
@@ -879,7 +879,7 @@ def print_moffat_parameters(moffparams, imgstart, datascale):
     and prints them to the terminal.
 
     Args:
-        moffparams (list) : The parameters of the fitted Moffat profile.
+        moffat_parameters (list) : The parameters of the fitted Moffat profile.
         imgstart (int)    : The lower limit of the spatial axis after the original 2D spectrum was
                             cut down to the region defined in reg.txt.
         datascale (float) : The multiplier used to scale the spatial profile so it could be fit
@@ -889,12 +889,12 @@ def print_moffat_parameters(moffparams, imgstart, datascale):
         None
     """
     sys.stdout.write(" >>> Fitted Moffat function parameters:\n")
-    sys.stdout.write("         A = " + str(moffparams[0]) + "\n")
-    sys.stdout.write("         c = " + str(moffparams[1] + imgstart) + "\n")
-    sys.stdout.write("     alpha = " + str(moffparams[2]) + "\n")
-    sys.stdout.write("      beta = " + str(moffparams[3]) + "\n")
-    sys.stdout.write("         B = " + str(moffparams[4]) + "\n")
-    sys.stdout.write("         m = " + str(moffparams[5]) + "\n\n")
+    sys.stdout.write("         A = " + str(moffat_parameters[0]) + "\n")
+    sys.stdout.write("         c = " + str(moffat_parameters[1] + imgstart) + "\n")
+    sys.stdout.write("     alpha = " + str(moffat_parameters[2]) + "\n")
+    sys.stdout.write("      beta = " + str(moffat_parameters[3]) + "\n")
+    sys.stdout.write("         B = " + str(moffat_parameters[4]) + "\n")
+    sys.stdout.write("         m = " + str(moffat_parameters[5]) + "\n\n")
     sys.stdout.write(
         " >>> Profile scaling factor used for fitting: " + str(datascale) + "\n"
     )
