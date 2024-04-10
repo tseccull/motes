@@ -983,7 +983,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         # Again for some reason teeny tiny numbers cause things to break.
         fig.subplots_adjust(bottom=0.2)
         ax_vmin = plt.axes([0.1, 0.05, 0.8, 0.03])
-        axvmax = plt.axes([0.1, 0.01, 0.8, 0.03])
+        ax_vmax = plt.axes([0.1, 0.01, 0.8, 0.03])
         smin = Slider(
             ax_vmin,
             "LowCut",
@@ -993,7 +993,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
             valstep=0.001 * np.nanmax(masked_data2D),
         )
         smax = Slider(
-            axvmax,
+            ax_vmax,
             "HighCut",
             1.0,
             np.nanmax(masked_data2D),
