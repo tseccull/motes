@@ -1056,9 +1056,9 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             background_spatial_hi_limit[ii] = axes_dict["spatial_axis"][-1]
 
         data_column = frame_dict["data"][ii]
-        colrange = np.array(range(len(data_column)))
+        column_axis = np.array(range(len(data_column)))
         skypix = data_column[
-            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > background_spatial_hi_limit[ii]))
+            np.where(np.logical_or(column_axis < background_spatial_lo_limit[ii], column_axis > background_spatial_hi_limit[ii]))
         ]
 
         # Kill MOTES if there isn't enough background sky to perform sky subtraction. Should
@@ -1091,8 +1091,8 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sys.stdout.write("     Terminating MOTES.\n")
             sys.exit()
 
-        skyrange = colrange[
-            np.where(np.logical_or(colrange < background_spatial_lo_limit[ii], colrange > background_spatial_hi_limit[ii]))
+        skyrange = column_axis[
+            np.where(np.logical_or(column_axis < background_spatial_lo_limit[ii], column_axis > background_spatial_hi_limit[ii]))
         ]
         if len(set(skypix)) == 1:
             continue
@@ -1130,10 +1130,10 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skygraderr = np.std(grads) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
-            skylevel = (skygrad * colrange) + skyint
+            skylevel = (skygrad * column_axis) + skyint
             sky_model.append(skylevel)
             skyerr = (
-                (skygraderr * colrange * skygraderr * colrange)
+                (skygraderr * column_axis * skygraderr * column_axis)
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
@@ -1156,11 +1156,11 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skygraderr = np.std(grads) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
-            skylevel = (skyquad * colrange * colrange) + (skygrad * colrange) + skyint
+            skylevel = (skyquad * column_axis * column_axis) + (skygrad * column_axis) + skyint
             sky_model.append(skylevel)
             skyerr = (
-                (skyquaderr * skyquaderr * colrange * colrange * colrange * colrange)
-                + (skygraderr * colrange * skygraderr * colrange)
+                (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
+                + (skygraderr * column_axis * skygraderr * column_axis)
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
@@ -1189,9 +1189,9 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             skylevel = (
-                (skytrip * colrange * colrange * colrange)
-                + (skyquad * colrange * colrange)
-                + (skygrad * colrange)
+                (skytrip * column_axis * column_axis * column_axis)
+                + (skyquad * column_axis * column_axis)
+                + (skygrad * column_axis)
                 + skyint
             )
             sky_model.append(skylevel)
@@ -1199,15 +1199,15 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 (
                     skytriperr
                     * skytriperr
-                    * colrange
-                    * colrange
-                    * colrange
-                    * colrange
-                    * colrange
-                    * colrange
+                    * column_axis
+                    * column_axis
+                    * column_axis
+                    * column_axis
+                    * column_axis
+                    * column_axis
                 )
-                + (skyquaderr * skyquaderr * colrange * colrange * colrange * colrange)
-                + (skygraderr * colrange * skygraderr * colrange)
+                + (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
+                + (skygraderr * column_axis * skygraderr * column_axis)
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
