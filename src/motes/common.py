@@ -871,7 +871,7 @@ def plot_fitted_spatial_profile(
     return None
 
 
-def print_moffat_parameters(moffat_parameters, imgstart, datascale):
+def print_moffat_parameters(moffat_parameters, image_start, datascale):
     """
     Takes a list of Moffat profile parameters, the lower limit of the spatial axis after the
     original 2D spectrum was cut down to the region defined in reg.txt and the multiplier used to
@@ -880,7 +880,7 @@ def print_moffat_parameters(moffat_parameters, imgstart, datascale):
 
     Args:
         moffat_parameters (list) : The parameters of the fitted Moffat profile.
-        imgstart (int)    : The lower limit of the spatial axis after the original 2D spectrum was
+        image_start (int)    : The lower limit of the spatial axis after the original 2D spectrum was
                             cut down to the region defined in reg.txt.
         datascale (float) : The multiplier used to scale the spatial profile so it could be fit
                             with a Moffat profile using scipy least_squares.
@@ -890,7 +890,7 @@ def print_moffat_parameters(moffat_parameters, imgstart, datascale):
     """
     sys.stdout.write(" >>> Fitted Moffat function parameters:\n")
     sys.stdout.write("         A = " + str(moffat_parameters[0]) + "\n")
-    sys.stdout.write("         c = " + str(moffat_parameters[1] + imgstart) + "\n")
+    sys.stdout.write("         c = " + str(moffat_parameters[1] + image_start) + "\n")
     sys.stdout.write("     alpha = " + str(moffat_parameters[2]) + "\n")
     sys.stdout.write("      beta = " + str(moffat_parameters[3]) + "\n")
     sys.stdout.write("         B = " + str(moffat_parameters[4]) + "\n")
