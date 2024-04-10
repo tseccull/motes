@@ -905,7 +905,7 @@ def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     return None
 
 
-def show_img(data_2D, axes_dict, header_parameters, drawlines, title):
+def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
     """
     Takes an input image and line data to be drawn on that image and creates a figure to be shown
     on screen.
@@ -915,7 +915,7 @@ def show_img(data_2D, axes_dict, header_parameters, drawlines, title):
         axes_dict (dict)          : A dictionary containing the spatial and spectral axes of the input
                                  image.
         header_parameters (dict)      : A dictionary containing the header parameters of the input image.
-        drawlines (list)       : A list of line data to be drawn on the input image.
+        draw_lines (list)       : A list of line data to be drawn on the input image.
         title (str)            : The title of the figure.
 
     Returns:
@@ -957,8 +957,8 @@ def show_img(data_2D, axes_dict, header_parameters, drawlines, title):
             ],
         )
 
-        for i in range(int(len(drawlines) / 2)):
-            ax.plot(drawlines[i * 2], drawlines[(i * 2) + 1], color="white")
+        for i in range(int(len(draw_lines) / 2)):
+            ax.plot(draw_lines[i * 2], draw_lines[(i * 2) + 1], color="white")
         cbar = fig.colorbar(s, cax=colax)
         cbar.ax.yaxis.set_offset_position("left")
         cbar.ax.set_ylabel(
