@@ -821,7 +821,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
 
 
 def plot_fitted_spatial_profile(
-    spatial_axis, bin_data, hi_resolution_spatial_axis, bin_moffat_parameters, image_start, headparams
+    spatial_axis, bin_data, hi_resolution_spatial_axis, bin_moffat_parameters, image_start, header_parameters
 ):
     """
     Plot the spatial profile of a collapsed spectrum or a collapsed bin therein, and plot the
@@ -836,7 +836,7 @@ def plot_fitted_spatial_profile(
                                         bin_data.
         image_start (int)                : The limit of the spatial axis after the original 2D
                                         spectrum was cut down to the region defined in reg.txt
-        headparams (dict)             : A dictionary of parameters pulled from the header of the
+        header_parameters (dict)             : A dictionary of parameters pulled from the header of the
                                         current datafile
 
     Returns:
@@ -865,7 +865,7 @@ def plot_fitted_spatial_profile(
     plt.legend()
     plt.title("Spectrum Spatial Profile and Fitted Moffat Profile")
     plt.xlabel("Spatial Axis, Pixels")
-    plt.ylabel("Median Flux, " + headparams["flux_unit"])
+    plt.ylabel("Median Flux, " + header_parameters["flux_unit"])
     plt.show()
 
     return None
