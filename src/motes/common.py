@@ -982,10 +982,10 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         # Add interactive scaling bar to figures if the 2D spectrum isn't flux calibrated.
         # Again for some reason teeny tiny numbers cause things to break.
         fig.subplots_adjust(bottom=0.2)
-        axvmin = plt.axes([0.1, 0.05, 0.8, 0.03])
+        ax_vmin = plt.axes([0.1, 0.05, 0.8, 0.03])
         axvmax = plt.axes([0.1, 0.01, 0.8, 0.03])
         smin = Slider(
-            axvmin,
+            ax_vmin,
             "LowCut",
             0,
             np.nanmax(masked_data2D) - 1,
