@@ -774,7 +774,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         # Step 5 of the Horne 1986 algorithm - Defining the spatial profile. Use the average value
         # of the extraction limits in the current column to estimate the location of the centre of
         # the peak of the spatial profile.
-        profcent = (hi_extraction_limit + lo_extraction_limit) * 0.5
+        profile_center = (hi_extraction_limit + lo_extraction_limit) * 0.5
 
         # Use the Moffat profile parameters for the current bin to make a moffat profile that
         # approximates the shape of the spectrum's spatial profile in the current column. The
@@ -782,7 +782,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         # location along the spatial axis. The background is assumed to have been subtracted by
         # now, so the background level and gradient are set to 0. Because the profile is a model
         # PSF, none of its values are negative and positivity of the profile need not be enforced.
-        profile = moffat(b[0], profcent, b[2], b[3], 0.0, 0.0, ax)
+        profile = moffat(b[0], profile_center, b[2], b[3], 0.0, 0.0, ax)
         # Normalize the profile such that its sum equals unity.
         nprof = profile / np.sum(profile)
 
