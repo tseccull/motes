@@ -992,7 +992,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
             valinit=0.0,
             valstep=0.001 * np.nanmax(masked_data2D),
         )
-        smax = Slider(
+        slider_max = Slider(
             ax_vmax,
             "HighCut",
             1.0,
@@ -1002,10 +1002,10 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         )
 
         def update(val):
-            vmax = smax.val
+            vmax = slider_max.val
             slider_min.valmax = vmax - 1
             vmin = slider_min.val
-            smax.valmin = vmin + 1
+            slider_max.valmin = vmin + 1
 
             s.set_clim(vmin, vmax)
             cbar.ax.set_ylabel(
@@ -1014,7 +1014,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
             fig.canvas.draw_idle()
 
         slider_min.on_changed(update)
-        smax.on_changed(update)
+        slider_max.on_changed(update)
 
         plt.show()
 
