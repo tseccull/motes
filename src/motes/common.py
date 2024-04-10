@@ -1045,7 +1045,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
     frame_dict["data"] = frame_dict["data"].T
     frame_dict["errs"] = frame_dict["errs"].T
 
-    medsky = []
+    sky_model = []
     colnum = len(background_spatial_lo_limit)
 
     # Makes sure the limits are within the image.
@@ -1113,7 +1113,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
             skysamp = np.nanmedian(bootsky, axis=0)
             skylevel = np.nanmean(skysamp)
-            medsky.append(skylevel)
+            sky_model.append(skylevel)
             skyerr = np.std(skysamp) / (99**0.5)
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
@@ -1131,7 +1131,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             skylevel = (skygrad * colrange) + skyint
-            medsky.append(skylevel)
+            sky_model.append(skylevel)
             skyerr = (
                 (skygraderr * colrange * skygraderr * colrange)
                 + (skyinterr * skyinterr)
@@ -1157,7 +1157,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             skylevel = (skyquad * colrange * colrange) + (skygrad * colrange) + skyint
-            medsky.append(skylevel)
+            sky_model.append(skylevel)
             skyerr = (
                 (skyquaderr * skyquaderr * colrange * colrange * colrange * colrange)
                 + (skygraderr * colrange * skygraderr * colrange)
@@ -1194,7 +1194,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 + (skygrad * colrange)
                 + skyint
             )
-            medsky.append(skylevel)
+            sky_model.append(skylevel)
             skyerr = (
                 (
                     skytriperr
@@ -1218,11 +1218,11 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             "     " + str(ii + 1) + "/" + str(colnum) + " columns completed.\r"
         )
 
-    medsky = np.array(medsky)
+    sky_model = np.array(sky_model)
     if parameters["-SKYSUB_MODE"] == "MEDIAN":
-        frame_dict["sky_model"] = np.tile(medsky, (np.shape(frame_dict["data"])[1], 1))
+        frame_dict["sky_model"] = np.tile(sky_model, (np.shape(frame_dict["data"])[1], 1))
     else:
-        frame_dict["sky_model"] = medsky
+        frame_dict["sky_model"] = sky_model
 
     frame_dict["data"] = frame_dict["data"].T
     frame_dict["errs"] = frame_dict["errs"].T
