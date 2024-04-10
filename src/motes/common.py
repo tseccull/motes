@@ -1021,7 +1021,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
     return None
 
 
-def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame_dict, axes_dict, pars, hpars):
+def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame_dict, axes_dict, parameters, hpars):
     """
     Subtracts the sky background from the 2D image by defining bg regions using limits input to the
     function and then fitting a profile to the background column by column while masking cosmic
@@ -1033,7 +1033,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         background_spatial_hi_limit (numpy.ndarray) : Upper limits of the background regions.
         frame_dict (dict)              : A dictionary containing the 2D image.
         axes_dict (dict)             : A dictionary containing the axis information.
-        pars (dict)               : A dictionary containing MOTES parameters.
+        parameters (dict)               : A dictionary containing MOTES parameters.
         hpars (dict)              : A dictionary containing header information.
 
     Returns:
@@ -1109,14 +1109,14 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skypix = skypix[loc]
             skyrange = skyrange[loc]
 
-        if pars["-SKYSUB_MODE"] == "MEDIAN":
+        if parameters["-SKYSUB_MODE"] == "MEDIAN":
             bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
             skysamp = np.nanmedian(bootsky, axis=0)
             skylevel = np.nanmean(skysamp)
             medsky.append(skylevel)
             skyerr = np.std(skysamp) / (99**0.5)
 
-        if pars["-SKYSUB_MODE"] == "LINEAR":
+        if parameters["-SKYSUB_MODE"] == "LINEAR":
             bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
             grads = []
             intercepts = []
@@ -1137,7 +1137,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
-        if pars["-SKYSUB_MODE"] == "POLY2":
+        if parameters["-SKYSUB_MODE"] == "POLY2":
             bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
             grads = []
             intercepts = []
@@ -1164,7 +1164,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 + (skyinterr * skyinterr)
             ) ** 0.5
 
-        if pars["-SKYSUB_MODE"] == "POLY3":
+        if parameters["-SKYSUB_MODE"] == "POLY3":
             bootsky = np.random.choice(skypix, (len(skypix), 100), replace=True)
             grads = []
             intercepts = []
@@ -1219,7 +1219,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         )
 
     medsky = np.array(medsky)
-    if pars["-SKYSUB_MODE"] == "MEDIAN":
+    if parameters["-SKYSUB_MODE"] == "MEDIAN":
         frame_dict["sky_model"] = np.tile(medsky, (np.shape(frame_dict["data"])[1], 1))
     else:
         frame_dict["sky_model"] = medsky
