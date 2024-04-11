@@ -1227,7 +1227,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
     frame_dict["data"] = frame_dict["data"].T
     frame_dict["errs"] = frame_dict["errs"].T
 
-    chipgaps = np.where(np.nanmedian(frame_dict["data"], axis=0) == 0)
-    frame_dict["data"][:, chipgaps[0]] += 1
+    chip_gaps = np.where(np.nanmedian(frame_dict["data"], axis=0) == 0)
+    frame_dict["data"][:, chip_gaps[0]] += 1
 
     return frame_dict
