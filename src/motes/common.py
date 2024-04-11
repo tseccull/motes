@@ -1141,17 +1141,17 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             linear_terms = []
             intercepts = []
-            quads = []
+            quadratic_terms = []
             for jj in bootstrapped_sky_pixels.T:
                 sky_model_parameters = poly2_least_squares(good_sky_axis, jj)
-                quads.append(sky_model_parameters[0])
+                quadratic_terms.append(sky_model_parameters[0])
                 linear_terms.append(sky_model_parameters[1])
                 intercepts.append(sky_model_parameters[2])
-            quads = np.array(quads)
+            quadratic_terms = np.array(quadratic_terms)
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
-            skyquad = np.mean(quads)
-            skyquaderr = np.std(quads) / (99**0.5)
+            skyquad = np.mean(quadratic_terms)
+            skyquaderr = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
@@ -1168,22 +1168,22 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
             linear_terms = []
             intercepts = []
-            quads = []
+            quadratic_terms = []
             trips = []
             for jj in bootstrapped_sky_pixels.T:
                 sky_model_parameters = poly3_least_squares(good_sky_axis, jj)
                 trips.append(sky_model_parameters[0])
-                quads.append(sky_model_parameters[1])
+                quadratic_terms.append(sky_model_parameters[1])
                 linear_terms.append(sky_model_parameters[2])
                 intercepts.append(sky_model_parameters[3])
             trips = np.array(trips)
-            quads = np.array(quads)
+            quadratic_terms = np.array(quadratic_terms)
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
             skytrip = np.mean(trips)
             skytriperr = np.std(trips) / (99**0.5)
-            skyquad = np.mean(quads)
-            skyquaderr = np.std(quads) / (99**0.5)
+            skyquad = np.mean(quadratic_terms)
+            skyquaderr = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
