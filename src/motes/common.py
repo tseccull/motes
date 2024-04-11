@@ -1121,9 +1121,9 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             linear_terms = []
             intercepts = []
             for jj in bootstrapped_sky_pixels.T:
-                linpars = linear_least_squares(good_sky_axis, jj)
-                linear_terms.append(linpars[0])
-                intercepts.append(linpars[1])
+                sky_model_parameters = linear_least_squares(good_sky_axis, jj)
+                linear_terms.append(sky_model_parameters[0])
+                intercepts.append(sky_model_parameters[1])
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
             skygrad = np.mean(linear_terms)
@@ -1143,10 +1143,10 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             intercepts = []
             quads = []
             for jj in bootstrapped_sky_pixels.T:
-                linpars = poly2_least_squares(good_sky_axis, jj)
-                quads.append(linpars[0])
-                linear_terms.append(linpars[1])
-                intercepts.append(linpars[2])
+                sky_model_parameters = poly2_least_squares(good_sky_axis, jj)
+                quads.append(sky_model_parameters[0])
+                linear_terms.append(sky_model_parameters[1])
+                intercepts.append(sky_model_parameters[2])
             quads = np.array(quads)
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
@@ -1171,11 +1171,11 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             quads = []
             trips = []
             for jj in bootstrapped_sky_pixels.T:
-                linpars = poly3_least_squares(good_sky_axis, jj)
-                trips.append(linpars[0])
-                quads.append(linpars[1])
-                linear_terms.append(linpars[2])
-                intercepts.append(linpars[3])
+                sky_model_parameters = poly3_least_squares(good_sky_axis, jj)
+                trips.append(sky_model_parameters[0])
+                quads.append(sky_model_parameters[1])
+                linear_terms.append(sky_model_parameters[2])
+                intercepts.append(sky_model_parameters[3])
             trips = np.array(trips)
             quads = np.array(quads)
             intercepts = np.array(intercepts)
