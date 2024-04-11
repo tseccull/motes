@@ -1150,13 +1150,13 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             quadratic_terms = np.array(quadratic_terms)
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
-            skyquad = np.mean(quadratic_terms)
+            sky_quadratic_term = np.mean(quadratic_terms)
             skyquaderr = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
             sky_intercept_err = np.std(intercepts) / (99**0.5)
-            column_sky_model = (skyquad * column_axis * column_axis) + (sky_linear_term * column_axis) + sky_intercept
+            column_sky_model = (sky_quadratic_term * column_axis * column_axis) + (sky_linear_term * column_axis) + sky_intercept
             sky_model.append(column_sky_model)
             sky_model_err = (
                 (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
@@ -1182,7 +1182,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             linear_terms = np.array(linear_terms)
             skytrip = np.mean(trips)
             skytriperr = np.std(trips) / (99**0.5)
-            skyquad = np.mean(quadratic_terms)
+            sky_quadratic_term = np.mean(quadratic_terms)
             skyquaderr = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
@@ -1190,7 +1190,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sky_intercept_err = np.std(intercepts) / (99**0.5)
             column_sky_model = (
                 (skytrip * column_axis * column_axis * column_axis)
-                + (skyquad * column_axis * column_axis)
+                + (sky_quadratic_term * column_axis * column_axis)
                 + (sky_linear_term * column_axis)
                 + sky_intercept
             )
