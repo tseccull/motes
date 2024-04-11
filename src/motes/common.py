@@ -1151,7 +1151,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
             sky_quadratic_term = np.mean(quadratic_terms)
-            skyquaderr = np.std(quadratic_terms) / (99**0.5)
+            sky_quadratic_term_err = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
@@ -1159,7 +1159,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             column_sky_model = (sky_quadratic_term * column_axis * column_axis) + (sky_linear_term * column_axis) + sky_intercept
             sky_model.append(column_sky_model)
             sky_model_err = (
-                (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
+                (sky_quadratic_term_err * sky_quadratic_term_err * column_axis * column_axis * column_axis * column_axis)
                 + (sky_linear_term_err * column_axis * sky_linear_term_err * column_axis)
                 + (sky_intercept_err * sky_intercept_err)
             ) ** 0.5
@@ -1183,7 +1183,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             skytrip = np.mean(trips)
             skytriperr = np.std(trips) / (99**0.5)
             sky_quadratic_term = np.mean(quadratic_terms)
-            skyquaderr = np.std(quadratic_terms) / (99**0.5)
+            sky_quadratic_term_err = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
@@ -1206,7 +1206,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                     * column_axis
                     * column_axis
                 )
-                + (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
+                + (sky_quadratic_term_err * sky_quadratic_term_err * column_axis * column_axis * column_axis * column_axis)
                 + (sky_linear_term_err * column_axis * sky_linear_term_err * column_axis)
                 + (sky_intercept_err * sky_intercept_err)
             ) ** 0.5
