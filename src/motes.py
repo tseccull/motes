@@ -536,8 +536,7 @@ def save_fits(
         hdu_list.append(sky_extraction_limits)
 
     fits_hdu_list = fits.HDUList(hdu_list)
-    split_file_path = input_file_path.split("_")
-    fits_hdu_list.writeto("_".join(split_file_path[0:-2]) + "_" + "1D" + "_" + split_file_path[-1])
+    fits_hdu_list.writeto("m" + input_file_path.split("/")[-1])
     fits_hdu_list.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
