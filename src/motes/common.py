@@ -1129,12 +1129,12 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
-            skyinterr = np.std(intercepts) / (99**0.5)
+            sky_intercept_err = np.std(intercepts) / (99**0.5)
             column_sky_model = (sky_linear_term * column_axis) + sky_intercept
             sky_model.append(column_sky_model)
             sky_model_err = (
                 (sky_linear_term_err * column_axis * sky_linear_term_err * column_axis)
-                + (skyinterr * skyinterr)
+                + (sky_intercept_err * sky_intercept_err)
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY2":
@@ -1155,13 +1155,13 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
-            skyinterr = np.std(intercepts) / (99**0.5)
+            sky_intercept_err = np.std(intercepts) / (99**0.5)
             column_sky_model = (skyquad * column_axis * column_axis) + (sky_linear_term * column_axis) + sky_intercept
             sky_model.append(column_sky_model)
             sky_model_err = (
                 (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
                 + (sky_linear_term_err * column_axis * sky_linear_term_err * column_axis)
-                + (skyinterr * skyinterr)
+                + (sky_intercept_err * sky_intercept_err)
             ) ** 0.5
 
         if parameters["-SKYSUB_MODE"] == "POLY3":
@@ -1187,7 +1187,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sky_linear_term = np.mean(linear_terms)
             sky_linear_term_err = np.std(linear_terms) / (99**0.5)
             sky_intercept = np.mean(intercepts)
-            skyinterr = np.std(intercepts) / (99**0.5)
+            sky_intercept_err = np.std(intercepts) / (99**0.5)
             column_sky_model = (
                 (skytrip * column_axis * column_axis * column_axis)
                 + (skyquad * column_axis * column_axis)
@@ -1208,7 +1208,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 )
                 + (skyquaderr * skyquaderr * column_axis * column_axis * column_axis * column_axis)
                 + (sky_linear_term_err * column_axis * sky_linear_term_err * column_axis)
-                + (skyinterr * skyinterr)
+                + (sky_intercept_err * sky_intercept_err)
             ) ** 0.5
 
         frame_dict["data"][ii] -= column_sky_model
