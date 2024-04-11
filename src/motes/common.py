@@ -1169,19 +1169,19 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             linear_terms = []
             intercepts = []
             quadratic_terms = []
-            trips = []
+            cubic_terms = []
             for jj in bootstrapped_sky_pixels.T:
                 sky_model_parameters = poly3_least_squares(good_sky_axis, jj)
-                trips.append(sky_model_parameters[0])
+                cubic_terms.append(sky_model_parameters[0])
                 quadratic_terms.append(sky_model_parameters[1])
                 linear_terms.append(sky_model_parameters[2])
                 intercepts.append(sky_model_parameters[3])
-            trips = np.array(trips)
+            cubic_terms = np.array(cubic_terms)
             quadratic_terms = np.array(quadratic_terms)
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
-            skytrip = np.mean(trips)
-            skytriperr = np.std(trips) / (99**0.5)
+            skytrip = np.mean(cubic_terms)
+            skytriperr = np.std(cubic_terms) / (99**0.5)
             sky_quadratic_term = np.mean(quadratic_terms)
             sky_quadratic_term_err = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
