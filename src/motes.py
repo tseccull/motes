@@ -412,7 +412,7 @@ def save_fits(
         "lower limit of spatial axis, pix",
     )
     input_file_primary_header["HIERARCH SPATPIXH"] = (
-        axes_dict["imgend"],
+        axes_dict["data_spatial_ceiling"],
         "upper limit of spatial axis, pix",
     )
     input_file_primary_header["HIERARCH DISPPIXL"] = (
@@ -420,7 +420,7 @@ def save_fits(
         "lower limit of dispersion axis, pix",
     )
     input_file_primary_header["HIERARCH DISPPIXH"] = (
-        axes_dict["wavend"],
+        axes_dict["wavelength_end"],
         "upper limit of dispersion axis, pix",
     )
     input_file_primary_header["HIERARCH WAVL"] = (
