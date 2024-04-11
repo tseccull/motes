@@ -280,8 +280,6 @@ def motes():
 
         # Extract the spectrum from a supersampled version of the 2D image using the extraction
         # limits.
-        sys.stdout.write(" >>> Extracting 1D spectrum. ")
-        sys.stdout.flush()
         frame_dict["data"] = frame_dict["data"].T
         frame_dict["errs"] = frame_dict["errs"].T
         frame_dict["qual"] = frame_dict["qual"].T
