@@ -715,7 +715,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
                                      spectrum
     """
 
-    sys.stdout.write("Performing optimal extraction...")
+    sys.stdout.write(" >>> Performing optimal extraction of 1D spectrum...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
     data_2D, errs_2D = filter_data(data_2D, np.abs(errs_2D))
@@ -756,9 +756,16 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
         col = col[int(np.floor(lo_extraction_limit)) : int(np.ceil(hi_extraction_limit + 1))]
 
         # Use the extraction limits to define the errs column for this wavelength element. Where
-        # errs have a value of 0, set them to the median err value for the entire column.
+        # errs have a value of 0, set them to the median err value for the entire column. If all
+        # errs have a value of zero, the column is likely to be bad and should have the optimal
+        # extraction outputs set to zero.
         err = errs_2D[i]
-        err[np.where(err == 0)] = np.median(err)
+        if all(x == 0.0 for x in err):
+            optimal_1D_data[i] += 0.0
+            optimal_1D_errs[i] += 0.0
+            continue
+            
+        err[np.where(err == 0)] = np.median(err[np.where(err != 0)])
         err = err[int(np.floor(lo_extraction_limit)) : int(np.ceil(hi_extraction_limit + 1))]
 
         # Use the err column to get the variance column
