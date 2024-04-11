@@ -1181,7 +1181,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             intercepts = np.array(intercepts)
             linear_terms = np.array(linear_terms)
             sky_cubic_term = np.mean(cubic_terms)
-            skytriperr = np.std(cubic_terms) / (99**0.5)
+            sky_cubic_term_err = np.std(cubic_terms) / (99**0.5)
             sky_quadratic_term = np.mean(quadratic_terms)
             sky_quadratic_term_err = np.std(quadratic_terms) / (99**0.5)
             sky_linear_term = np.mean(linear_terms)
@@ -1197,8 +1197,8 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
             sky_model.append(column_sky_model)
             sky_model_err = (
                 (
-                    skytriperr
-                    * skytriperr
+                    sky_cubic_term_err
+                    * sky_cubic_term_err
                     * column_axis
                     * column_axis
                     * column_axis
