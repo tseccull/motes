@@ -1040,8 +1040,6 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         frame_dict (dict) : Dictionary containing the background subtracted 2D image.
     """
 
-    sys.stdout.write("Subtracting sky background...\n")
-
     frame_dict["data"] = frame_dict["data"].T
     frame_dict["errs"] = frame_dict["errs"].T
 
