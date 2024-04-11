@@ -474,10 +474,6 @@ def save_fits(
         motes_parameters["-FWHM_MULTIPLIER"],
         "FWHM used to define the extraction limits",
     )
-    input_file_primary_header["HIERARCH INTERP KIND"] = (
-        motes_parameters["-INTERP_KIND"],
-        "interpolation mode used",
-    )
 
     if motes_parameters["-SUBTRACT_SKY"]:
         input_file_primary_header["HIERARCH SKYSUB FWHM MULT"] = (
