@@ -27,7 +27,7 @@ jobs:
       - name: Install requirements
         shell: bash -l {0}
         run: |
-          pip install flake8 pylint bandit black astropy matplotlib numpy
+          pip install flake8 pylint bandit black
 
       - name: Linting check with flake8
         shell: bash -l {0}
