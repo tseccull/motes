@@ -1227,7 +1227,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
     if parameters["-SKYSUB_MODE"] == "MEDIAN":
         frame_dict["sky_model"] = np.tile(sky_model, (np.shape(frame_dict["data"])[1], 1))
     else:
-        frame_dict["sky_model"] = sky_model
+        frame_dict["sky_model"] = sky_model.T
 
     frame_dict["data"] = frame_dict["data"].T
     frame_dict["errs"] = frame_dict["errs"].T
