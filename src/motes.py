@@ -541,7 +541,7 @@ def save_fits(
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "/".join(input_file_path.split("/")[0:-1]) + "/m" + split_file_path[-1] + "\n"
+        "/".join(input_file_path.split("/")[0:-1]) + "/m" + input_file_path.split("/")[-1] + "\n"
     )
     return None
 
