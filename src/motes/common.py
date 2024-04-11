@@ -1118,16 +1118,16 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
 
         if parameters["-SKYSUB_MODE"] == "LINEAR":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
-            grads = []
+            linear_terms = []
             intercepts = []
             for jj in bootstrapped_sky_pixels.T:
                 linpars = linear_least_squares(good_sky_axis, jj)
-                grads.append(linpars[0])
+                linear_terms.append(linpars[0])
                 intercepts.append(linpars[1])
             intercepts = np.array(intercepts)
-            grads = np.array(grads)
-            skygrad = np.mean(grads)
-            skygraderr = np.std(grads) / (99**0.5)
+            linear_terms = np.array(linear_terms)
+            skygrad = np.mean(linear_terms)
+            skygraderr = np.std(linear_terms) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             column_sky_model = (skygrad * column_axis) + skyint
@@ -1139,21 +1139,21 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
 
         if parameters["-SKYSUB_MODE"] == "POLY2":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
-            grads = []
+            linear_terms = []
             intercepts = []
             quads = []
             for jj in bootstrapped_sky_pixels.T:
                 linpars = poly2_least_squares(good_sky_axis, jj)
                 quads.append(linpars[0])
-                grads.append(linpars[1])
+                linear_terms.append(linpars[1])
                 intercepts.append(linpars[2])
             quads = np.array(quads)
             intercepts = np.array(intercepts)
-            grads = np.array(grads)
+            linear_terms = np.array(linear_terms)
             skyquad = np.mean(quads)
             skyquaderr = np.std(quads) / (99**0.5)
-            skygrad = np.mean(grads)
-            skygraderr = np.std(grads) / (99**0.5)
+            skygrad = np.mean(linear_terms)
+            skygraderr = np.std(linear_terms) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             column_sky_model = (skyquad * column_axis * column_axis) + (skygrad * column_axis) + skyint
@@ -1166,7 +1166,7 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
 
         if parameters["-SKYSUB_MODE"] == "POLY3":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
-            grads = []
+            linear_terms = []
             intercepts = []
             quads = []
             trips = []
@@ -1174,18 +1174,18 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
                 linpars = poly3_least_squares(good_sky_axis, jj)
                 trips.append(linpars[0])
                 quads.append(linpars[1])
-                grads.append(linpars[2])
+                linear_terms.append(linpars[2])
                 intercepts.append(linpars[3])
             trips = np.array(trips)
             quads = np.array(quads)
             intercepts = np.array(intercepts)
-            grads = np.array(grads)
+            linear_terms = np.array(linear_terms)
             skytrip = np.mean(trips)
             skytriperr = np.std(trips) / (99**0.5)
             skyquad = np.mean(quads)
             skyquaderr = np.std(quads) / (99**0.5)
-            skygrad = np.mean(grads)
-            skygraderr = np.std(grads) / (99**0.5)
+            skygrad = np.mean(linear_terms)
+            skygraderr = np.std(linear_terms) / (99**0.5)
             skyint = np.mean(intercepts)
             skyinterr = np.std(intercepts) / (99**0.5)
             column_sky_model = (
