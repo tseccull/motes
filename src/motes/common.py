@@ -536,7 +536,7 @@ def make_wav_axis(start, increment, length):
 
 def moffat(amplitude, center, alpha, beta, background_level, background_gradient, data_range):
     """
-    Creates moffat profile added a linear sloped background based on input parameters
+    Creates moffat profile added to a linear sloped background based on input parameters
 
     Args:
         amplitude (float64)             : amplitude of the Moffat profile
@@ -550,7 +550,7 @@ def moffat(amplitude, center, alpha, beta, background_level, background_gradient
         data_range (numpy.ndarray) : x axis of the Moffat profile.
 
     Returns:
-        moffat_background (numpy.ndarray) : a moffat profile defined on the data_range axis using
+        moffat_plus_background (numpy.ndarray) : a moffat profile defined on the data_range axis using
                                             the parameters input to the function, with added
                                             background flux.
     """
@@ -946,14 +946,14 @@ def show_img(data_2d, axes_dict, header_parameters, draw_lines, title):
         gs = gridspec.GridSpec(18, 33)
         ax = plt.subplot(gs[:, :32])
         color_axis = plt.subplot(gs[1:, 32])
-        masked_data2D = np.ma.masked_where(data_2d == 0, data_2d)
+        masked_data2d = np.ma.masked_where(data_2d == 0, data_2d)
         cmap = matplotlib.cm.inferno
         cmap.set_bad(color="red")
         s = ax.imshow(
-            masked_data2D,
+            masked_data2d,
             aspect="auto",
             vmin=0,
-            vmax=np.nanmedian(masked_data2D) + (0.5 * np.nanstd(masked_data2D)),
+            vmax=np.nanmedian(masked_data2d) + (0.5 * np.nanstd(masked_data2d)),
             origin="lower",
             cmap=cmap,
             extent=[
@@ -995,17 +995,17 @@ def show_img(data_2d, axes_dict, header_parameters, draw_lines, title):
             ax_vmin,
             "LowCut",
             0,
-            np.nanmax(masked_data2D) - 1,
+            np.nanmax(masked_data2d) - 1,
             valinit=0.0,
-            valstep=0.001 * np.nanmax(masked_data2D),
+            valstep=0.001 * np.nanmax(masked_data2d),
         )
         slider_max = Slider(
             ax_vmax,
             "HighCut",
             1.0,
-            np.nanmax(masked_data2D),
-            valinit=np.nanmedian(masked_data2D) + (3.0 * np.nanstd(masked_data2D)),
-            valstep=0.001 * np.nanmax(masked_data2D),
+            np.nanmax(masked_data2d),
+            valinit=np.nanmedian(masked_data2d) + (3.0 * np.nanstd(masked_data2d)),
+            valstep=0.001 * np.nanmax(masked_data2d),
         )
 
         def update(val):
