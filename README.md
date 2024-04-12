@@ -3,9 +3,9 @@
 [![Motes CI](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml)
 ![Licence](https://img.shields.io/github/license/tseccull/motes)
 
-Version 0.4.6
+Version 0.4.7
 
-Last Updated: 2024-02-13 - T. Seccull & D. Kiersz
+Last Updated: 2024-04-XX - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 
@@ -14,7 +14,7 @@ astronomical point sources from 2D spectrograms. MOTES is also capable of sky
 subtraction and , to a limited degree, cosmic ray rejection/masking. 
 
 Citation: Please cite .... paper to be written .... if you use MOTES in your 
-research. Need a Zenodo DOI?
+research. Need a Zenodo DO
 
 # Project Status
 Currently in final stages of development toward v1.0 and release. Dominik's 
