@@ -418,7 +418,8 @@ def harvest_gmos(input_fits_hdu, primary_header):
     zero_rows = np.concatenate(
         [np.zeros(boundary_columns), zero_rows, np.zeros(boundary_columns)]
     )
-    for n in reversed(range(boundary_columns)):
+    while boundary_columns > 0:
+        boundary_columns -= 1
         zero_rows = [
             1 if x == 0 and zero_rows[y + 1] == 1 else x
             for y, x in enumerate(zero_rows[:-1])
