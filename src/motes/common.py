@@ -909,7 +909,7 @@ def set_extraction_limits(moffat_parameters, width_multiplier=3.0):
     lower_extraction_limit = moffat_parameters[1] - (width_multiplier * fwhm)
     upper_extraction_limit = moffat_parameters[1] + (width_multiplier * fwhm)
 
-    return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
+    return lower_extraction_limit, upper_extraction_limit, moffat_parameters[1]
 
 
 def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
