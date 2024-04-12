@@ -555,12 +555,12 @@ def moffat(amplitude, center, alpha, beta, background_level, background_gradient
                                             background flux.
     """
 
-    moffat = amplitude * (
+    moffat_profile = amplitude * (
         (1 + (((data_range - center) * (data_range - center)) / (alpha * alpha))) ** -beta
     )
-    moffat_background = moffat + background_level + (data_range * background_gradient)
+    moffat_plus_background = moffat_profile + background_level + (data_range * background_gradient)
 
-    return moffat_background
+    return moffat_plus_background
 
 
 def moffat_least_squares(r, col, seeing, pixel_resolution):
