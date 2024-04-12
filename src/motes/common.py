@@ -15,39 +15,6 @@ from matplotlib.widgets import Slider
 from scipy.optimize import least_squares
 
 
-def set_extraction_limits(moffat_parameters, width_multiplier=3.0):
-    """
-    Calculate the extraction limits from a Moffat profile based on the distance from the central
-    peak as a multiple of FWHM.
-
-    Args:
-        moffat_parameters (list)                  : list containing the parameters of the Moffat profile
-                                             to be created and measured. The parameters are:
-                                             [amplitude, location, scale, power].
-        width_multiplier (float, optional) : defines the distance from the center of the spatial
-                                             profile at which to set the extraction limits, in
-                                             multiples of the FWHM. Defaults to 3.0.
-
-    Returns:
-        lower_extraction_limit (numpy.float64) : the lower bound of the region to be extracted.
-        upper_extraction_limit (numpy.float64) : the upper bound of the region to be extracted.
-        fwhm (numpy.float64)                   : the Full Width at Half Maximum of the Moffat
-                                                 profile.
-        moffat_parameters[1] (numpy.float64)          : location of the center of the Moffat profile.
-    """
-
-    # Create a Moffat profile based on the input parameters.
-    fwhm = 2 * moffat_parameters[2] * (((2 ** (1 / moffat_parameters[3])) - 1) ** 0.5)
-
-    # Respectively define the upper and lower extraction limits at a distance above and below the
-    # peak of the Moffat profile that equals the FWHM of the Moffat profile times a multiplying
-    # factor.
-    lower_extraction_limit = moffat_parameters[1] - (width_multiplier * fwhm)
-    upper_extraction_limit = moffat_parameters[1] + (width_multiplier * fwhm)
-
-    return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
-
-
 def extrapolate_extraction_limits(extraction_limits, dispersion_axis_length, short_end, long_end):
     """
     Linearly extrapolate the extraction limits at the ends of the 2D spectrum.
@@ -910,6 +877,39 @@ def print_moffat_parameters(moffat_parameters, image_start, data_scale):
     )
 
     return None
+
+
+def set_extraction_limits(moffat_parameters, width_multiplier=3.0):
+    """
+    Calculate the extraction limits from a Moffat profile based on the distance from the central
+    peak as a multiple of FWHM.
+
+    Args:
+        moffat_parameters (list)                  : list containing the parameters of the Moffat profile
+                                             to be created and measured. The parameters are:
+                                             [amplitude, location, scale, power].
+        width_multiplier (float, optional) : defines the distance from the center of the spatial
+                                             profile at which to set the extraction limits, in
+                                             multiples of the FWHM. Defaults to 3.0.
+
+    Returns:
+        lower_extraction_limit (numpy.float64) : the lower bound of the region to be extracted.
+        upper_extraction_limit (numpy.float64) : the upper bound of the region to be extracted.
+        fwhm (numpy.float64)                   : the Full Width at Half Maximum of the Moffat
+                                                 profile.
+        moffat_parameters[1] (numpy.float64)          : location of the center of the Moffat profile.
+    """
+
+    # Create a Moffat profile based on the input parameters.
+    fwhm = 2 * moffat_parameters[2] * (((2 ** (1 / moffat_parameters[3])) - 1) ** 0.5)
+
+    # Respectively define the upper and lower extraction limits at a distance above and below the
+    # peak of the Moffat profile that equals the FWHM of the Moffat profile times a multiplying
+    # factor.
+    lower_extraction_limit = moffat_parameters[1] - (width_multiplier * fwhm)
+    upper_extraction_limit = moffat_parameters[1] + (width_multiplier * fwhm)
+
+    return lower_extraction_limit, upper_extraction_limit, fwhm, moffat_parameters[1]
 
 
 def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
