@@ -76,27 +76,27 @@ def extrapolate_gradient(data_array, data_limits):
     return gradient
 
 
-def filter_data(data_2d, errs_2D):
+def filter_data(data_2d, errs_2d):
     """
-    This function takes in the data_2d and errs_2D and outputs frames where any NaN or Inf values are
+    This function takes in the data_2d and errs_2d and outputs frames where any NaN or Inf values are
     0.0 (this can be later filtered to a median of the column). This is used before the extraction
     procedures to ensure the S/N in the bin is numerical (required for optimal extraction).
 
     Args:
         data_2d (numpy.ndarray) : Original data_2d
-        errs_2D (numpy.ndarray) : Original errs_2D
+        errs_2d (numpy.ndarray) : Original errs_2d
 
     Returns:
         data_2d (numpy.ndarray) : Filtered data_2d
-        errs_2D (numpy.ndarray) : Filtered errs_2D
+        errs_2d (numpy.ndarray) : Filtered errs_2d
     """
 
-    errs_2D[~np.isfinite(errs_2D)] = 0.0
-    data_2d[~np.isfinite(errs_2D)] = 0.0
+    errs_2d[~np.isfinite(errs_2d)] = 0.0
+    data_2d[~np.isfinite(errs_2d)] = 0.0
     data_2d[~np.isfinite(data_2d)] = 0.0
-    errs_2D[~np.isfinite(data_2d)] = 0.0
+    errs_2d[~np.isfinite(data_2d)] = 0.0
 
-    return data_2d, errs_2D
+    return data_2d, errs_2d
 
 
 def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_length, parameter_dict, has_sky=False):
@@ -653,7 +653,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2d, errs_2D, extraction_limits, bin_parameters, axes_dict):
+def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes_dict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -665,7 +665,7 @@ def optimal_extraction(data_2d, errs_2D, extraction_limits, bin_parameters, axes
 
     Args:
         data_2d (numpy.ndarray)           : Input data frame
-        errs_2D (numpy.ndarray)           : Input error frame
+        errs_2d (numpy.ndarray)           : Input error frame
         extraction_limits (numpy.ndarray) : An array containing limits at each dispersion pixel
         bin_parameters (list)             : A list containing the bin limits across the dispersion
                                            axis, to enable slicing the data across dispersion axis.
@@ -685,7 +685,7 @@ def optimal_extraction(data_2d, errs_2D, extraction_limits, bin_parameters, axes
     sys.stdout.write(" >>> Performing optimal extraction of 1D spectrum...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
-    data_2d, errs_2D = filter_data(data_2d, np.abs(errs_2D))
+    data_2d, errs_2d = filter_data(data_2d, np.abs(errs_2d))
 
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
@@ -726,7 +726,7 @@ def optimal_extraction(data_2d, errs_2D, extraction_limits, bin_parameters, axes
         # errs have a value of 0, set them to the median err value for the entire column. If all
         # errs have a value of zero, the column is likely to be bad and should have the optimal
         # extraction outputs set to zero.
-        err = errs_2D[i]
+        err = errs_2d[i]
         if all(x == 0.0 for x in err):
             optimal_1D_data[i] += 0.0
             optimal_1D_errs[i] += 0.0
