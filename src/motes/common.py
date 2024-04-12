@@ -674,11 +674,11 @@ def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes
                                            data frame
 
     Returns:
-        optimal_1D_data (numpy.ndarray) : 1D array of the optimally extracted spectrum
-        optimal_1D_errs (numpy.ndarray) : 1D array of the uncertainties of the optimally extracted
+        optimal_1d_data (numpy.ndarray) : 1D array of the optimally extracted spectrum
+        optimal_1d_errs (numpy.ndarray) : 1D array of the uncertainties of the optimally extracted
                                      spectrum
-        aperture_1D_data (numpy.ndarray) : 1D array of the aperture extracted spectrum
-        aperture_1D_errs (numpy.ndarray) : 1D array of the uncertainties of the aperture extracted
+        aperture_1d_data (numpy.ndarray) : 1D array of the aperture extracted spectrum
+        aperture_1d_errs (numpy.ndarray) : 1D array of the uncertainties of the aperture extracted
                                      spectrum
     """
 
@@ -689,10 +689,10 @@ def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes
 
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
-    optimal_1D_data = np.zeros(np.shape(data_2d)[0])
-    optimal_1D_errs = np.zeros(np.shape(data_2d)[0])
-    aperture_1D_data = np.zeros(np.shape(data_2d)[0])
-    aperture_1D_errs = np.zeros(np.shape(data_2d)[0])
+    optimal_1d_data = np.zeros(np.shape(data_2d)[0])
+    optimal_1d_errs = np.zeros(np.shape(data_2d)[0])
+    aperture_1d_data = np.zeros(np.shape(data_2d)[0])
+    aperture_1d_errs = np.zeros(np.shape(data_2d)[0])
 
     # Set up bin identification parameters for the following loop.
     bin_number = -1
@@ -728,8 +728,8 @@ def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes
         # extraction outputs set to zero.
         err = errs_2d[i]
         if all(x == 0.0 for x in err):
-            optimal_1D_data[i] += 0.0
-            optimal_1D_errs[i] += 0.0
+            optimal_1d_data[i] += 0.0
+            optimal_1d_errs[i] += 0.0
             continue
 
         err[np.where(err == 0)] = np.median(err[np.where(err != 0)])
@@ -742,8 +742,8 @@ def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes
         # the aperture 1D output array. Get the root sum square of the err column and add this
         # value to the uncertainty array for the 1D aperture extraction.
         f = np.sum(col)
-        aperture_1D_data[i] += f
-        aperture_1D_errs[i] += np.sqrt(np.sum(var))
+        aperture_1d_data[i] += f
+        aperture_1d_errs[i] += np.sqrt(np.sum(var))
 
         # Step 5 of the Horne 1986 algorithm - Defining the spatial profile. Use the average value
         # of the extraction limits in the current column to estimate the location of the centre of
@@ -788,10 +788,10 @@ def optimal_extraction(data_2d, errs_2d, extraction_limits, bin_parameters, axes
             vopt = np.sum(normalized_profile[cosmic_mask]) / np.sum(
                 ((normalized_profile * normalized_profile) / var)[cosmic_mask]
             )
-        optimal_1D_data[i] += fopt
-        optimal_1D_errs[i] += np.sqrt(vopt)
+        optimal_1d_data[i] += fopt
+        optimal_1d_errs[i] += np.sqrt(vopt)
 
-    return optimal_1D_data, optimal_1D_errs, aperture_1D_data, aperture_1D_errs
+    return optimal_1d_data, optimal_1d_errs, aperture_1d_data, aperture_1d_errs
 
 
 def plot_fitted_spatial_profile(
