@@ -731,7 +731,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
             optimal_1D_data[i] += 0.0
             optimal_1D_errs[i] += 0.0
             continue
-            
+
         err[np.where(err == 0)] = np.median(err[np.where(err != 0)])
         err = err[int(np.floor(lo_extraction_limit)) : int(np.ceil(hi_extraction_limit + 1))]
 
