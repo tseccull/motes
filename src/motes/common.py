@@ -117,7 +117,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
         parameter_dict (dict)                 : Dictionary of parameters ready in from the motesparams.txt
                                         configuration file.
         has_sky (bool, optional)      : Used to tell get_bins whether the sky has been subtracted
-                                        yet or not, and to set the minimum_SNR threshold accordingly.
+                                        yet or not, and to set the minimum_snr threshold accordingly.
                                         False by default.
 
     Returns:
@@ -126,11 +126,11 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
         frame_dict (dict)        : Returns frame_dict.
     """
 
-    # Take S/N threshold (minimum_SNR) and minimum number of columns per dispersion bin (minimum_columns)
+    # Take S/N threshold (minimum_snr) and minimum number of columns per dispersion bin (minimum_columns)
     if parameter_dict["-SUBTRACT_SKY"] and has_sky:
-        minimum_SNR = parameter_dict["-SKY_SNR_BIN_LIM"]
+        minimum_snr = parameter_dict["-SKY_SNR_BIN_LIM"]
     else:
-        minimum_SNR = parameter_dict["-SNR_BIN_LIM"]
+        minimum_snr = parameter_dict["-SNR_BIN_LIM"]
 
     # Minimum columns for a bin
     minimum_columns = parameter_dict["-COL_BIN_LIM"]
@@ -143,16 +143,16 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     sys.stdout.write(
         " >>> Determining spectrum localisation bins on dispersion axis.\n"
     )
-    sys.stdout.write("     User-defined S/N threshold = " + str(minimum_SNR) + "\n")
+    sys.stdout.write("     User-defined S/N threshold = " + str(minimum_snr) + "\n")
 
     # Start at the centre of the dispersion axis and start binning towards the short wavelength end
     # of the spectrum.
     while x - width > 0:
         snr_estimate = 0.0
 
-        # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_SNR),
+        # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_snr),
         # add one more pixel column to the bin.
-        while snr_estimate <= minimum_SNR:
+        while snr_estimate <= minimum_snr:
             width += 1
 
             # Stop the loop once the short wavelength end of the spectrum os reached.
@@ -200,9 +200,9 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     while x + width < dispersion_axis_length:
         snr_estimate = 0.0
 
-        # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_SNR),
+        # If the S/N of the current bin has not yet reached the user-defined threshold (minimum_snr),
         # add one more pixel column to the bin.
-        while snr_estimate <= minimum_SNR:
+        while snr_estimate <= minimum_snr:
             width += 1
 
             # Stop the loop once the long wavelength end of the spectrum is reached.
