@@ -76,27 +76,27 @@ def extrapolate_gradient(data_array, data_limits):
     return gradient
 
 
-def filter_data(data_2D, errs_2D):
+def filter_data(data_2d, errs_2D):
     """
-    This function takes in the data_2D and errs_2D and outputs frames where any NaN or Inf values are
+    This function takes in the data_2d and errs_2D and outputs frames where any NaN or Inf values are
     0.0 (this can be later filtered to a median of the column). This is used before the extraction
     procedures to ensure the S/N in the bin is numerical (required for optimal extraction).
 
     Args:
-        data_2D (numpy.ndarray) : Original data_2D
+        data_2d (numpy.ndarray) : Original data_2d
         errs_2D (numpy.ndarray) : Original errs_2D
 
     Returns:
-        data_2D (numpy.ndarray) : Filtered data_2D
+        data_2d (numpy.ndarray) : Filtered data_2d
         errs_2D (numpy.ndarray) : Filtered errs_2D
     """
 
     errs_2D[~np.isfinite(errs_2D)] = 0.0
-    data_2D[~np.isfinite(errs_2D)] = 0.0
-    data_2D[~np.isfinite(data_2D)] = 0.0
-    errs_2D[~np.isfinite(data_2D)] = 0.0
+    data_2d[~np.isfinite(errs_2D)] = 0.0
+    data_2d[~np.isfinite(data_2d)] = 0.0
+    errs_2D[~np.isfinite(data_2d)] = 0.0
 
-    return data_2D, errs_2D
+    return data_2d, errs_2D
 
 
 def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_length, parameter_dict, has_sky=False):
@@ -252,7 +252,7 @@ def get_bins(frame_dict, spatial_lo_limit, spatial_hi_limit, dispersion_axis_len
     return bin_locations, frame_dict
 
 
-def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data_2D, header_parameters, axes_dict):
+def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_limit, data_2d, header_parameters, axes_dict):
     """
     Print and plot the output of get_bins.
 
@@ -262,7 +262,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
                                  configuration file.
         spatial_lo_limit (int)           : lower limit of the spatial region measured for S/N in get_bins()
         spatial_hi_limit (int)          : upper limit of the spatial region measured for S/N in get_bins()
-        data_2D (numpy.ndarray) : 2D spectroscopic data
+        data_2d (numpy.ndarray) : 2D spectroscopic data
         header_parameters (dict)      : A dictionary of parameters full from the datafile header.
         axes_dict (dict)          : A dictionary containing axes and axis metadata for the current
                                  extraction
@@ -297,7 +297,7 @@ def get_bins_output(bin_parameters, parameters, spatial_lo_limit, spatial_hi_lim
             draw_lines.append(axes_dict["spatial_axis"][bin_line_location] + axes_dict["data_spatial_floor"])
 
         show_img(
-            data_2D,
+            data_2d,
             axes_dict,
             header_parameters,
             draw_lines,
@@ -653,7 +653,7 @@ def moffat_resid(x, data_range, data):
     return residual
 
 
-def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes_dict):
+def optimal_extraction(data_2d, errs_2D, extraction_limits, bin_parameters, axes_dict):
     """
     Perform optimal extraction using a modified version of Horne (1986) where S=0, G=0 and errors
     are not 'revised' since we already have the 'variance frame'. Ideally, this extraction reduces
@@ -664,7 +664,7 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
     the bin limits and within the extraction limits previously calculated.
 
     Args:
-        data_2D (numpy.ndarray)           : Input data frame
+        data_2d (numpy.ndarray)           : Input data frame
         errs_2D (numpy.ndarray)           : Input error frame
         extraction_limits (numpy.ndarray) : An array containing limits at each dispersion pixel
         bin_parameters (list)             : A list containing the bin limits across the dispersion
@@ -685,21 +685,21 @@ def optimal_extraction(data_2D, errs_2D, extraction_limits, bin_parameters, axes
     sys.stdout.write(" >>> Performing optimal extraction of 1D spectrum...")
 
     # Filter any NaNs and Inf for data/errs AND ensure the errors are positive for this extraction.
-    data_2D, errs_2D = filter_data(data_2D, np.abs(errs_2D))
+    data_2d, errs_2D = filter_data(data_2d, np.abs(errs_2D))
 
     # Set up output arrays for the optimally and aperture extracted spectra and their respective
     # uncertainties
-    optimal_1D_data = np.zeros(np.shape(data_2D)[0])
-    optimal_1D_errs = np.zeros(np.shape(data_2D)[0])
-    aperture_1D_data = np.zeros(np.shape(data_2D)[0])
-    aperture_1D_errs = np.zeros(np.shape(data_2D)[0])
+    optimal_1D_data = np.zeros(np.shape(data_2d)[0])
+    optimal_1D_errs = np.zeros(np.shape(data_2d)[0])
+    aperture_1D_data = np.zeros(np.shape(data_2d)[0])
+    aperture_1D_errs = np.zeros(np.shape(data_2d)[0])
 
     # Set up bin identification parameters for the following loop.
     bin_number = -1
     b = np.zeros(8)
 
     # Loop through each dispersion element of the spectrum.
-    for i, col in enumerate(data_2D):
+    for i, col in enumerate(data_2d):
         # Identify the location of the current element in the original 2D spectrum
         og_column_location = i + axes_dict["wavelength_start"]
 
@@ -912,13 +912,13 @@ def set_extraction_limits(moffat_parameters, width_multiplier=3.0):
     return lower_extraction_limit, upper_extraction_limit, moffat_parameters[1]
 
 
-def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
+def show_img(data_2d, axes_dict, header_parameters, draw_lines, title):
     """
     Takes an input image and line data to be drawn on that image and creates a figure to be shown
     on screen.
 
     Args:
-        data_2D (numpy.ndarray) : The input image.
+        data_2d (numpy.ndarray) : The input image.
         axes_dict (dict)          : A dictionary containing the spatial and spectral axes of the input
                                  image.
         header_parameters (dict)      : A dictionary containing the header parameters of the input image.
@@ -938,15 +938,15 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
         warnings.simplefilter("ignore")
         warnings.warn("partition", UserWarning)
 
-        power = int(np.floor(np.log10(np.abs(np.nanmean(data_2D)))))
-        data_2D = copy.deepcopy(data_2D) / 10**power
+        power = int(np.floor(np.log10(np.abs(np.nanmean(data_2d)))))
+        data_2d = copy.deepcopy(data_2d) / 10**power
 
         figwidth = 10.0
         fig = plt.figure(figsize=(figwidth, figwidth / 1.9))
         gs = gridspec.GridSpec(18, 33)
         ax = plt.subplot(gs[:, :32])
         color_axis = plt.subplot(gs[1:, 32])
-        masked_data2D = np.ma.masked_where(data_2D == 0, data_2D)
+        masked_data2D = np.ma.masked_where(data_2d == 0, data_2d)
         cmap = matplotlib.cm.inferno
         cmap.set_bad(color="red")
         s = ax.imshow(
@@ -972,7 +972,7 @@ def show_img(data_2D, axes_dict, header_parameters, draw_lines, title):
             "Pixel Flux, x10^" + str(power) + " " + header_parameters["flux_unit"]
         )
         ax2 = ax.twiny()
-        ax2.plot(axes_dict["wavelength_axis"], data_2D[0, :], alpha=0)
+        ax2.plot(axes_dict["wavelength_axis"], data_2d[0, :], alpha=0)
         ax2.set_xlim(axes_dict["wavelength_axis"][0], axes_dict["wavelength_axis"][-1])
         ax2.set_xlabel("Wavelength, " + header_parameters["wavelength_unit"])
         ax.set_ylim(
