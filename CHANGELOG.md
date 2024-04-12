@@ -7,13 +7,13 @@ followed.
 ## 0.4.7 2024-04-XX
 Updates by T. Seccull
 
-This is a large update that provides various bug fixes, removes unused code, and adjusts almost all 
-variables to conform to snake_case. Many changes are based on the analysis of linting software like 
-flake8 and pylint. Linting isn't yet fully complete, but this update hopefully represents a solid start 
-to that work. Large portions of the codebase can still be simplified and organized with a cleaner 
-structure. MOTES is still fully functional, and has been tested following the changes in this update. I 
-did make a few changes to the motes.yml file, but reverted them as Dominik is working on a better 
-version for a future update; its best I leave the CI stuff to someone who knows what they're doing.
+This is a large update that provides various bug fixes, removes unused code and variables, and adjusts 
+almost all variables to conform to snake_case. Many changes are based on the analysis of linting 
+software like flake8 and pylint. Linting isn't yet fully complete, but this update hopefully represents a 
+solid start to that work. Large portions of the codebase can still be simplified and organized with a 
+cleaner structure. MOTES is still fully functional, and has been tested following the changes in this 
+update. I did make a few changes to the motes.yml file, but reverted them as Dominik is working on a 
+better version for a future update; its best I leave the CI stuff to someone who knows what they're doing.
 
 ### Fixed
 - Bad pixel columns containing no good data (this doesn't include flagged columns in detector chip gaps)
@@ -32,10 +32,15 @@ version for a future update; its best I leave the CI stuff to someone who knows 
 ### Changed
 - Some instances of boolean logic statements (like some cases of `np.where()` for example) have been
   reformatted as recommended by flake8.
+- Minor formatting changes have been done to satisfy flake8 and pylint.
 - 200+ keywords, variable names, and funtion names across the codebase have been carefully adjusted to be
   more descriptive and follow the snake_case convention.
 - The file name format for the output files for MOTES have been changed. From now on the file name will be
   the same as the name of the input file, but prepended with an `m`.
+- `extraction_limits()` function name changed to `set_extraction_limits()` to avoid conflicts with internal
+  variable names. The maintain alphabetization of the funtions in common.py, `set_extraction_limits()` has
+  been moved further down in the file.
+- 
 
 ### Removed
 - Trailing spaces at the ends of some lines.
@@ -50,6 +55,7 @@ version for a future update; its best I leave the CI stuff to someone who knows 
   be interpolated linearly between the centres of each bin fitted with a Moffat profile. The `-INTERP_KIND`
   keyword appeared only in the save_fits() function, and has no bearing on the function of MOTES; it should be
   removed from `motesparams.txt`.
+- A few unused variables have been removed.
 
 ## 0.4.6 2024-02-13
 Updates by T. Seccull & D. Kiersz
