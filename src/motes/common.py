@@ -1102,17 +1102,16 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
         if len(set(sky_pixels)) == 1:
             continue
 
-        else:
-            sky_pixels_median = np.nanmedian(sky_pixels)
-            sky_pixels_sigma = np.nanstd(sky_pixels)
-            good_sky_pixels_location = np.where(
-                np.logical_and(
-                    sky_pixels > sky_pixels_median - (10 * sky_pixels_sigma),
-                    sky_pixels < sky_pixels_median + (10 * sky_pixels_sigma),
-                )
+        sky_pixels_median = np.nanmedian(sky_pixels)
+        sky_pixels_sigma = np.nanstd(sky_pixels)
+        good_sky_pixels_location = np.where(
+            np.logical_and(
+                sky_pixels > sky_pixels_median - (10 * sky_pixels_sigma),
+                sky_pixels < sky_pixels_median + (10 * sky_pixels_sigma),
             )
-            good_sky_pixels = sky_pixels[good_sky_pixels_location]
-            good_sky_axis = sky_axis[good_sky_pixels_location]
+        )
+        good_sky_pixels = sky_pixels[good_sky_pixels_location]
+        good_sky_axis = sky_axis[good_sky_pixels_location]
 
         if parameters["-SKYSUB_MODE"] == "MEDIAN":
             bootstrapped_sky_pixels = np.random.choice(good_sky_pixels, (len(good_sky_pixels), 100), replace=True)
