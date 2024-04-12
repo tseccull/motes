@@ -4,6 +4,53 @@ This changelog follows the format described
 [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is 
 followed.
 
+## 0.4.7 2024-04-XX
+Updates by T. Seccull
+
+This is a large update that provides various bug fixes, removes unused code, and adjusts almost all 
+variables to conform to snake_case. Many changes are based on the analysis of linting software like 
+flake8 and pylint. Linting isn't yet fully complete, but this update hopefully represents a solid start 
+to that work. Large portions of the codebase can still be simplified and organized with a cleaner 
+structure. MOTES is still fully functional, and has been tested following the changes in this update. I 
+did make a few changes to the motes.yml file, but reverted them as Dominik is working on a better 
+version for a future update; its best I leave the CI stuff to someone who knows what they're doing.
+
+### Fixed
+- Bad pixel columns containing no good data (this doesn't include flagged columns in detector chip gaps)
+  were causing divide by zero runtime errors in `optimal_extraction()` in cases where the `MEDIAN` sky
+  subtraction mode was used. The extraction would still complete successfully with the bad data removed
+  from the spectrum, but the script's behaviour was not consistent between all sky subtraction modes.
+  To fix this I added an if statement to catch columns of all-zero data and extract the optimal spectrum
+  with zero counts and zero errors before continuing on to the next good column. This if statement
+  bypasses the actual optimal extraction that would throw the runtime warning if the bad data was fed to
+  it.
+- Using the `LINEAR`, `POLY2`, or `POLY3` sky subtraction modes would cause the sky model frame to be
+  saved with a transposed (i.e. x and y axis both flipped) orientation. I added an extra `.T` to the
+  `sky_model` frame in the frame dictionary before the end of `subtract_sky()` for these modes to fix
+  this. 
+
+### Changed
+- Some instances of boolean logic statements (like some cases of `np.where()` for example) have been
+  reformatted as recommended by flake8.
+- 200+ keywords, variable names, and funtion names across the codebase have been carefully adjusted to be
+  more descriptive and follow the snake_case convention.
+- The file name format for the output files for MOTES have been changed. From now on the file name will be
+  the same as the name of the input file, but prepended with an `m`.
+
+### Removed
+- Trailing spaces at the ends of some lines.
+- Previously deprecated and commented out sections of the get_bins() function in common.py have finally been
+  removed. This includes all sections of code triggered by `-REPLACE_CRBP` being set to True in
+  motesparams.txt. As `-REPLACE_CRBP` is no longer used, it can be removed from motesparams.txt and should
+  not be included in that file alongside any demo data that gets added to the repo.
+- A few stdout print statements were being duplicated when the code was run because similar statements were
+  being printed both before the call to a function and at the start of the function itself. In each case
+  one of these duplicates has been removed.
+- References to `-INTERP_KIND` have been removed, as the extraction limits are now hard coded to be
+  be interpolated linearly between the centres of each bin fitted with a Moffat profile. The `-INTERP_KIND`
+  keyword appeared only in the save_fits() function, and has no bearing on the function of MOTES; it should be
+  removed from `motesparams.txt`.
+
 ## 0.4.6 2024-02-13
 Updates by T. Seccull & D. Kiersz
 
