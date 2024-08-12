@@ -1,3 +1,5 @@
+#!/home/tom/miniforge3/envs/dragons/bin/python
+
 """
 harvester.py - A collection of functions to read in data from the image file and repackage it into
                a dictionary for use in the rest of MOTES.
@@ -328,15 +330,14 @@ def harvest_gmos(input_fits_hdu, primary_header):
     qual = input_fits_hdu["DQ"].data
     original_qual = copy.deepcopy(qual)
 
+	# Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad
+    # pixels or trip up the bin definition stage.
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
-    # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as bad.
-    qual[np.where(data + qual == 1)] = 0
-    qual = 1 - qual
-
-    # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual
-    # frame.
-    qual[~np.isfinite(data)] = 0
-    data[~np.isfinite(data)] = 1.0
+    data[qual==16] = 1.
+    errs[qual==16] = 1.
+    new_qual = np.ones(np.shape(qual))
+    new_qual[qual>0] = 0
+    qual = new_qual
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
     # constraints used by Gemini.
@@ -384,18 +385,27 @@ def harvest_gmos(input_fits_hdu, primary_header):
     sys.stdout.flush()
     header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
-        "pixel_resolution": float(primary_header["PIXSCALE"]),
         "exptime": primary_header["EXPTIME"],
         "seeing": seeing,
-        "instrument": primary_header["INSTRUME"],
-        "wavelength_unit": science_header["WAT1_001"].split(" ")[2].split("=")[1],
+        "instrument": primary_header["INSTRUME"]
     }
 
-    # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
+    # BUNIT only appears in the headers of GMOS spectra if they have
+    # been flux calibrated of if they have been reduced with DRAGONS.
     if "BUNIT" in science_header:
         header_dict["flux_unit"] = science_header["BUNIT"]
     else:
-        header_dict["flux_unit"] = "electrons"
+        header_dict["flux_unit"] = "electron"
+        
+    if "CUNIT1" in science_header:
+        header_dict["wavelength_unit"] = science_header["CUNIT1"]
+    else:
+        header_dict["wavelenght_unit"] = science_header["WAT1_001"].split(" ")[2].split("=")[1]
+    
+    if "PIXSCALE" in science_header:
+        header_dict["pixel_resolution"] = float(science_header["PIXSCALE"])
+    else:
+        header_dict["pixel_resolution"] = float(primary_header["PIXSCALE"])
 
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
@@ -404,34 +414,23 @@ def harvest_gmos(input_fits_hdu, primary_header):
         + '"\n'
     )
 
-    # Create the wavelength axis of the spectrum.
-    wavelength_axis = common.make_wav_axis(
-        science_header["CRVAL1"], science_header["CD1_1"], science_header["NAXIS1"]
-    )
+    if science_header["CRPIX1"] > 0.5:
+        reference_pixel = np.ceil(science_header["CRPIX1"])
+        reference_wavelength = ((reference_pixel-science_header["CRPIX1"]) * science_header["CD1_1"]) + science_header["CRVAL1"]
+    else:
+        reference_pixel = np.floor(science_header["CRPIX1"])
+        reference_wavelength = ((science_header["CRPIX1"] - reference_pixel) * science_header["CD1_1"]) + science_header["CRVAL1"]
+    wavelength_axis = (np.arange(-reference_pixel+1, science_header["NAXIS1"]-reference_pixel) * science_header["CD1_1"]) + reference_wavelength
+    print(wavelength_axis)
 
-    # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad
-    # pixels or trip up the bin definition stage. Chip gaps are identified as pixel columns which
-    # are all zeros, and then three columns either side of the chip gaps are also flagged just to
-    # be safe.
-    zero_rows = [1 if all(x == 0) else 0 for x in data.T]
-    boundary_columns = 3
-    zero_rows = np.concatenate(
-        [np.zeros(boundary_columns), zero_rows, np.zeros(boundary_columns)]
-    )
-    while boundary_columns > 0:
-        boundary_columns -= 1
-        zero_rows = [
-            1 if x == 0 and zero_rows[y + 1] == 1 else x
-            for y, x in enumerate(zero_rows[:-1])
-        ]
-        zero_rows = [
-            1 if x == 0 and zero_rows[y - 1] == 1 else x
-            for y, x in enumerate(zero_rows[1:])
-        ]
-    zero_rows = [1 if x > 0 else x for x in zero_rows]
-    chip_gap_map = np.tile(zero_rows, (np.shape(data)[0], 1))
-    data[chip_gap_map == 1] = 1.0
-    errs[chip_gap_map == 1] = 1.0
+
+    # If DRAGONS has been used to reduce the data, flip the wavelength
+    # axis and the 2D data.
+    if science_header["CD1_1"] < 0:
+        wavelength_axis = np.flip(wavelength_axis)
+        data = np.flip(data, axis=1)
+        errs = np.flip(errs, axis=1)
+        qual = np.flip(qual, axis=1)
 
     return data, errs, qual, original_qual, header_dict, wavelength_axis
 

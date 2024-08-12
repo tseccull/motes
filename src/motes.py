@@ -1,3 +1,5 @@
+#!/home/tom/miniforge3/envs/dragons/bin/python
+
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
 Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for

@@ -1,3 +1,5 @@
+#!/home/tom/miniforge3/envs/dragons/bin/python
+
 """
 common.py - Common functions for the MOTES pipeline.
 """

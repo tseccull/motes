@@ -1,3 +1,5 @@
+#!/home/tom/miniforge3/envs/dragons/bin/python
+
 """
 startup.py - First script to be run by MOTES to read in parameters and regions.
 """
