@@ -2,10 +2,13 @@
 
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
-Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for
-extracting spectrum from astronomical 2D spectrograms.
-Version: 0.4.5
-Date: 2023-12-23
+
+Description: Modular and Optimal Tracer and Extractor of Specrtra 
+(MOTES). A Python package for extracting spectrum from astronomical
+2D spectrograms.
+
+Version: 0.5.0
+Date: 2024-08-12
 Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
@@ -41,8 +44,8 @@ def motes():
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        header_parameters, frame_dict, axes_dict, input_file_primary_header = motesio.data_harvest(
-            i, input_file_path, data_regions
+        header_parameters, frame_dict, axes_dict, original_hdu_list = (
+            motesio.data_harvest(i, input_file_path, data_regions)
         )
         # Make backup copies of the original data and error frames.
         frame_dict["original_data"] = copy.deepcopy(frame_dict["data"])
@@ -196,6 +199,7 @@ def motes():
             )
 
             bin_moffat_parameters[0] /= data_scaling_factor
+            bin_moffat_parameters[1] += axes_dict["data_spatial_floor"]
             bin_moffat_parameters[4] /= data_scaling_factor
             bin_moffat_parameters[5] /= data_scaling_factor
 
@@ -326,14 +330,14 @@ def motes():
         if motes_parameters["-SAVE"]:
             sys.stdout.write(" >>> Saving 1D spectrum and metadata.\n")
             sys.stdout.flush()
-            save_fits(
+            motesio.save_fits(
+                original_hdu_list,
                 axes_dict,
                 header_parameters,
                 optimal_1d_data,
                 optimal_1d_errs,
                 aperture_1d_data,
                 aperture_1d_errs,
-                input_file_primary_header,
                 motes_parameters,
                 input_file_path,
                 moffat_profile_parameters,
@@ -347,196 +351,6 @@ def motes():
         sys.stdout.write(" >>> Extraction of " + input_file_path + " completed.\n")
 
     sys.stdout.write(" >>> MOTES Processing Complete.\n\n")
-    return None
-
-
-def save_fits(
-    axes_dict,
-    header_parameters,
-    optimal_1d_data,
-    optimal_1d_errs,
-    aperture_1d_data,
-    aperture_1d_errs,
-    input_file_primary_header,
-    motes_parameters,
-    input_file_path,
-    moffat_profile_parameters,
-    frame_dict,
-    moffat_parameters_all_bins,
-    extraction_limits,
-    moffat_parameters_all_sky_bins,
-    sky_extraction_limits,
-):
-    """
-    This function saves the extracted spectrum and intermediate products in a single, newly
-    constructed, FITS file.
-
-    Args:
-        axes_dict (dict)                        : A dictionary containing the axes information.
-        header_parameters (dict)                       : A dictionary containing the header information.
-        optimal_1d_data (numpy.ndarray)               : An array containing the flux values of the optimally
-                                               extracted 1D spectrum.
-        optimal_1d_errs (numpy.ndarray)               : An array containing the flux errors of the optimally
-                                               extracted 1D spectrum.
-        aperture_1d_data (numpy.ndarray)               : An array containing the flux values of the aperture
-                                               extracted 1D spectrum.
-        aperture_1d_errs (numpy.ndarray)               : An array containing the flux errors of the aperture
-                                               extracted 1D spectrum.
-        input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
-        motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
-        input_file_path (str)                       : The filename of the 1D spectrum.
-        moffat_profile_parameters (list)                      : A list containing the Moffat fit parameters.
-        frame_dict (dict)                         : A dictionary containing the original 2D spectrum
-                                               data and error frames.
-        moffat_parameters_all_bins (numpy.ndarray)                : A dictionary containing the binning parameters.
-        extraction_limits (numpy.ndarray)       : An array containing the extraction limits.
-        moffat_parameters_all_sky_bins (numpy.ndarray)               : An array containing the binning parameters for the
-                                               sky extraction.
-        sky_extraction_limits (list)             : A list containing the extraction limits for the sky
-                                               extraction.
-
-    Returns:
-        None
-    """
-
-    input_file_primary_header["MOTES"] = "######## Extracted 1D Spectrum Metadata ########"
-    input_file_primary_header.add_blank("", before="MOTES")
-    input_file_primary_header["HIERARCH UTC EXT DATE"] = (
-        datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
-        "file creation date",
-    )
-    input_file_primary_header["HIERARCH SPATPIXL"] = (
-        axes_dict["data_spatial_floor"],
-        "lower limit of spatial axis, pix",
-    )
-    input_file_primary_header["HIERARCH SPATPIXH"] = (
-        axes_dict["data_spatial_ceiling"],
-        "upper limit of spatial axis, pix",
-    )
-    input_file_primary_header["HIERARCH DISPPIXL"] = (
-        axes_dict["wavelength_start"],
-        "lower limit of dispersion axis, pix",
-    )
-    input_file_primary_header["HIERARCH DISPPIXH"] = (
-        axes_dict["wavelength_end"],
-        "upper limit of dispersion axis, pix",
-    )
-    input_file_primary_header["HIERARCH WAVL"] = (
-        np.floor(axes_dict["wavelength_axis"][0]),
-        "lower limit of wav range, " + header_parameters["wavelength_unit"],
-    )
-    input_file_primary_header["HIERARCH WAVH"] = (
-        np.ceil(axes_dict["wavelength_axis"][-1]),
-        "upper limit of wav range, " + header_parameters["wavelength_unit"],
-    )
-    input_file_primary_header["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
-
-    input_file_primary_header["HIERARCH MOFF A"] = round(moffat_profile_parameters[0], 5), "moffat profile amplitude"
-    input_file_primary_header.add_blank(
-        "Parameters fit to the median spatial profile of the spectrum",
-        before="HIERARCH MOFF A",
-    )
-    input_file_primary_header["HIERARCH MOFF C"] = (
-        round(moffat_profile_parameters[1] + axes_dict["data_spatial_floor"], 5),
-        "moffat profile center",
-    )
-    input_file_primary_header["HIERARCH MOFF ALPHA"] = (
-        round(moffat_profile_parameters[2], 5),
-        "moffat profile alpha value",
-    )
-    input_file_primary_header["HIERARCH MOFF BETA"] = (
-        round(moffat_profile_parameters[3], 5),
-        "moffat profile beta value",
-    )
-    input_file_primary_header["HIERARCH MOFF BACK"] = (
-        round(moffat_profile_parameters[4], 5),
-        "moffat profile background level",
-    )
-    input_file_primary_header["HIERARCH MOFF GRAD"] = (
-        round(moffat_profile_parameters[5], 5),
-        "moffat profile background slope",
-    )
-    input_file_primary_header["HIERARCH IQ"] = (
-        round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2),
-        'IQ measured from median profile, "',
-    )
-
-    input_file_primary_header["HIERARCH SNR BIN LIMIT"] = motes_parameters["-SNR_BIN_LIM"], "maximum SNR per bin"
-    input_file_primary_header.add_blank(
-        "Dispersion Binning and Spectrum Extraction",
-        before="HIERARCH SNR BIN LIMIT",
-    )
-    input_file_primary_header["HIERARCH COL BIN LIMIT"] = (
-        int(motes_parameters["-COL_BIN_LIM"]),
-        "minimum number of columns per bin",
-    )
-    input_file_primary_header["HIERARCH FWHM MULTIPLIER"] = (
-        motes_parameters["-FWHM_MULTIPLIER"],
-        "FWHM used to define the extraction limits",
-    )
-
-    if motes_parameters["-SUBTRACT_SKY"]:
-        input_file_primary_header["HIERARCH SKYSUB FWHM MULT"] = (
-            motes_parameters["-BG_FWHM_MULTIPLIER"],
-            "FWHM multiplier for defining background",
-        )
-        input_file_primary_header.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
-        input_file_primary_header["HIERARCH SKYSUB SNR BIN LIM"] = (
-            motes_parameters["-SKY_SNR_BIN_LIM"],
-            "max SNR per bin for sky subtraction",
-        )
-        sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
-        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
-        sky_bin_hdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
-        sky_bin_hdu.header["EXTNAME"] = "SKY_BIN_PARS"
-        sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
-        sky_extraction_limits.header["EXTNAME"] = "SKY_EXT_LIMS"
-
-    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
-    input_file_primary_header.add_blank(
-        "Data Saved in the Extracted Spectrum HDU",
-        before="HIERARCH EXTRACTED HDU ROW 0",
-    )
-    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + header_parameters["flux_unit"]
-    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
-    input_file_primary_header["EXTNAME"] = "OPTI_1D_SPEC"
-
-    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=input_file_primary_header)
-    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=input_file_primary_header)
-    aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
-    orig_2d_spec_hdu = fits.ImageHDU(frame_dict["original_data"])
-    orig_2d_spec_hdu.header["EXTNAME"] = "ORIG_2D_SPEC"
-    orig_2d_errs_hdu = fits.ImageHDU(frame_dict["original_errs"])
-    orig_2d_errs_hdu.header["EXTNAME"] = "ORIG_2D_ERRS"
-    orig_2d_qual_hdu = fits.ImageHDU(frame_dict["original_qual"])
-    orig_2d_qual_hdu.header["EXTNAME"] = "ORIG_2D_QUAL"
-    bins_moffat_parameters_hdu = fits.ImageHDU(moffat_parameters_all_bins)
-    bins_moffat_parameters_hdu.header["EXTNAME"] = "EXT_BIN_PARS"
-    extraction_limits = fits.ImageHDU(extraction_limits)
-    extraction_limits.header["EXTNAME"] = "EXT_LIMS"
-    hdu_list = [
-        optimal_1d_datahdu,
-        aperture_1d_datahdu,
-        orig_2d_spec_hdu,
-        orig_2d_errs_hdu,
-        orig_2d_qual_hdu,
-        bins_moffat_parameters_hdu,
-        extraction_limits,
-    ]
-
-    if motes_parameters["-SUBTRACT_SKY"]:
-        hdu_list.append(sky_model_hdu)
-        hdu_list.append(sky_bin_hdu)
-        hdu_list.append(sky_extraction_limits)
-
-    fits_hdu_list = fits.HDUList(hdu_list)
-    fits_hdu_list.writeto("m" + input_file_path.split("/")[-1])
-    fits_hdu_list.close()
-
-    sys.stdout.write(" >>> Spectrum extracted and saved:\n")
-    sys.stdout.write(
-        "     " + "/".join(input_file_path.split("/")[0:-1]) + "/m" + input_file_path.split("/")[-1] + "\n"
-    )
     return None
 
 
@@ -593,6 +407,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
         # background level (B), and background gradient (m) all need to be scaled down again after
         # the fitting.
         bin_moffat_parameters[0] /= data_scaling_factor
+        bin_moffat_parameters[1] += axes_dict["data_spatial_floor"]
         bin_moffat_parameters[4] /= data_scaling_factor
         bin_moffat_parameters[5] /= data_scaling_factor
 
