@@ -1,7 +1,8 @@
 #!/home/tom/miniforge3/envs/work/bin/python
 
 """
-motesio.py - Contains the main I/O functions needed for MOTES to function.
+motesio.py - Contains the main I/O functions needed for MOTES to
+             function.
 """
 
 import os
@@ -10,13 +11,16 @@ import sys
 
 def read_motes_parameter_file():
     """
-    Import parameters from motesparams.txt parameter file into a dictionary.
+    Import parameters from motesparams.txt parameter file into a 
+    dictionary.
 
     Args:
-        None
+     -- None
 
     Returns:
-        parameter_dict (dict) : a dictionary containing the parameters read in from motesparams.txt.
+     -- parameter_dict (dict): 
+         a dictionary containing the parameters read in from 
+         motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")
@@ -29,14 +33,19 @@ def read_motes_parameter_file():
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
     # parameter's value follows its associated keyword.
-    lumpy_parameter_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
+    lumpy_parameter_list = [
+	    x.split("=") for x in parameter_lines if x[0] == "-"
+	]
     flat_parameter_list = [y for x in lumpy_parameter_list for y in x]
 
     # Convert all numerical values in the parameter list to floats.
     # If digit, convert to float. If not, leave as string.
-    parameter_list = [
-        float(i) if i.replace(".", "", 1).isdigit() else i for i in flat_parameter_list
-    ]
+    parameter_list = []
+    for i in flat_parameter_list:
+        if i.replace(".", "", 1).isdigit():
+            parameter_list.append(float(i))
+        else:
+            parameter_list.append(i)
 
     # Assign parameters and their associated keywords to a dictionary.
     parameter_dict = dict(zip(parameter_list[::2], parameter_list[1::2]))
@@ -48,19 +57,22 @@ def read_motes_parameter_file():
 
 def read_regions():
     """
-    Search for, and read in, reg.txt file in root working directory. Reads an input line from
-    reg.txt and returns a list of integers defining the boundaries of the region of the 2D data
-    that contains the spectrum to be extracted. For each file, the first two integers are the
-    number of pixel rows to remove from each end of the spatial axis of the spectrum, and the last
-    two are the upper and lower wavelength bounds of the region on the dispersion axis.
+    Search for, and read in, reg.txt file in root working directory. 
+    Reads an input line from reg.txt and returns a list of integers 
+    defining the boundaries of the region of the 2D data that contains
+    the spectrum to be extracted. For each file, the first two integers
+    are the number of pixel rows to remove from each end of the spatial
+    axis of the spectrum, and the last two are the upper and lower
+    wavelength bounds of the region on the dispersion axis.
 
     Args:
-        None
+     -- None
 
     Returns:
-        data_region (list) : A list for each file contains a list of integers that define the
-                           boundaries of the region of the 2D spectum that will be used for the
-                           extraction.
+     -- data_region (list):
+         A list for each file contains a list of integers that define
+         the boundaries of the region of the 2D spectum that will be
+         used for the extraction.
     """
 
     # Search for reg.txt and read in the list that it contains.
@@ -70,7 +82,9 @@ def read_regions():
 
         with open("reg.txt", "r", encoding="utf-8") as region_file:
             region_lines = region_file.read().splitlines()
-            data_regions = [[int(limit) for limit in x.split(",")] for x in region_lines]
+            data_regions = [
+                [int(limit) for limit in x.split(",")] for x in region_lines
+            ]
         sys.stdout.write("DONE.\n")
 
     # Complain and quit MOTES if reg.txt isn't found.
