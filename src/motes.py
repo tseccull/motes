@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import motes.common as common
-import motes.harvester as harvester
 import motesio.motesio as motesio
 
 def motes():
@@ -42,7 +41,7 @@ def motes():
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        header_parameters, frame_dict, axes_dict, input_file_primary_header = harvester.data_harvest(
+        header_parameters, frame_dict, axes_dict, input_file_primary_header = motesio.data_harvest(
             i, input_file_path, data_regions
         )
         # Make backup copies of the original data and error frames.
