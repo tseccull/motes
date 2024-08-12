@@ -1,7 +1,7 @@
-#!/home/tom/miniforge3/envs/dragons/bin/python
+#!/home/tom/miniforge3/envs/work/bin/python
 
 """
-startup.py - First script to be run by MOTES to read in parameters and regions.
+motesio.py - Contains the main I/O functions needed for MOTES to function.
 """
 
 import os

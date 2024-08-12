@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/dragons/bin/python
+#!/home/tom/miniforge3/envs/work/bin/python
 
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
@@ -21,8 +21,7 @@ import numpy as np
 
 import motes.common as common
 import motes.harvester as harvester
-import motes.startup as startup
-
+import motesio.motesio as motesio
 
 def motes():
     """
@@ -31,8 +30,8 @@ def motes():
     performs optional sky subtraction and optimal extraction of 1D spectra.
     """
     # Run startup functions
-    motes_parameters = startup.read_motes_parameter_file()  # Import parameters from file to dict
-    data_regions = startup.read_regions()  # Search for, and read in, reg.txt
+    motes_parameters = motesio.read_motes_parameter_file()  # Import parameters from file to dict
+    data_regions = motesio.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
     for i, input_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):

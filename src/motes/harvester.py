@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/dragons/bin/python
+#!/home/tom/miniforge3/envs/work/bin/python
 
 """
 harvester.py - A collection of functions to read in data from the image file and repackage it into
