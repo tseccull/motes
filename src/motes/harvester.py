@@ -1,5 +1,5 @@
 """
-harvester.py - A collection of functions to read in data from the image file and repackage it into 
+harvester.py - A collection of functions to read in data from the image file and repackage it into
                a dictionary for use in the rest of MOTES.
 """
 
@@ -9,27 +9,27 @@ import sys
 import astropy.io.fits as fits
 import numpy as np
 
-from motes import common
+import motes.common as common
 
 
-def data_harvest(reg_counter, filename_2D, region):
+def data_harvest(region_counter, input_file_path, data_regions):
     """Extract header metadata and data frames, and repackage them into dictionaries for use in the
        rest of MOTES.
 
     Args:
-        reg_counter (int) : An integer noting which line in region is being called to define the
+        region_counter (int) : An integer noting which line in region is being called to define the
                             boundaries of the 2D data.
-        filename_2D (str) : The name of the data file.
-        region (list)     : A list of regions read in from reg.txt in startup.read_regions()
+        input_file_path (str) : The name of the data file.
+        data_regions (list)     : A list of regions read in from reg.txt in startup.read_regions()
 
     Returns:
-        head_dict (dict)  : A dictionary containing parameters and metadata read from the header of
+        header_dict (dict)  : A dictionary containing parameters and metadata read from the header of
                             the image file.
         frame_dict (dict) : A dictionary containing the 2D data frames read from the image file.
         axes_dict (dict)  : A dictionary containing the spatial and spectral axis arrays associated
                             with the data frames, along with metadata used to define the boundaries
                             of the 2D data.
-        imghead (dict)    : A copy of the image file header; this is also a dictionary.
+        input_file_primary_header (dict)    : A copy of the image file header; this is also a dictionary.
     """
 
     # Create dictionary to tell data_harvest which instrument specific function to call.
@@ -44,46 +44,46 @@ def data_harvest(reg_counter, filename_2D, region):
 
     # Open file containing the spectral data, then extract the header, image frame, error frame,
     # and quality frame (if the file has one).
-    with fits.open(filename_2D) as imgfile:
-        imghead = imgfile[0].header
-        inst = imghead["INSTRUME"]
-        # Based on the value of inst, this calls one of the harvest_instrument functions.
+    with fits.open(input_file_path) as input_fits_hdu:
+        input_file_primary_header = input_fits_hdu[0].header
+        instrument = input_file_primary_header["INSTRUME"]
+        # Based on the value of instrument, this calls one of the harvest_instrument functions.
         (
-            imgdata,
-            imgerrs,
-            imgqual,
-            ogimgqual,
-            head_dict,
-            wavaxis,
+            data,
+            errs,
+            qual,
+            original_qual,
+            header_dict,
+            wavelength_axis,
         ) = instrument_dict[
-            inst
-        ](imgfile, imghead)
+            instrument
+        ](input_fits_hdu, input_file_primary_header)
 
     # Slice all dataframes based on the input from reg.txt
-    imgshape = np.shape(imgdata)
-    imgstart = int(0 + region[reg_counter][0])
-    imgend = int(imgshape[0] - region[reg_counter][1])
+    data_shape = np.shape(data)
+    data_spatial_floor = int(0 + data_regions[region_counter][0])
+    data_spatial_ceiling = int(data_shape[0] - data_regions[region_counter][1])
 
     # Slice off the spatial rows outside the spatial region.
-    datasliced = imgdata[imgstart : imgend + 1, :]
-    errssliced = imgerrs[imgstart : imgend + 1, :]
-    qualsliced = imgqual[imgstart : imgend + 1, :]
-    dataslicedshape = np.shape(datasliced)
+    data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
+    errs_sliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
+    qual_sliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
+    data_sliced_shape = np.shape(data_sliced)
     sys.stdout.write(
         " >>> 2D spectrum sliced on spatial axis based on user defined limits:\n"
         "     New spatial axis covers pixel rows "
-        + str(imgstart)
+        + str(data_spatial_floor)
         + "-"
-        + str(imgend)
+        + str(data_spatial_ceiling)
         + ".\n"
     )
 
     # Create spatial axis for the 2D spectrum and a high resolution version (standard res * 5) for
     # the purposes of plotting
-    spataxis = np.linspace(0.0, float(dataslicedshape[0] - 1), num=dataslicedshape[0])
-    hiresspataxis = np.linspace(spataxis[0], spataxis[-1], num=len(spataxis) * 5)
+    spatial_axis = np.linspace(0.0, float(data_sliced_shape[0] - 1), num=data_sliced_shape[0])
+    hi_resolution_spatial_axis = np.linspace(spatial_axis[0], spatial_axis[-1], num=len(spatial_axis) * 5)
 
-    if region[reg_counter][2] < wavaxis[0] or region[reg_counter][3] > wavaxis[-1]:
+    if data_regions[region_counter][2] < wavelength_axis[0] or data_regions[region_counter][3] > wavelength_axis[-1]:
         sys.stdout.write(
             " >>> User defined wavelength limit(s) are outside native wavelength range\n"
             '     Make sure "-LOW_WAV_SLICE" > lower limit of wavelength axis\n'
@@ -92,70 +92,70 @@ def data_harvest(reg_counter, filename_2D, region):
         )
         sys.exit()
 
-    wavslice = np.where(
+    wavelength_slice = np.where(
         np.logical_and(
-            wavaxis >= region[reg_counter][2], wavaxis <= region[reg_counter][3]
+            wavelength_axis >= data_regions[region_counter][2], wavelength_axis <= data_regions[region_counter][3]
         )
     )
-    wavstart = wavslice[0][0]
-    wavend = wavslice[0][-1]
-    wavaxis = wavaxis[wavslice]
+    wavelength_start = wavelength_slice[0][0]
+    wavelength_end = wavelength_slice[0][-1]
+    wavelength_axis = wavelength_axis[wavelength_slice]
 
-    datasliced = np.squeeze(datasliced[:, wavslice])
-    errssliced = np.squeeze(errssliced[:, wavslice])
-    qualsliced = np.squeeze(qualsliced[:, wavslice])
+    data_sliced = np.squeeze(data_sliced[:, wavelength_slice])
+    errs_sliced = np.squeeze(errs_sliced[:, wavelength_slice])
+    qual_sliced = np.squeeze(qual_sliced[:, wavelength_slice])
 
     sys.stdout.write(
         " >>> 2D spectrum sliced on dispersion axis based on user defined limits:\n"
         "     New Wavelength range is "
-        + str(region[reg_counter][2])
+        + str(data_regions[region_counter][2])
         + "-"
-        + str(region[reg_counter][3])
+        + str(data_regions[region_counter][3])
         + " "
-        + head_dict["wavunit"]
+        + header_dict["wavelength_unit"]
         + ".\n"
         "     This range is equivalent to pixel columns "
-        + str(wavstart)
+        + str(wavelength_start)
         + "-"
-        + str(wavstart + len(wavaxis))
+        + str(wavelength_start + len(wavelength_axis))
         + "\n"
     )
 
     frame_dict = {
-        "data": datasliced,
-        "errs": errssliced,
-        "qual": qualsliced,
-        "ogqual": ogimgqual,
+        "data": data_sliced,
+        "errs": errs_sliced,
+        "qual": qual_sliced,
+        "original_qual": original_qual,
     }
 
     axes_dict = {
-        "spataxislen": len(spataxis),
-        "saxis": spataxis,
-        "hrsaxis": hiresspataxis,
-        "imgstart": imgstart,
-        "imgend": imgend,
-        "dispaxislen": len(wavaxis),
-        "waxis": wavaxis,
-        "wavstart": wavstart,
-        "wavend": wavend,
+        "spataxislen": len(spatial_axis),
+        "spatial_axis": spatial_axis,
+        "hi_resolution_spatial_axis": hi_resolution_spatial_axis,
+        "data_spatial_floor": data_spatial_floor,
+        "data_spatial_ceiling": data_spatial_ceiling,
+        "dispersion_axis_length": len(wavelength_axis),
+        "wavelength_axis": wavelength_axis,
+        "wavelength_start": wavelength_start,
+        "wavelength_end": wavelength_end,
     }
 
-    return head_dict, frame_dict, axes_dict, imghead
+    return header_dict, frame_dict, axes_dict, input_file_primary_header
 
 
-def harvest_floyds(imgfilehdu, imgheader):
+def harvest_floyds(input_fits_hdu, primary_header):
     """
     Harvest the header and data from a FLOYDS spectrum. Please note that this spectrum must not be
     flux calibrated, to ensure that a reliable ERR frame is made.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame array
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the
+        data (numpy.ndarray)   : the 2D data frame array
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5). In the
                                     case of FLOYDS, no variance or uncertainty frame is provided,
                                     so one is constructed using the data along with read noise and
                                     dark current metadata contained in the file header. This is why
@@ -163,107 +163,107 @@ def harvest_floyds(imgfilehdu, imgheader):
                                     MOTES, as the flux calibration spoils the construction of the
                                     error frame. Flux calibration should be applied after the
                                     spectrum is extracted if MOTES is used.
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FLOYDS spectra are not provided with a qual frame, a
                                     blank one (flagging all pixels as good; i.e. ==1) is created to
                                     ensure compatibility with MOTES.
-        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
                                     In the case of FLOYDS this frame is set to all ones (see
                                     above).
-        headerdict (dict)         : a dictionary containing the header information required by
+        header_dict (dict)         : a dictionary containing the header information required by
                                     MOTES.
     """
 
     # Retrieve the HDU and extract/construct the 2D data, err, and qual frames.
-    imgdata = imgfilehdu[0].data
-    imgerrs = np.sqrt(
-        imgdata
-        + (imgheader["RDNOISE"] * imgheader["RDNOISE"])
-        + (imgheader["DARKCURR"] * imgheader["DARKCURR"])
+    data = input_fits_hdu[0].data
+    errs = np.sqrt(
+        data
+        + (primary_header["RDNOISE"] * primary_header["RDNOISE"])
+        + (primary_header["DARKCURR"] * primary_header["DARKCURR"])
     )
-    imgqual = np.ones(np.shape(imgdata))
-    ogimgqual = copy.deepcopy(imgqual) - 1
+    qual = np.ones(np.shape(data))
+    original_qual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec.
-    pixres = imgheader["PIXSCALE"]
+    pixel_resolution = primary_header["PIXSCALE"]
     sys.stdout.write(
-        " >>> Spatial pixel resolution determined: " + str(pixres).strip("0") + '"\n'
+        " >>> Spatial pixel resolution determined: " + str(pixel_resolution).strip("0") + '"\n'
     )
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": pixres,
-        "exptime": imgheader["EXPTIME"],
-        "inst": imgheader["INSTRUME"],
-        "seeing": imgheader["AGFWHM"],  # Grabs estimated FWHM from autoguider.
-        "fluxunit": "electrons",
-        "wavunit": imgheader["WAT2_001"].split(" ")[2].split("=")[1],
+    header_dict = {
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": pixel_resolution,
+        "exptime": primary_header["EXPTIME"],
+        "instrument": primary_header["INSTRUME"],
+        "seeing": primary_header["AGFWHM"],  # Grabs estimated FWHM from autoguider.
+        "flux_unit": "electrons",
+        "wavelength_unit": primary_header["WAT2_001"].split(" ")[2].split("=")[1],
     }
     sys.stdout.write("DONE.\n")
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
+    wavelength_axis = common.make_wav_axis(
+        primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
-def harvest_fors2(imgfilehdu, imgheader):
+def harvest_fors2(input_fits_hdu, primary_header):
     """
     Harvest the header and data from a FORS2 spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        data (numpy.ndarray)   : the 2D data frame
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
                                     Since FORS2 spectra are not provided with a qual frame, a blank
                                     one (flagging all pixels as good; i.e. ==1) is created to
                                     ensure compatibility with MOTES.
-        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
                                     In the case of FORS2 this frame is set to all zeros (see
-                                    imgqual above).
-        headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+                                    qual above).
+        header_dict (dict)         : a dictionary containing the header information.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame and error frame.
-    imgdata = imgfilehdu[0].data
-    imgerrs = imgfilehdu[1].data ** 0.5
-    imgqual = np.ones(np.shape(imgdata))
-    ogimgqual = copy.deepcopy(imgqual) - 1
+    data = input_fits_hdu[0].data
+    errs = input_fits_hdu[1].data ** 0.5
+    qual = np.ones(np.shape(data))
+    original_qual = copy.deepcopy(qual) - 1
 
     # Determine the spatial pixel resolution of the image in arcsec depending on the binning of the
     # detector and the configuration of the collimator (high resolution or standard resolution).
     # If the pixel resolution can't be determined, complain and quit MOTES.
     if (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
-        pixres = 0.125
+        pixel_resolution = 0.125
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 1
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 1
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
-        pixres = 0.0632
+        pixel_resolution = 0.0632
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 2
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_SR"
     ):
-        pixres = 0.25
+        pixel_resolution = 0.25
     elif (
-        imgheader["HIERARCH ESO DET WIN1 BINY"] == 2
-        and imgheader["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
+        primary_header["HIERARCH ESO DET WIN1 BINY"] == 2
+        and primary_header["HIERARCH ESO INS COLL NAME"] == "COLL_HR"
     ):
-        pixres = 0.125
+        pixel_resolution = 0.125
     else:
         sys.stdout.write("FAILED.\n")
         sys.stdout.write(
@@ -273,75 +273,75 @@ def harvest_fors2(imgfilehdu, imgheader):
         sys.stdout.write("     Terminating MOTES.\n\n")
         sys.exit()
 
-    sys.stdout.write(" >>> Spatial pixel resolution determined: " + str(pixres) + '"\n')
+    sys.stdout.write(" >>> Spatial pixel resolution determined: " + str(pixel_resolution) + '"\n')
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": pixres,
-        "exptime": imgheader["HIERARCH ESO INS SHUT EXPTIME"],
-        "inst": imgheader["INSTRUME"],
+    header_dict = {
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": pixel_resolution,
+        "exptime": primary_header["HIERARCH ESO INS SHUT EXPTIME"],
+        "instrument": primary_header["INSTRUME"],
         "seeing": 0.5
         * (
-            imgheader["HIERARCH ESO TEL AMBI FWHM START"]
-            + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
+            primary_header["HIERARCH ESO TEL AMBI FWHM START"]
+            + primary_header["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "fluxunit": imgheader["BUNIT"],
-        "wavunit": "Angstroms",
+        "flux_unit": primary_header["BUNIT"],
+        "wavelength_unit": "Angstroms",
     }
 
     sys.stdout.write("DONE.\n")
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CD1_1"], imgheader["NAXIS1"]
+    wavelength_axis = common.make_wav_axis(
+        primary_header["CRVAL1"], primary_header["CD1_1"], primary_header["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
-def harvest_gmos(imgfilehdu, imgheader):
+def harvest_gmos(input_fits_hdu, primary_header):
     """
     Harvest the header and data from a GMOS spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+        data (numpy.ndarray)   : the 2D data frame
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        header_dict (dict)         : a dictionary containing the header information.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame, error frame, and qual frame. Also retrieve the header of the science
     # image frame, as some metadata is stored there instead of the primary header.
-    scihead = imgfilehdu["SCI"].header
-    imgdata = imgfilehdu["SCI"].data
-    imgerrs = imgfilehdu["VAR"].data ** 0.5
-    imgqual = imgfilehdu["DQ"].data
-    ogimgqual = copy.deepcopy(imgqual)
+    science_header = input_fits_hdu["SCI"].header
+    data = input_fits_hdu["SCI"].data
+    errs = input_fits_hdu["VAR"].data ** 0.5
+    qual = input_fits_hdu["DQ"].data
+    original_qual = copy.deepcopy(qual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Pixels in chip gaps are kept as 1 to make sure they don't get flagged as bad.
-    imgqual[np.where(imgdata + imgqual == 1)] = 0
-    imgqual = 1 - imgqual
+    qual[np.where(data + qual == 1)] = 0
+    qual = 1 - qual
 
     # Set pixels with NaN value to 1 in the data frame, and flag them as bad pixels in the qual
     # frame.
-    imgqual[np.where(np.isfinite(imgdata) == False)] = 0
-    imgdata[np.where(np.isfinite(imgdata) == False)] = 1.0
+    qual[~np.isfinite(data)] = 0
+    data[~np.isfinite(data)] = 1.0
 
     # All this is to get an initial estimate of the IQ. Tables below are based on the condition
     # constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
-    IQ_dict = {
+    iq_dict = {
         "20-percentile": 0,
         "70-percentile": 1,
         "85-percentile": 2,
@@ -350,7 +350,7 @@ def harvest_gmos(imgfilehdu, imgheader):
         "UNKNOWN": 3,
     }
 
-    WavTab = np.array(
+    wavelength_table = np.array(
         [
             [0000.0, 4000.0, 0],
             [4000.0, 5500.0, 1],
@@ -361,7 +361,7 @@ def harvest_gmos(imgfilehdu, imgheader):
         ]
     )
 
-    IQTab = np.array(
+    iq_table = np.array(
         [
             [0.6, 0.90, 1.20, 2.00],
             [0.6, 0.85, 1.10, 1.90],
@@ -372,134 +372,135 @@ def harvest_gmos(imgfilehdu, imgheader):
         ]
     )
 
-    iq = imgheader["RAWIQ"]
+    iq = primary_header["RAWIQ"]
 
-    for i in WavTab:
-        if scihead["CRVAL1"] > i[0] and scihead["CRVAL1"] < i[1]:
-            seeing = float(IQTab[int(i[2])][int(IQ_dict[iq])])
+    for i in wavelength_table:
+        if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
+            seeing = float(iq_table[int(i[2])][int(iq_dict[iq])])
             break
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": float(imgheader["PIXSCALE"]),
-        "exptime": imgheader["EXPTIME"],
+    header_dict = {
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": float(primary_header["PIXSCALE"]),
+        "exptime": primary_header["EXPTIME"],
         "seeing": seeing,
-        "inst": imgheader["INSTRUME"],
-        "wavunit": scihead["WAT1_001"].split(" ")[2].split("=")[1],
+        "instrument": primary_header["INSTRUME"],
+        "wavelength_unit": science_header["WAT1_001"].split(" ")[2].split("=")[1],
     }
 
     # BUNIT only appears in the headers of GMOS spectra if they have been flux calibrated.
-    if "BUNIT" in scihead:
-        headerdict["fluxunit"] = scihead["BUNIT"]
+    if "BUNIT" in science_header:
+        header_dict["flux_unit"] = science_header["BUNIT"]
     else:
-        headerdict["fluxunit"] = "electrons"
+        header_dict["flux_unit"] = "electrons"
 
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixresolution"])
+        + str(header_dict["pixel_resolution"])
         + '"\n'
     )
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
-        scihead["CRVAL1"], scihead["CD1_1"], scihead["NAXIS1"]
+    wavelength_axis = common.make_wav_axis(
+        science_header["CRVAL1"], science_header["CD1_1"], science_header["NAXIS1"]
     )
 
     # Sets all data and errs within the GMOS chip gaps to 1, so they don't get flagged as bad
     # pixels or trip up the bin definition stage. Chip gaps are identified as pixel columns which
     # are all zeros, and then three columns either side of the chip gaps are also flagged just to
     # be safe.
-    zerorows = [1 if all(x == 0) else 0 for x in imgdata.T]
-    boundary_cols = 3
-    zerorows = np.concatenate(
-        [np.zeros(boundary_cols), zerorows, np.zeros(boundary_cols)]
+    zero_rows = [1 if all(x == 0) else 0 for x in data.T]
+    boundary_columns = 3
+    zero_rows = np.concatenate(
+        [np.zeros(boundary_columns), zero_rows, np.zeros(boundary_columns)]
     )
-    for n in reversed(range(boundary_cols)):
-        zerorows = [
-            1 if x == 0 and zerorows[y + 1] == 1 else x
-            for y, x in enumerate(zerorows[:-1])
+    while boundary_columns > 0:
+        boundary_columns -= 1
+        zero_rows = [
+            1 if x == 0 and zero_rows[y + 1] == 1 else x
+            for y, x in enumerate(zero_rows[:-1])
         ]
-        zerorows = [
-            1 if x == 0 and zerorows[y - 1] == 1 else x
-            for y, x in enumerate(zerorows[1:])
+        zero_rows = [
+            1 if x == 0 and zero_rows[y - 1] == 1 else x
+            for y, x in enumerate(zero_rows[1:])
         ]
-    zerorows = [1 if x > 0 else x for x in zerorows]
-    chipgapmap = np.tile(zerorows, (np.shape(imgdata)[0], 1))
-    imgdata[chipgapmap == 1] = 1.0
-    imgerrs[chipgapmap == 1] = 1.0
+    zero_rows = [1 if x > 0 else x for x in zero_rows]
+    chip_gap_map = np.tile(zero_rows, (np.shape(data)[0], 1))
+    data[chip_gap_map == 1] = 1.0
+    errs[chip_gap_map == 1] = 1.0
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis
 
 
-def harvest_xshoo(imgfilehdu, imgheader):
+def harvest_xshoo(input_fits_hdu, primary_header):
     """
     Harvest the header and data from an X-Shooter spectrum.
 
     Args:
-        imgfilehdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
+        input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU) : the Header Data Unit (HDU) read in from
                                                             the data file.
-        imgheader (astropy.io.fits.header.Header)         : the header read in from the data file.
+        primary_header (astropy.io.fits.header.Header)         : the header read in from the data file.
 
     Returns:
-        imgdata (numpy.ndarray)   : the 2D data frame
-        imgerrs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
-        imgqual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
-        ogimgqual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
-        headerdict (dict)         : a dictionary containing the header information.
-        wavaxis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
+        data (numpy.ndarray)   : the 2D data frame
+        errs (numpy.ndarray)   : the 2D error/uncertainty frame (variance_frame^0.5).
+        qual (numpy.ndarray)   : the 2D quality frame noting the locations of bad pixels etc.
+        original_qual (numpy.ndarray) : the original 2D quality frame prior to manipulation by MOTES.
+        header_dict (dict)         : a dictionary containing the header information.
+        wavelength_axis (numpy.ndarray)   : the 1D wavelength axis of the spectrum.
     """
 
-    print(type(imgfilehdu))
-    print(type(imgheader))
+    print(type(input_fits_hdu))
+    print(type(primary_header))
 
     # Retrieve the data frame, error frame, and qual frame.
-    imgdata = imgfilehdu[0].data
-    imgerrs = imgfilehdu[1].data
-    imgqual = imgfilehdu[2].data
-    ogimgqual = copy.deepcopy(imgqual)
+    data = input_fits_hdu[0].data
+    errs = input_fits_hdu[1].data
+    qual = input_fits_hdu[2].data
+    original_qual = copy.deepcopy(qual)
 
     # Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
     # Values flagged by the X-Shooter data reduction pipeline as interpolated are considered good.
-    imgqual[imgqual == 4194304] = 0
+    qual[qual == 4194304] = 0
 
     # If the bspline sky subtraction method has been used in the X-Shooter data reduction pipeline,
     # pixels flagged as outliers or inaccurate are considered good.
-    imgqual[imgqual == 8388608] = 0
-    imgqual[imgqual == 16777216] = 0
-    imgqual[imgqual > 0] *= -1
-    imgqual[imgqual == 0] = 1
-    imgqual[imgqual < 0] = 0
-    imgqual[np.where(np.isfinite(imgdata) == False)] = 0
+    qual[qual == 8388608] = 0
+    qual[qual == 16777216] = 0
+    qual[qual > 0] *= -1
+    qual[qual == 0] = 1
+    qual[qual < 0] = 0
+    qual[~np.isfinite(data)] = 0
 
     # Put header information into a dictionary
     sys.stdout.write(" >>> Gathering required information from FITS header. ")
     sys.stdout.flush()
-    headerdict = {
-        "object": imgheader["OBJECT"].replace(" ", "_"),
-        "pixresolution": imgheader["CDELT2"],
-        "exptime": imgheader["EXPTIME"],
+    header_dict = {
+        "object": primary_header["OBJECT"].replace(" ", "_"),
+        "pixel_resolution": primary_header["CDELT2"],
+        "exptime": primary_header["EXPTIME"],
         "seeing": 0.5
         * (
-            imgheader["HIERARCH ESO TEL AMBI FWHM START"]
-            + imgheader["HIERARCH ESO TEL AMBI FWHM END"]
+            primary_header["HIERARCH ESO TEL AMBI FWHM START"]
+            + primary_header["HIERARCH ESO TEL AMBI FWHM END"]
         ),
-        "fluxunit": imgheader["BUNIT"],
-        "wavunit": "nm",
+        "flux_unit": primary_header["BUNIT"],
+        "wavelength_unit": "nm",
     }
     sys.stdout.write("DONE.\n")
     sys.stdout.write(
         " >>> Spatial pixel resolution determined: "
-        + str(headerdict["pixresolution"])
+        + str(header_dict["pixel_resolution"])
         + '"\n'
     )
 
     # Create the wavelength axis of the spectrum.
-    wavaxis = common.make_wav_axis(
-        imgheader["CRVAL1"], imgheader["CDELT1"], imgheader["NAXIS1"]
+    wavelength_axis = common.make_wav_axis(
+        primary_header["CRVAL1"], primary_header["CDELT1"], primary_header["NAXIS1"]
     )
 
-    return imgdata, imgerrs, imgqual, ogimgqual, headerdict, wavaxis
+    return data, errs, qual, original_qual, header_dict, wavelength_axis

@@ -1,6 +1,6 @@
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
-Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for 
+Description: Modular and Optimal Tracer and Extractor of Specrtra (MOTES). A Python package for
 extracting spectrum from astronomical 2D spectrograms.
 Version: 0.4.5
 Date: 2023-12-23
@@ -29,24 +29,24 @@ def motes():
     performs optional sky subtraction and optimal extraction of 1D spectra.
     """
     # Run startup functions
-    params = startup.read_parfile()  # Import parameters from file to dict
-    intreg = startup.read_regions()  # Search for, and read in, reg.txt
+    motes_parameters = startup.read_motes_parameter_file()  # Import parameters from file to dict
+    data_regions = startup.read_regions()  # Search for, and read in, reg.txt
 
     # Open and process each spectrum contained in the current directory.
-    for i, file_2D in enumerate(sorted(glob.glob("./inputs/*.fits"))):
-        sys.stdout.write(("/" * (70 - len(file_2D[:70]))) + " " + file_2D[:70] + "\n")
+    for i, input_file_path in enumerate(sorted(glob.glob("./inputs/*.fits"))):
+        sys.stdout.write(("/" * (70 - len(input_file_path[:70]))) + " " + input_file_path[:70] + "\n")
         sys.stdout.write(" >>> Beginning MOTES Processing\n")
 
         # Gather header metadata and the image data from the 2D image file.
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file.\n"
         )
-        headparams, framedict, axesdict, imghead = harvester.data_harvest(
-            i, file_2D, intreg
+        header_parameters, frame_dict, axes_dict, input_file_primary_header = harvester.data_harvest(
+            i, input_file_path, data_regions
         )
         # Make backup copies of the original data and error frames.
-        framedict["ogdata"] = copy.deepcopy(framedict["data"])
-        framedict["ogerrs"] = copy.deepcopy(framedict["errs"])
+        frame_dict["original_data"] = copy.deepcopy(frame_dict["data"])
+        frame_dict["original_errs"] = copy.deepcopy(frame_dict["errs"])
         sys.stdout.write(
             " >>> Gathering image frames and header data from input file completed.\n"
         )
@@ -59,39 +59,39 @@ def motes():
         sys.stdout.flush()
 
         # Calculate median spatial profile of the spectrum.
-        datadispcollapse = np.nanmedian(framedict["data"], axis=1)
+        full_median_spatial_profile = np.nanmedian(frame_dict["data"], axis=1)
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
         # so it's necessary to scale the data to a size that least squares can handle.
         # The shape of the profile fitted to the scaled spatial profile is the same as the
         # unscaled, but to to get a model profile that matches the original profile, the profile
         # amplitude (A), background level (B), and background gradient (m) all need to be scaled
         # down again after the fitting.
-        datascale = 10 ** np.abs(
-            np.floor(np.log10(np.abs(np.nanmedian(datadispcollapse))))
+        data_scaling_factor = 10 ** np.abs(
+            np.floor(np.log10(np.abs(np.nanmedian(full_median_spatial_profile))))
         )
         # Fit the median spatial profile with a Moffat function.
-        moffparams = common.moffat_least_squares(
-            axesdict["saxis"],
-            datadispcollapse * datascale,
-            headparams["seeing"],
-            headparams["pixresolution"],
+        moffat_profile_parameters = common.moffat_least_squares(
+            axes_dict["spatial_axis"],
+            full_median_spatial_profile * data_scaling_factor,
+            header_parameters["seeing"],
+            header_parameters["pixel_resolution"],
         )
         # Get an improved estimate of the FWHM of the spectrum from the best fit Moffat profile.
-        headparams["seeing"] = (
-            2 * moffparams[2] * np.sqrt((2 ** (1 / moffparams[3])) - 1)
+        header_parameters["seeing"] = (
+            2 * moffat_profile_parameters[2] * np.sqrt((2 ** (1 / moffat_profile_parameters[3])) - 1)
         )
         # Scale the amplitude, background gradient, and background level of the model Moffat
         # profile down.
-        moffparams[0] /= datascale
-        moffparams[4] /= datascale
-        moffparams[5] /= datascale
+        moffat_profile_parameters[0] /= data_scaling_factor
+        moffat_profile_parameters[4] /= data_scaling_factor
+        moffat_profile_parameters[5] /= data_scaling_factor
 
         sys.stdout.write("DONE.\n")
         sys.stdout.write(
             " >>> FWHM of median spatial profile is "
-            + str(round(headparams["seeing"], 2))
+            + str(round(header_parameters["seeing"], 2))
             + " Pixels, or "
-            + str(round(headparams["seeing"] * headparams["pixresolution"], 2))
+            + str(round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2))
             + '"\n'
         )
 
@@ -99,75 +99,74 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        lowext, highext, fwhm, cent = common.extraction_limits(moffparams, axesdict)
+        binning_region_spatial_floor, binning_region_spatial_ceiling, moffat_center = common.set_extraction_limits(moffat_profile_parameters)
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
-            + str(int(lowext + axesdict["imgstart"]))
+            + str(int(binning_region_spatial_floor + axes_dict["data_spatial_floor"]))
             + "-"
-            + str(int(highext + axesdict["imgstart"]))
+            + str(int(binning_region_spatial_ceiling + axes_dict["data_spatial_floor"]))
             + "\n"
         )
 
         # DIAGNOSTICS -  Plot fitted Moffat profile over collapsed 2D spectrum and print the
         # parameters of the fitted Moffat profile.
-        if params["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
-            common.printmoffparams(moffparams, axesdict["imgstart"], datascale)
+        if motes_parameters["-DIAG_PLOT_COLLAPSED_2D_SPEC"]:
+            common.print_moffat_parameters(moffat_profile_parameters, axes_dict["data_spatial_floor"], data_scaling_factor)
             common.plot_fitted_spatial_profile(
-                axesdict["saxis"],
-                datadispcollapse,
-                axesdict["hrsaxis"],
-                moffparams,
-                axesdict["imgstart"],
-                headparams,
+                axes_dict["spatial_axis"],
+                full_median_spatial_profile,
+                axes_dict["hi_resolution_spatial_axis"],
+                moffat_profile_parameters,
+                axes_dict["data_spatial_floor"],
+                header_parameters,
             )
 
         # Determine the location of bins on the dispersion axis within which to measure the spatial
         # profile.
-        binparams, framedict = common.get_bins(
-            framedict,
-            int(np.floor(lowext)),
-            int(np.ceil(highext)),
-            axesdict["dispaxislen"],
-            params,
-            sky=True,
+        bin_parameters, frame_dict = common.get_bins(
+            frame_dict,
+            int(np.floor(binning_region_spatial_floor)),
+            int(np.ceil(binning_region_spatial_ceiling)),
+            axes_dict["dispersion_axis_length"],
+            motes_parameters,
+            has_sky=True,
         )
 
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
         common.get_bins_output(
-            binparams,
-            params,
-            lowext,
-            highext,
-            framedict["data"],
-            headparams,
-            axesdict,
+            bin_parameters,
+            motes_parameters,
+            binning_region_spatial_floor,
+            binning_region_spatial_ceiling,
+            frame_dict["data"],
+            header_parameters,
+            axes_dict,
         )
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
-        if params["-SUBTRACT_SKY"]:
-            framedict, skybinpars, skyextlims = skyloc(
-                framedict, axesdict, datascale, headparams, binparams, params
+        if motes_parameters["-SUBTRACT_SKY"]:
+            frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits = sky_locator(
+                frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
         # motesparams.txt
-        binparams, framedict = common.get_bins(
-            framedict,
-            int(np.floor(lowext)),
-            int(np.ceil(highext)),
-            axesdict["dispaxislen"],
-            params,
-            replace_crbp=bool(params["-REPLACE_CRBP"]),
+        bin_parameters, frame_dict = common.get_bins(
+            frame_dict,
+            int(np.floor(binning_region_spatial_floor)),
+            int(np.ceil(binning_region_spatial_ceiling)),
+            axes_dict["dispersion_axis_length"],
+            motes_parameters,
         )
 
         common.get_bins_output(
-            binparams,
-            params,
-            lowext,
-            highext,
-            framedict["data"],
-            headparams,
-            axesdict,
+            bin_parameters,
+            motes_parameters,
+            binning_region_spatial_floor,
+            binning_region_spatial_ceiling,
+            frame_dict["data"],
+            header_parameters,
+            axes_dict,
         )
 
         # For each dispersion bin determined by the get_bins function, median the bin along the
@@ -177,79 +176,78 @@ def motes():
             " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
         )
 
-        extbin = []
-        extractionlimits = []
+        moffat_parameters_all_bins = []
+        extraction_limits = []
 
-        for bin in binparams:
+        for each_bin in bin_parameters:
             # Take the median spatial profile of the dispersion bin, and leave out pixel columns in
             # the chip gaps if this is a GMOS spectrum.
-            binimg = framedict["data"][:, bin[0] : bin[1]]
-            chipgap = np.where(np.median(binimg, axis=0) != 1)
-            bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
+            raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
+            chip_gap_location = np.where(np.median(raw_bin_data, axis=0) != 1)
+            bin_data = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
 
             # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
             # spatial profile and return its parameters.
-            binmoffparams = common.moffat_least_squares(
-                axesdict["saxis"],
-                bindata * datascale,
-                headparams["seeing"],
-                headparams["pixresolution"],
+            bin_moffat_parameters = common.moffat_least_squares(
+                axes_dict["spatial_axis"],
+                bin_data * data_scaling_factor,
+                header_parameters["seeing"],
+                header_parameters["pixel_resolution"],
             )
 
-            binmoffparams[0] /= datascale
-            binmoffparams[4] /= datascale
-            binmoffparams[5] /= datascale
+            bin_moffat_parameters[0] /= data_scaling_factor
+            bin_moffat_parameters[4] /= data_scaling_factor
+            bin_moffat_parameters[5] /= data_scaling_factor
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
-            LowExt, HighExt, fwhm, centre = common.extraction_limits(
-                binmoffparams,
-                axesdict,
-                width_multiplier=params["-FWHM_MULTIPLIER"],
+            bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center = common.set_extraction_limits(
+                bin_moffat_parameters,
+                width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
 
-            extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+            extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
 
             # Record the Moffat function parameters for each dispersion bin and add the wavstart
             # offset to the bin locations so they can be saved as metadata along with the extracted
             # spectrum.
-            binmoffparams.append(bin[0] + axesdict["wavstart"])
-            binmoffparams.append(bin[1] + axesdict["wavstart"])
-            extbin.append(binmoffparams)
+            bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
+            bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
+            moffat_parameters_all_bins.append(bin_moffat_parameters)
 
             # DIAGNOSTICS - Plot computed moffat profile over data for each bin
-            if params["-DIAG_PLOT_MOFFAT"]:
+            if motes_parameters["-DIAG_PLOT_MOFFAT"]:
                 common.plot_fitted_spatial_profile(
-                    axesdict["saxis"],
-                    bindata,
-                    axesdict["hrsaxis"],
-                    binmoffparams,
-                    axesdict["imgstart"],
-                    headparams,
+                    axes_dict["spatial_axis"],
+                    bin_data,
+                    axes_dict["hi_resolution_spatial_axis"],
+                    bin_moffat_parameters,
+                    axes_dict["data_spatial_floor"],
+                    header_parameters,
                 )
 
-        binpars = np.array(extbin)
+        moffat_parameters_all_bins = np.array(moffat_parameters_all_bins)
         sys.stdout.write("     Fitting complete.\n")
 
         sys.stdout.write(" >>> Drawing extraction aperture limits. ")
         sys.stdout.flush()
-        extractionlimits = np.array(extractionlimits).T
+        extraction_limits = np.array(extraction_limits).T
 
         # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum. All pixels
         # fully within the aperture are extracted.
-        if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-            drawlines = [
-                extractionlimits[0] + axesdict["wavstart"],
-                extractionlimits[1] + axesdict["imgstart"] - 1,
-                extractionlimits[0] + axesdict["wavstart"],
-                extractionlimits[2] + axesdict["imgstart"] + 1,
+        if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+            draw_lines = [
+                extraction_limits[0] + axes_dict["wavelength_start"],
+                extraction_limits[1] + axes_dict["data_spatial_floor"] - 1,
+                extraction_limits[0] + axes_dict["wavelength_start"],
+                extraction_limits[2] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
-                framedict["data"],
-                axesdict,
-                headparams,
-                drawlines,
+                frame_dict["data"],
+                axes_dict,
+                header_parameters,
+                draw_lines,
                 "2D Spectrum Overplotted with Extraction Limits",
             )
 
@@ -257,342 +255,335 @@ def motes():
         # wavelength element across the entire unbinned wavelength axis of the entire 2D spectrum
         # has its own extraction limits.
 
-        finalextractionlims = common.interpolate_extraction_lims(
-            extractionlimits, axesdict["dispaxislen"]
+        final_extraction_limits = common.interpolate_extraction_lims(
+            extraction_limits, axes_dict["dispersion_axis_length"]
         )
         sys.stdout.write("DONE.\n")
 
         # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
         # ends of the wavelength axis. All pixels fully within the aperture are extracted.
-        if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-            drawlines = [
-                np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-                finalextractionlims[0] + axesdict["imgstart"] - 1,
-                np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-                finalextractionlims[1] + axesdict["imgstart"] + 1,
+        if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+            draw_lines = [
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+                final_extraction_limits[0] + axes_dict["data_spatial_floor"] - 1,
+                np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+                final_extraction_limits[1] + axes_dict["data_spatial_floor"] + 1,
             ]
 
             common.show_img(
-                framedict["data"],
-                axesdict,
-                headparams,
-                drawlines,
+                frame_dict["data"],
+                axes_dict,
+                header_parameters,
+                draw_lines,
                 "2D Spectrum Overplotted with Full Extraction Limits",
             )
 
         # Extract the spectrum from a supersampled version of the 2D image using the extraction
         # limits.
-        sys.stdout.write(" >>> Extracting 1D spectrum. ")
-        sys.stdout.flush()
-        framedict["data"] = framedict["data"].T
-        framedict["errs"] = framedict["errs"].T
-        framedict["qual"] = framedict["qual"].T
+        frame_dict["data"] = frame_dict["data"].T
+        frame_dict["errs"] = frame_dict["errs"].T
+        frame_dict["qual"] = frame_dict["qual"].T
 
-        opdata1D, operrs1D, apdata1D, aperrs1D = common.optimal_extraction(
-            framedict["data"],
-            framedict["errs"],
-            finalextractionlims,
-            binpars,
-            axesdict,
+        optimal_1d_data, optimal_1d_errs, aperture_1d_data, aperture_1d_errs = common.optimal_extraction(
+            frame_dict["data"],
+            frame_dict["errs"],
+            final_extraction_limits,
+            moffat_parameters_all_bins,
+            axes_dict,
         )
 
-        finalextractionlims = np.array(finalextractionlims)
+        final_extraction_limits = np.array(final_extraction_limits)
         sys.stdout.write("DONE.\n")
 
         # DIAGNOSTICS - Plot extracted spectrum.
-        if params["-PLOT_EXTRACTED_SPECTRUM"]:
+        if motes_parameters["-PLOT_EXTRACTED_SPECTRUM"]:
             # DIAGNOSTICS, EXTRACTED SPECTRUM
             plt.figure(figsize=(9, 6))
             plt.errorbar(
-                axesdict["waxis"],
-                apdata1D,
-                yerr=aperrs1D,
+                axes_dict["wavelength_axis"],
+                aperture_1d_data,
+                yerr=aperture_1d_errs,
                 color="k",
                 marker=".",
                 label="Aperture Spectrum",
             )
             plt.errorbar(
-                axesdict["waxis"],
-                opdata1D,
-                yerr=operrs1D,
+                axes_dict["wavelength_axis"],
+                optimal_1d_data,
+                yerr=optimal_1d_errs,
                 color="r",
                 marker=".",
                 label="Optimal Spectrum",
             )
             plt.grid(alpha=0.5, linestyle="dotted")
             plt.title("Extracted 1D Spectrum")
-            plt.ylabel("Flux, " + headparams["fluxunit"])
-            plt.xlabel("Wavelength, " + headparams["wavunit"])
+            plt.ylabel("Flux, " + header_parameters["flux_unit"])
+            plt.xlabel("Wavelength, " + header_parameters["wavelength_unit"])
             plt.legend()
             plt.show()
 
         # Save the extracted spectrum to a new .fits file.
-        if params["-SAVE"]:
+        if motes_parameters["-SAVE"]:
             sys.stdout.write(" >>> Saving 1D spectrum and metadata.\n")
             sys.stdout.flush()
             save_fits(
-                axesdict,
-                headparams,
-                opdata1D,
-                operrs1D,
-                apdata1D,
-                aperrs1D,
-                imghead,
-                params,
-                file_2D,
-                moffparams,
-                framedict,
-                binpars,
-                finalextractionlims,
-                skybinpars,
-                skyextlims,
+                axes_dict,
+                header_parameters,
+                optimal_1d_data,
+                optimal_1d_errs,
+                aperture_1d_data,
+                aperture_1d_errs,
+                input_file_primary_header,
+                motes_parameters,
+                input_file_path,
+                moffat_profile_parameters,
+                frame_dict,
+                moffat_parameters_all_bins,
+                final_extraction_limits,
+                moffat_parameters_all_sky_bins,
+                sky_extraction_limits,
             )
 
-        sys.stdout.write(" >>> Extraction of " + file_2D + " completed.\n")
+        sys.stdout.write(" >>> Extraction of " + input_file_path + " completed.\n")
 
     sys.stdout.write(" >>> MOTES Processing Complete.\n\n")
     return None
 
 
 def save_fits(
-    axdict,
-    hparams,
-    opflux,
-    operrs,
-    apflux,
-    aperrs,
-    head,
-    pars,
-    filename,
-    moffpars,
-    fdict,
-    bpars,
-    extractionlims,
-    sbpars,
-    skyextractionlims,
+    axes_dict,
+    header_parameters,
+    optimal_1d_data,
+    optimal_1d_errs,
+    aperture_1d_data,
+    aperture_1d_errs,
+    input_file_primary_header,
+    motes_parameters,
+    input_file_path,
+    moffat_profile_parameters,
+    frame_dict,
+    moffat_parameters_all_bins,
+    extraction_limits,
+    moffat_parameters_all_sky_bins,
+    sky_extraction_limits,
 ):
     """
     This function saves the extracted spectrum and intermediate products in a single, newly
     constructed, FITS file.
 
     Args:
-        axdict (dict)                        : A dictionary containing the axes information.
-        hparams (dict)                       : A dictionary containing the header information.
-        opflux (numpy.ndarray)               : An array containing the flux values of the optimally
+        axes_dict (dict)                        : A dictionary containing the axes information.
+        header_parameters (dict)                       : A dictionary containing the header information.
+        optimal_1d_data (numpy.ndarray)               : An array containing the flux values of the optimally
                                                extracted 1D spectrum.
-        operrs (numpy.ndarray)               : An array containing the flux errors of the optimally
+        optimal_1d_errs (numpy.ndarray)               : An array containing the flux errors of the optimally
                                                extracted 1D spectrum.
-        apflux (numpy.ndarray)               : An array containing the flux values of the aperture
+        aperture_1d_data (numpy.ndarray)               : An array containing the flux values of the aperture
                                                extracted 1D spectrum.
-        aperrs (numpy.ndarray)               : An array containing the flux errors of the aperture
+        aperture_1d_errs (numpy.ndarray)               : An array containing the flux errors of the aperture
                                                extracted 1D spectrum.
-        head (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
-        pars (dict)                          : A dictionary containing the MOTES parameters.
-        filename (str)                       : The filename of the 1D spectrum.
-        moffpars (list)                      : A list containing the Moffat fit parameters.
-        fdict (dict)                         : A dictionary containing the original 2D spectrum
+        input_file_primary_header (astropy.io.fits.header.Header) : The original FITS header of the 2D spectrum.
+        motes_parameters (dict)                          : A dictionary containing the MOTES parameters.
+        input_file_path (str)                       : The filename of the 1D spectrum.
+        moffat_profile_parameters (list)                      : A list containing the Moffat fit parameters.
+        frame_dict (dict)                         : A dictionary containing the original 2D spectrum
                                                data and error frames.
-        bpars (numpy.ndarray)                : A dictionary containing the binning parameters.
-        extractionlims (numpy.ndarray)       : An array containing the extraction limits.
-        sbpars (numpy.ndarray)               : An array containing the binning parameters for the
+        moffat_parameters_all_bins (numpy.ndarray)                : A dictionary containing the binning parameters.
+        extraction_limits (numpy.ndarray)       : An array containing the extraction limits.
+        moffat_parameters_all_sky_bins (numpy.ndarray)               : An array containing the binning parameters for the
                                                sky extraction.
-        skyextractionlims (list)             : A list containing the extraction limits for the sky
+        sky_extraction_limits (list)             : A list containing the extraction limits for the sky
                                                extraction.
 
     Returns:
         None
     """
 
-    head["MOTES"] = "######## Extracted 1D Spectrum Metadata ########"
-    head.add_blank("", before="MOTES")
-    head["HIERARCH UTC EXT DATE"] = (
+    input_file_primary_header["MOTES"] = "######## Extracted 1D Spectrum Metadata ########"
+    input_file_primary_header.add_blank("", before="MOTES")
+    input_file_primary_header["HIERARCH UTC EXT DATE"] = (
         datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
         "file creation date",
     )
-    head["HIERARCH SPATPIXL"] = (
-        axdict["imgstart"],
+    input_file_primary_header["HIERARCH SPATPIXL"] = (
+        axes_dict["data_spatial_floor"],
         "lower limit of spatial axis, pix",
     )
-    head["HIERARCH SPATPIXH"] = (
-        axdict["imgend"],
+    input_file_primary_header["HIERARCH SPATPIXH"] = (
+        axes_dict["data_spatial_ceiling"],
         "upper limit of spatial axis, pix",
     )
-    head["HIERARCH DISPPIXL"] = (
-        axdict["wavstart"],
+    input_file_primary_header["HIERARCH DISPPIXL"] = (
+        axes_dict["wavelength_start"],
         "lower limit of dispersion axis, pix",
     )
-    head["HIERARCH DISPPIXH"] = (
-        axdict["wavend"],
+    input_file_primary_header["HIERARCH DISPPIXH"] = (
+        axes_dict["wavelength_end"],
         "upper limit of dispersion axis, pix",
     )
-    head["HIERARCH WAVL"] = (
-        np.floor(axdict["waxis"][0]),
-        "lower limit of wav range, " + hparams["wavunit"],
+    input_file_primary_header["HIERARCH WAVL"] = (
+        np.floor(axes_dict["wavelength_axis"][0]),
+        "lower limit of wav range, " + header_parameters["wavelength_unit"],
     )
-    head["HIERARCH WAVH"] = (
-        np.ceil(axdict["waxis"][-1]),
-        "upper limit of wav range, " + hparams["wavunit"],
+    input_file_primary_header["HIERARCH WAVH"] = (
+        np.ceil(axes_dict["wavelength_axis"][-1]),
+        "upper limit of wav range, " + header_parameters["wavelength_unit"],
     )
-    head["HIERARCH WAVU"] = hparams["wavunit"], "Wavelength unit"
+    input_file_primary_header["HIERARCH WAVU"] = header_parameters["wavelength_unit"], "Wavelength unit"
 
-    head["HIERARCH MOFF A"] = round(moffpars[0], 5), "moffat profile amplitude"
-    head.add_blank(
+    input_file_primary_header["HIERARCH MOFF A"] = round(moffat_profile_parameters[0], 5), "moffat profile amplitude"
+    input_file_primary_header.add_blank(
         "Parameters fit to the median spatial profile of the spectrum",
         before="HIERARCH MOFF A",
     )
-    head["HIERARCH MOFF C"] = (
-        round(moffpars[1] + axdict["imgstart"], 5),
-        "moffat profile centre",
+    input_file_primary_header["HIERARCH MOFF C"] = (
+        round(moffat_profile_parameters[1] + axes_dict["data_spatial_floor"], 5),
+        "moffat profile center",
     )
-    head["HIERARCH MOFF ALPHA"] = (
-        round(moffpars[2], 5),
+    input_file_primary_header["HIERARCH MOFF ALPHA"] = (
+        round(moffat_profile_parameters[2], 5),
         "moffat profile alpha value",
     )
-    head["HIERARCH MOFF BETA"] = (
-        round(moffpars[3], 5),
+    input_file_primary_header["HIERARCH MOFF BETA"] = (
+        round(moffat_profile_parameters[3], 5),
         "moffat profile beta value",
     )
-    head["HIERARCH MOFF BACK"] = (
-        round(moffpars[4], 5),
+    input_file_primary_header["HIERARCH MOFF BACK"] = (
+        round(moffat_profile_parameters[4], 5),
         "moffat profile background level",
     )
-    head["HIERARCH MOFF GRAD"] = (
-        round(moffpars[5], 5),
+    input_file_primary_header["HIERARCH MOFF GRAD"] = (
+        round(moffat_profile_parameters[5], 5),
         "moffat profile background slope",
     )
-    head["HIERARCH IQ"] = (
-        round(hparams["seeing"] * hparams["pixresolution"], 2),
+    input_file_primary_header["HIERARCH IQ"] = (
+        round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2),
         'IQ measured from median profile, "',
     )
 
-    head["HIERARCH SNR BIN LIMIT"] = pars["-SNR_BIN_LIM"], "maximum SNR per bin"
-    head.add_blank(
+    input_file_primary_header["HIERARCH SNR BIN LIMIT"] = motes_parameters["-SNR_BIN_LIM"], "maximum SNR per bin"
+    input_file_primary_header.add_blank(
         "Dispersion Binning and Spectrum Extraction",
         before="HIERARCH SNR BIN LIMIT",
     )
-    head["HIERARCH COL BIN LIMIT"] = (
-        int(pars["-COL_BIN_LIM"]),
+    input_file_primary_header["HIERARCH COL BIN LIMIT"] = (
+        int(motes_parameters["-COL_BIN_LIM"]),
         "minimum number of columns per bin",
     )
-    head["HIERARCH FWHM MULTIPLIER"] = (
-        pars["-FWHM_MULTIPLIER"],
+    input_file_primary_header["HIERARCH FWHM MULTIPLIER"] = (
+        motes_parameters["-FWHM_MULTIPLIER"],
         "FWHM used to define the extraction limits",
     )
-    head["HIERARCH INTERP KIND"] = (
-        pars["-INTERP_KIND"],
-        "interpolation mode used",
-    )
 
-    if pars["-SUBTRACT_SKY"]:
-        head["HIERARCH SKYSUB FWHM MULT"] = (
-            pars["-BG_FWHM_MULTIPLIER"],
+    if motes_parameters["-SUBTRACT_SKY"]:
+        input_file_primary_header["HIERARCH SKYSUB FWHM MULT"] = (
+            motes_parameters["-BG_FWHM_MULTIPLIER"],
             "FWHM multiplier for defining background",
         )
-        head.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
-        head["HIERARCH SKYSUB SNR BIN LIM"] = (
-            pars["-SKY_SNR_BIN_LIM"],
+        input_file_primary_header.add_blank("Sky Subtraction", before="HIERARCH SKYSUB FWHM MULT")
+        input_file_primary_header["HIERARCH SKYSUB SNR BIN LIM"] = (
+            motes_parameters["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction",
         )
-        skymodhdu = fits.ImageHDU(fdict["skymod"])
-        skymodhdu.header["EXTNAME"] = "2D_SKY"
-        skybinhdu = fits.ImageHDU(sbpars)
-        skybinhdu.header["EXTNAME"] = "SKY_BIN_PARS"
-        skyextractionlims = fits.ImageHDU(skyextractionlims)
-        skyextractionlims.header["EXTNAME"] = "SKY_EXT_LIMS"
+        sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
+        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
+        sky_bin_hdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
+        sky_bin_hdu.header["EXTNAME"] = "SKY_BIN_PARS"
+        sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
+        sky_extraction_limits.header["EXTNAME"] = "SKY_EXT_LIMS"
 
-    head["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + hparams["wavunit"]
-    head.add_blank(
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 0"] = "Wavelength Axis, " + header_parameters["wavelength_unit"]
+    input_file_primary_header.add_blank(
         "Data Saved in the Extracted Spectrum HDU",
         before="HIERARCH EXTRACTED HDU ROW 0",
     )
-    head["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + hparams["fluxunit"]
-    head["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + hparams["fluxunit"]
-    head["EXTNAME"] = "OPTI_1D_SPEC"
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 1"] = "Flux, " + header_parameters["flux_unit"]
+    input_file_primary_header["HIERARCH EXTRACTED HDU ROW 2"] = "Flux Uncertainty, " + header_parameters["flux_unit"]
+    input_file_primary_header["EXTNAME"] = "OPTI_1D_SPEC"
 
-    opfluxhdu = fits.PrimaryHDU([axdict["waxis"], opflux, operrs], header=head)
-    apfluxhdu = fits.ImageHDU([axdict["waxis"], apflux, aperrs], header=head)
-    apfluxhdu.header["EXTNAME"] = "APER_1D_SPEC"
-    spec2Dhdu = fits.ImageHDU(fdict["ogdata"])
-    spec2Dhdu.header["EXTNAME"] = "ORIG_2D_SPEC"
-    errs2Dhdu = fits.ImageHDU(fdict["ogerrs"])
-    errs2Dhdu.header["EXTNAME"] = "ORIG_2D_ERRS"
-    qual2Dhdu = fits.ImageHDU(fdict["ogqual"])
-    qual2Dhdu.header["EXTNAME"] = "ORIG_2D_QUAL"
-    binhdu = fits.ImageHDU(bpars)
-    binhdu.header["EXTNAME"] = "EXT_BIN_PARS"
-    extractionlims = fits.ImageHDU(extractionlims)
-    extractionlims.header["EXTNAME"] = "EXT_LIMS"
+    optimal_1d_datahdu = fits.PrimaryHDU([axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs], header=input_file_primary_header)
+    aperture_1d_datahdu = fits.ImageHDU([axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs], header=input_file_primary_header)
+    aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
+    orig_2d_spec_hdu = fits.ImageHDU(frame_dict["original_data"])
+    orig_2d_spec_hdu.header["EXTNAME"] = "ORIG_2D_SPEC"
+    orig_2d_errs_hdu = fits.ImageHDU(frame_dict["original_errs"])
+    orig_2d_errs_hdu.header["EXTNAME"] = "ORIG_2D_ERRS"
+    orig_2d_qual_hdu = fits.ImageHDU(frame_dict["original_qual"])
+    orig_2d_qual_hdu.header["EXTNAME"] = "ORIG_2D_QUAL"
+    bins_moffat_parameters_hdu = fits.ImageHDU(moffat_parameters_all_bins)
+    bins_moffat_parameters_hdu.header["EXTNAME"] = "EXT_BIN_PARS"
+    extraction_limits = fits.ImageHDU(extraction_limits)
+    extraction_limits.header["EXTNAME"] = "EXT_LIMS"
     hdu_list = [
-        opfluxhdu,
-        apfluxhdu,
-        spec2Dhdu,
-        errs2Dhdu,
-        qual2Dhdu,
-        binhdu,
-        extractionlims,
+        optimal_1d_datahdu,
+        aperture_1d_datahdu,
+        orig_2d_spec_hdu,
+        orig_2d_errs_hdu,
+        orig_2d_qual_hdu,
+        bins_moffat_parameters_hdu,
+        extraction_limits,
     ]
 
-    if pars["-SUBTRACT_SKY"]:
-        hdu_list.append(skymodhdu)
-        hdu_list.append(skybinhdu)
-        hdu_list.append(skyextractionlims)
+    if motes_parameters["-SUBTRACT_SKY"]:
+        hdu_list.append(sky_model_hdu)
+        hdu_list.append(sky_bin_hdu)
+        hdu_list.append(sky_extraction_limits)
 
-    hdulist = fits.HDUList(hdu_list)
-    filenamelist = filename.split("_")
-    hdulist.writeto("_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1])
-    hdulist.close()
+    fits_hdu_list = fits.HDUList(hdu_list)
+    fits_hdu_list.writeto("m" + input_file_path.split("/")[-1])
+    fits_hdu_list.close()
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "_".join(filenamelist[0:-2]) + "_" + "1D" + "_" + filenamelist[-1] + "\n"
+        "     " + "/".join(input_file_path.split("/")[0:-1]) + "/m" + input_file_path.split("/")[-1] + "\n"
     )
     return None
 
 
-def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
+def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters):
     """
     Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
     extraction, and then use the regions outside the boundaries defined by that process to
     characterise and subtract background sky emission.
 
     Args:
-        framedict (dict)  : A dictionary containing the 2D spectrum and its associated errors and
+        frame_dict (dict)  : A dictionary containing the 2D spectrum and its associated errors and
                             quality arrays.
-        axesdict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D
+        axes_dict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D
                             spectrum.
-        datascale (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
+        data_scaling_factor (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
                             same units as the sky.
-        headparams (dict) : A dictionary containing the header parameters of the 2D spectrum.
-        binparams (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
-        params (dict)     : A dictionary containing the parameters of the extraction.
+        header_parameters (dict) : A dictionary containing the header parameters of the 2D spectrum.
+        bin_parameters (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
+        motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
 
     Returns:
-        framedict (dict)         : A dictionary containing the 2D spectrum and its associated
+        frame_dict (dict)         : A dictionary containing the 2D spectrum and its associated
                                    errors and quality arrays.
-        skybin (list)            : A list containing bins for the sky background.
-        skyextractionlims (list) : A list containing the extraction limits for the sky background.
+        moffat_parameters_all_sky_bins (list)            : A list containing bins for the sky background.
+        sky_extraction_limits (list) : A list containing the extraction limits for the sky background.
     """
 
     sys.stdout.write(
         " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
     )
 
-    skybin = []
-    extractionlimits = []
-    for bin in binparams:
+    moffat_parameters_all_sky_bins = []
+    extraction_limits = []
+    for each_bin in bin_parameters:
         # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
         # chip gaps if this is a GMOS spectrum.
-        binimg = framedict["data"][:, bin[0] : bin[1]]
-        chipgap = np.where(np.median(binimg, axis=0) != 1)
-        bindata = np.nanmedian(binimg[:, chipgap[0]], axis=1)
+        raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
+        chip_gap_location = np.where(np.median(raw_bin_data, axis=0) != 1)
+        bin_data = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
 
         # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
         # spatial profile and return its parameters.
-        binmoffparams = common.moffat_least_squares(
-            axesdict["saxis"],
-            bindata * datascale,
-            headparams["seeing"],
-            headparams["pixresolution"],
+        bin_moffat_parameters = common.moffat_least_squares(
+            axes_dict["spatial_axis"],
+            bin_data * data_scaling_factor,
+            header_parameters["seeing"],
+            header_parameters["pixel_resolution"],
         )
 
         # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
@@ -601,101 +592,98 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
         # get a model profile that matches the original profile, the profile amplitude (A),
         # background level (B), and background gradient (m) all need to be scaled down again after
         # the fitting.
-
-        binmoffparams[0] /= datascale
-        binmoffparams[4] /= datascale
-        binmoffparams[5] /= datascale
+        bin_moffat_parameters[0] /= data_scaling_factor
+        bin_moffat_parameters[4] /= data_scaling_factor
+        bin_moffat_parameters[5] /= data_scaling_factor
 
         # Define the extraction limits of the current dispersion bin based on the parameters of the
         # Moffat profile previously fitted to it.
-        LowExt, HighExt, fwhm, centre = common.extraction_limits(
-            binmoffparams,
-            axesdict,
-            width_multiplier=params["-BG_FWHM_MULTIPLIER"],
+        bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center = common.set_extraction_limits(
+            bin_moffat_parameters,
+            width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
         )
 
-        extractionlimits.append([(bin[0] + bin[1]) * 0.5, LowExt, HighExt, centre])
+        extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
 
         # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
         # to the bin locations so they can be saved as metadata along with the extracted spectrum.
-        binmoffparams.append(bin[0] + axesdict["wavstart"])
-        binmoffparams.append(bin[1] + axesdict["wavstart"])
-        skybin.append(binmoffparams)
+        bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
+        bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
+        moffat_parameters_all_sky_bins.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each bin
-        if params["-DIAG_PLOT_MOFFAT"]:
+        if motes_parameters["-DIAG_PLOT_MOFFAT"]:
             common.plot_fitted_spatial_profile(
-                axesdict["saxis"],
-                bindata,
-                axesdict["hrsaxis"],
-                binmoffparams,
-                axesdict["imgstart"],
-                headparams,
+                axes_dict["spatial_axis"],
+                bin_data,
+                axes_dict["hi_resolution_spatial_axis"],
+                bin_moffat_parameters,
+                axes_dict["data_spatial_floor"],
+                header_parameters,
             )
 
-    skybin = np.array(skybin)
+    moffat_parameters_all_sky_bins = np.array(moffat_parameters_all_sky_bins)
 
     sys.stdout.write("     Fitting complete.\n")
 
     sys.stdout.write(" >>> Drawing target/sky boundaries. ")
     sys.stdout.flush()
-    extractionlimits = np.array(extractionlimits).T
+    extraction_limits = np.array(extraction_limits).T
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
-            extractionlimits[0] + axesdict["wavstart"],
-            (extractionlimits[1]) + axesdict["imgstart"],
-            extractionlimits[0] + axesdict["wavstart"],
-            (extractionlimits[2]) + axesdict["imgstart"],
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+        draw_lines = [
+            extraction_limits[0] + axes_dict["wavelength_start"],
+            (extraction_limits[1]) + axes_dict["data_spatial_floor"],
+            extraction_limits[0] + axes_dict["wavelength_start"],
+            (extraction_limits[2]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
-            framedict["data"],
-            axesdict,
-            headparams,
-            drawlines,
+            frame_dict["data"],
+            axes_dict,
+            header_parameters,
+            draw_lines,
             "2D Spectrum Overplotted with Target/Sky Boundaries",
         )
 
     # Interpolate the extraction limits calculated for each median bin such that each wavelength
     # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
     # extraction limits.
-
-    skyextractionlims = common.interpolate_extraction_lims(
-        extractionlimits, axesdict["dispaxislen"]
+    sky_extraction_limits = common.interpolate_extraction_lims(
+        extraction_limits, axes_dict["dispersion_axis_length"]
     )
 
     sys.stdout.write("DONE.\n")
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
-            np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-            (skyextractionlims[0]) + axesdict["imgstart"],
-            np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-            (skyextractionlims[1]) + axesdict["imgstart"],
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+        draw_lines = [
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
-            framedict["data"],
-            axesdict,
-            headparams,
-            drawlines,
+            frame_dict["data"],
+            axes_dict,
+            header_parameters,
+            draw_lines,
             "2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
     sys.stdout.write(" >>> Subtracting sky.\n")
     sys.stdout.flush()
 
-    framedict = common.subtract_sky(
-        skyextractionlims[0],
-        skyextractionlims[1],
-        framedict,
-        axesdict,
-        params,
-        headparams,
+    frame_dict = common.subtract_sky(
+        sky_extraction_limits[0],
+        sky_extraction_limits[1],
+        frame_dict,
+        axes_dict,
+        motes_parameters,
+        header_parameters,
     )
 
     sys.stdout.write("\n     DONE.\n")
@@ -703,23 +691,23 @@ def skyloc(framedict, axesdict, datascale, headparams, binparams, params):
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
     # ends of the wavelength axis.
-    if params["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        drawlines = [
-            np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-            (skyextractionlims[0]) + axesdict["imgstart"],
-            np.array(range(axesdict["dispaxislen"])) + axesdict["wavstart"],
-            (skyextractionlims[1]) + axesdict["imgstart"],
+    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
+        draw_lines = [
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
+            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
+            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
         ]
 
         common.show_img(
-            framedict["data"],
-            axesdict,
-            headparams,
-            drawlines,
+            frame_dict["data"],
+            axes_dict,
+            header_parameters,
+            draw_lines,
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
-    return framedict, skybin, skyextractionlims
+    return frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits
 
 
 if __name__ == "__main__":
