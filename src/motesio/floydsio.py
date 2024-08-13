@@ -73,3 +73,8 @@ def harvest_floyds(input_fits_hdu, primary_header):
     )
 
     return data, errs, qual, original_qual, header_dict, wavelength_axis
+
+
+def save_floyds(hdu_list, original_hdu_list):
+
+    return hdu_list

@@ -74,3 +74,8 @@ def harvest_xshoo(input_fits_hdu, primary_header):
     )
 
     return data, errs, qual, original_qual, header_dict, wavelength_axis
+
+
+def save_xshoo(hdu_list, original_hdu_list):
+
+    return hdu_list

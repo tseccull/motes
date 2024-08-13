@@ -13,6 +13,7 @@ Authors: Tom Seccull, Dominik Kiersz
 Licence: GNU General Public License v3.0
 """
 
+
 import copy
 import datetime
 import glob
@@ -24,6 +25,7 @@ import numpy as np
 
 import motes.common as common
 import motesio.motesio as motesio
+
 
 def motes():
     """
@@ -197,7 +199,6 @@ def motes():
                 header_parameters["seeing"],
                 header_parameters["pixel_resolution"],
             )
-
             bin_moffat_parameters[0] /= data_scaling_factor
             bin_moffat_parameters[1] += axes_dict["data_spatial_floor"]
             bin_moffat_parameters[4] /= data_scaling_factor
@@ -468,7 +469,6 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
     sky_extraction_limits = common.interpolate_extraction_lims(
         extraction_limits, axes_dict["dispersion_axis_length"]
     )
-
     sys.stdout.write("DONE.\n")
 
     # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
@@ -521,7 +521,7 @@ def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, b
             draw_lines,
             "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
-
+    
     return frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits
 
 

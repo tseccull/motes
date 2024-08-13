@@ -159,4 +159,13 @@ def harvest_gmos(input_fits_hdu):
 
 
 def save_gmos(hdu_list, original_hdu_list):
-	hdu_list.append(original_hdu_list["MDF"])
+    original_hdu_list["MDF"].header["EXTNAME"] = "ORIG_MDF"
+    hdu_list.append(original_hdu_list["ORIG_MDF"])
+    original_hdu_list["SCI"].header["EXTNAME"] = "ORIG_SCI"
+    hdu_list.append(original_hdu_list["ORIG_SCI"])
+    original_hdu_list["VAR"].header["EXTNAME"] = "ORIG_VAR"
+    hdu_list.append(original_hdu_list["ORIG_VAR"])
+    original_hdu_list["DQ"].header["EXTNAME"] = "ORIG_DQ"
+    hdu_list.append(original_hdu_list["ORIG_DQ"])
+       
+    return hdu_list

@@ -583,7 +583,7 @@ def moffat_least_squares(r, col, seeing, pixel_resolution):
     """
 
     # Set up initial conditions for the least squares fit.
-    # x0 = [amplitude, centre, alpha, beta, background gradient, background level]
+    # x0 = [amplitude, centre, alpha, beta, background level, background gradient]
     # Initial beta estimate comes from optimal value from atmospheric turbulence theory as
     # described in Trujillo, I. et al. (2001), MNRAS, 328, 977-985
     # See https://ui.adsabs.harvard.edu/abs/2001MNRAS.328..977T/abstract
@@ -1059,8 +1059,8 @@ def subtract_sky(background_spatial_lo_limit, background_spatial_hi_limit, frame
     for ii in range(number_of_columns):
         if background_spatial_lo_limit[ii] < 0:
             background_spatial_lo_limit[ii] = 0
-        if background_spatial_hi_limit[ii] > axes_dict["spatial_axis"][-1]:
-            background_spatial_hi_limit[ii] = axes_dict["spatial_axis"][-1]
+        if background_spatial_hi_limit[ii] > (axes_dict["spatial_axis"] + axes_dict["data_spatial_floor"])[-1]:
+            background_spatial_hi_limit[ii] = (axes_dict["spatial_axis"] + axes_dict["data_spatial_floor"])[-1]
 
         data_column = frame_dict["data"][ii]
         column_axis = np.array(range(len(data_column)))

@@ -166,6 +166,89 @@ def data_harvest(region_counter, input_file_path, data_regions):
     return header_dict, frame_dict, axes_dict, original_hdu_list
 
 
+def make_bin_table(bin_data, flux_unit, sky=False):
+    """
+    Take data about the Moffat profile fitted in each bin and convert
+    it to FITS Table HDU.
+    
+    Args:
+     -- bin_data (numpy.ndarray)
+            array of bin fitting data
+     -- flux_unit (str)
+            unit (BUNIT) of the data in the science frame
+    
+    Returns:
+     -- bin_table_hdu (astropy.io.fits.hdu.table.BinTableDHU)
+            Table HDU containing bin fitting data
+    """
+    
+    bin_data[:,7] -= 1
+    bin_table = Table(
+        bin_data,
+        names=(
+            "amplitude",
+            "center",
+            "alpha",
+            "beta",
+            "background_level",
+            "background_grad",
+            "bin_limit_lo",
+            "bin_limit_hi"
+        ), 
+        dtype = ("f8", "f8", "f8", "f8", "f8", "f8", "i4", "i4")
+    )
+    if sky:
+        bin_table_hdu = fits.BinTableHDU(bin_table, name="SBMPARAM")
+    else:
+        bin_table_hdu = fits.BinTableHDU(bin_table, name="XBMPARAM")
+    bin_table_hdu.header["TABUNIT1"] = flux_unit
+    bin_table_hdu.header["TABUNIT2"] = "spatial_pixel"
+    bin_table_hdu.header["TABUNIT3"] = None
+    bin_table_hdu.header["TABUNIT4"] = None
+    bin_table_hdu.header["TABUNIT5"] = flux_unit + " / spatial_pixel"
+    bin_table_hdu.header["TABUNIT6"] = flux_unit
+    bin_table_hdu.header["TABUNIT7"] = "spectral_pixel"
+    bin_table_hdu.header["TABUNIT8"] = "spectral_pixel"
+	
+    return bin_table_hdu
+
+
+def make_ext_table(extraction_data, wavelength_unit, sky=False):
+    """
+    Take data about the spectrum extraction limits and convert it to
+    FITS Table HDU.
+    
+    Args:
+     -- bin_data (numpy.ndarray)
+            array of bin fitting data
+     -- wavelength_unit (str)
+            unit of the wavelength axis
+    
+    Returns:
+     -- ext_table_hdu (astropy.io.fits.hdu.table.BinTableDHU)
+            Table HDU containing the extraction limit data
+    """
+    
+    ext_table = Table(
+        extraction_data,
+        names=(
+            "wavelength",
+            "ext_lim_lo",
+            "ext_lim_hi"
+        ), 
+        dtype = ("f8", "f8", "f8")
+    )
+    if sky:
+        ext_table_hdu = fits.BinTableHDU(ext_table, name="SKYLMTAB")
+    else:
+        ext_table_hdu = fits.BinTableHDU(ext_table, name="XTLMTAB")
+    ext_table_hdu.header["TABUNIT1"] = wavelength_unit
+    ext_table_hdu.header["TABUNIT2"] = "pixel"
+    ext_table_hdu.header["TABUNIT3"] = "pixel"
+	
+    return ext_table_hdu
+
+
 def read_motes_parameter_file():
     """
     Import parameters from motesparams.txt parameter file into a 
@@ -422,12 +505,6 @@ def save_fits(
             motes_parameters["-SKY_SNR_BIN_LIM"],
             "max SNR per bin for sky subtraction"
         )
-        sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
-        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
-        sky_bin_hdu = fits.ImageHDU(moffat_parameters_all_sky_bins)
-        sky_bin_hdu.header["EXTNAME"] = "SKY_BIN_PARS"
-        sky_extraction_limits = fits.ImageHDU(sky_extraction_limits)
-        sky_extraction_limits.header["EXTNAME"] = "SKY_EXT_LIMS"
 
     primary_header["HIERARCH EXTRACTED HDU ROW 0"] = (
         "Wavelength Axis, " + header_parameters["wavelength_unit"]
@@ -440,6 +517,7 @@ def save_fits(
     )
     
     primary_header["EXTNAME"] = "OPTI_1D_SPEC"
+    
     optimal_1d_datahdu = fits.PrimaryHDU(
         [axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs],
         header=primary_header
@@ -451,100 +529,81 @@ def save_fits(
     )
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     
-    ext_bin_moffat_parameters = Table(
-        moffat_parameters_all_bins,
-        names=(
-            "amplitude",
-            "center",
-            "alpha",
-            "beta",
-            "background_grad",
-            "background_level",
-            "bin_limit_lo",
-            "bin_limit_hi"
-        ), 
-        dtype = ("f8", "f8", "f8", "f8", "f8", "f8", "i4", "i4"),
-        units = (
-            header_parameters["flux_unit"] + ".",
-            "spatial_pixel",
-            "",
-            "",
-            header_parameters["flux_unit"] + " / spatial_pixel",
-            header_parameters["flux_unit"] + ".",
-            "spectral pixel",
-            "spectral pixel"
-        )
+    ext_bin_pars_tabhdu = make_bin_table(
+        moffat_parameters_all_bins, header_parameters["flux_unit"]
     )
-    ext_bin_pars_tabhdu = fits.BinTableHDU(
-        ext_bin_moffat_parameters, name="XBMPARAM"
+    ext_limit_array = (
+        np.vstack([axes_dict["wavelength_axis"], extraction_limits])
     )
-    
-    print(header_parameters["flux_unit"])
-    print(ext_bin_pars_tabhdu.header)
-    exit()
-    
-    if motes_parameters["-SUBTRACT_SKY"]:
-        sky_bin_moffat_parameters = Table(
-            moffat_parameters_all_bins,
-            names=(
-                "amplitude",
-                "center",
-                "alpha",
-                "beta",
-                "background_grad",
-                "background_level",
-                "bin_limit_lo",
-                "bin_limit_hi"
-            ), 
-            dtype=("f8", "f8", "f8", "f8", "f8", "f8", "i4", "i4")
-        )
-        sky_bin_pars_tabhdu = fits.BinTableHDU(
-            ext_bin_moffat_parameters, name="SBMPARAM"
-        )
+    ext_limit_table_hdu = (
+        make_ext_table(ext_limit_array.T, header_parameters["wavelength_unit"])
+    )
     
     hdu_list = [
        optimal_1d_datahdu,
-       aperture_1d_datahdu
-       
+       aperture_1d_datahdu,
+       ext_bin_pars_tabhdu,
+       ext_limit_table_hdu,
     ]
     
-    moffat_parameters_all_bins[:,7] -= 1
-    moffat_parameters_all_sky_bins[:,7] -= 1
-    print(Table(moffat_parameters_all_bins, names=("amplitude", "center", "alpha", "beta", "background_grad", "background_level", "bin_limit_lo", "bin_limit_hi"), dtype=("f8", "f8", "f8", "f8", "f8", "f8", "i4", "i4")))
-    print(Table(moffat_parameters_all_sky_bins, names=("amplitude", "center", "alpha", "beta", "background_grad", "background_level", "bin limit lo", "bin limit hi"), dtype=("f8", "f8", "f8", "f8", "f8", "f8", "i4", "i4")))
-    print(np.shape(moffat_parameters_all_bins))
-    exit()
+    if motes_parameters["-SUBTRACT_SKY"]:
+        sky_bin_pars_tabhdu = make_bin_table(
+            moffat_parameters_all_sky_bins,
+            header_parameters["flux_unit"],
+            sky=True
+        )
+        sky_limit_array = (
+            np.vstack([axes_dict["wavelength_axis"], sky_extraction_limits])
+        )
+        sky_limit_table_hdu = make_ext_table(
+            sky_limit_array.T, header_parameters["wavelength_unit"], sky=True
+        )
     
-    bins_moffat_parameters_hdu = fits.ImageHDU(moffat_parameters_all_bins)
-    bins_moffat_parameters_hdu.header["EXTNAME"] = "EXT_BIN_PARS"
-    extraction_limits = fits.ImageHDU(extraction_limits)
-    extraction_limits.header["EXTNAME"] = "EXT_LIMS"
+        sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
+        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
+        sky_model_hdu.header["DATATYPE"] = ("Model Intensity", "Type of Data")
+        sky_model_hdu.header["DATASECS"] = (
+            (
+                "["
+                + str(axes_dict["data_spatial_floor"])
+                + ":" + str(axes_dict["data_spatial_ceiling"])
+                + "]"
+            ),
+            "Data section; spatial axis, pixels"
+        )
+        sky_model_hdu.header["DATASECW"] = (
+            (
+                "[" 
+                + str(axes_dict["wavelength_start"]) 
+                + ":" + str(axes_dict["wavelength_end"]) 
+                + "]"
+            ),
+            "Data section; wavelength axis, pixels"
+        )
+        sky_model_hdu.header["BUNIT"] = header_parameters["flux_unit"]
+        sky_model_hdu.header["METHOD"] = (
+            motes_parameters["-SKYSUB_MODE"], "MOTES sky subtraction method."
+        )
+        sky_model_hdu.header["COMMENT"] = (
+            "2D_SKY data is oriented the same as OPTI_1D_SPEC and APER_1D_SPEC along the wavelength axis."
+        )
+        
+        hdu_list.append(sky_model_hdu)
+        hdu_list.append(sky_bin_pars_tabhdu)
+        hdu_list.append(sky_limit_table_hdu)
    
     instrument_save_dict = {
         "en06": floydsio.save_floyds,
         "en12": floydsio.save_floyds,
-        "FORS2": forsio.save_fors2,
+        "FORS2": forsio.save_fors,
         "GMOS-N": gmosio.save_gmos,
         "GMOS-S": gmosio.save_gmos,
         "XSHOOTER": xshooio.save_xshoo
     }
    
-    hdu_list = instrument_save_dict[instrument](hdu_list, original_hdu_list)
-    
-    hdu_list = [
-        optimal_1d_datahdu,
-        aperture_1d_datahdu,
-        orig_2d_spec_hdu,
-        orig_2d_errs_hdu,
-        orig_2d_qual_hdu,
-        bins_moffat_parameters_hdu,
-        extraction_limits,
-    ]
-
-    if motes_parameters["-SUBTRACT_SKY"]:
-        hdu_list.append(sky_model_hdu)
-        hdu_list.append(sky_bin_hdu)
-        hdu_list.append(sky_extraction_limits)
+    hdu_list = instrument_save_dict[primary_header["INSTRUME"]](
+        hdu_list, original_hdu_list
+    )
 
     fits_hdu_list = fits.HDUList(hdu_list)
     fits_hdu_list.writeto("m" + input_file_path.split("/")[-1])
@@ -552,6 +611,10 @@ def save_fits(
 
     sys.stdout.write(" >>> Spectrum extracted and saved:\n")
     sys.stdout.write(
-        "     " + "/".join(input_file_path.split("/")[0:-1]) + "/m" + input_file_path.split("/")[-1] + "\n"
+        "     "
+        + "/".join(input_file_path.split("/")[0:-1])
+        + "/m" + input_file_path.split("/")[-1]
+        + "\n"
     )
+    
     return None
