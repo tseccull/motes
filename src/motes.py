@@ -25,6 +25,7 @@ import numpy as np
 
 import motes.common as common
 import motesio.motesio as motesio
+import motessky.sky as sky
 
 
 def motes():
@@ -104,7 +105,11 @@ def motes():
         # entire spectrum to determine spatial limits that are used to bound the region of the
         # spectrum used by the common.get_bins function to bin the 2D spectrum while taking account
         # of its S/N.
-        binning_region_spatial_floor, binning_region_spatial_ceiling, moffat_center = common.set_extraction_limits(moffat_profile_parameters)
+        limits_and_center = common.set_extraction_limits(moffat_profile_parameters)
+        binning_region_spatial_floor = limits_and_center[0]
+        binning_region_spatial_ceiling = limits_and_center[1]
+        moffat_center = limits_and_center[2]
+        
         sys.stdout.write(
             " >>> Spectrum localised to aperture in range of spatial pixel rows "
             + str(int(binning_region_spatial_floor + axes_dict["data_spatial_floor"]))
@@ -151,7 +156,7 @@ def motes():
         sys.stdout.write(" >>> Bad pixels replaced.\n")
         # Subtract the sky spectrum if requested by the user.
         if motes_parameters["-SUBTRACT_SKY"]:
-            frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits = sky_locator(
+            frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits = sky.sky_locator(
                 frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters
             )
         # Will plot the location of the bins determined by get_bins if -DIAG_PLOT_BIN_LOC=1 in
@@ -206,10 +211,13 @@ def motes():
 
             # Define the extraction limits of the current dispersion bin based on the parameters of
             # the Moffat profile previously fitted to it.
-            bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center = common.set_extraction_limits(
+            limits_and_center = common.set_extraction_limits(
                 bin_moffat_parameters,
                 width_multiplier=motes_parameters["-FWHM_MULTIPLIER"],
             )
+            bin_lower_extraction_limit = limits_and_center[0]
+            bin_upper_extraction_limit = limits_and_center[1]
+            moffat_center = limits_and_center[2]
 
             extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
 
@@ -353,176 +361,6 @@ def motes():
 
     sys.stdout.write(" >>> MOTES Processing Complete.\n\n")
     return None
-
-
-def sky_locator(frame_dict, axes_dict, data_scaling_factor, header_parameters, bin_parameters, motes_parameters):
-    """
-    Perform sky subtraction on the 2D spectrum. Locaalise the spectrum in the same way done for the
-    extraction, and then use the regions outside the boundaries defined by that process to
-    characterise and subtract background sky emission.
-
-    Args:
-        frame_dict (dict)  : A dictionary containing the 2D spectrum and its associated errors and
-                            quality arrays.
-        axes_dict (dict)   : A dictionary containing the wavelength and spatial axes of the 2D
-                            spectrum.
-        data_scaling_factor (float) : A flux scale factor to convert the flux units of the 2D spectrum to the
-                            same units as the sky.
-        header_parameters (dict) : A dictionary containing the header parameters of the 2D spectrum.
-        bin_parameters (dict)  : A dictionary containing the bin parameters of the 2D spectrum.
-        motes_parameters (dict)  : A dictionary containing the parameters of the extraction.
-
-    Returns:
-        frame_dict (dict)         : A dictionary containing the 2D spectrum and its associated
-                                   errors and quality arrays.
-        moffat_parameters_all_sky_bins (list)            : A list containing bins for the sky background.
-        sky_extraction_limits (list) : A list containing the extraction limits for the sky background.
-    """
-
-    sys.stdout.write(
-        " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
-    )
-
-    moffat_parameters_all_sky_bins = []
-    extraction_limits = []
-    for each_bin in bin_parameters:
-        # Take the median spatial profile of the dispersion bin, and leave out pixel columns in the
-        # chip gaps if this is a GMOS spectrum.
-        raw_bin_data = frame_dict["data"][:, each_bin[0] : each_bin[1]]
-        chip_gap_location = np.where(np.median(raw_bin_data, axis=0) != 1)
-        bin_data = np.nanmedian(raw_bin_data[:, chip_gap_location[0]], axis=1)
-
-        # Use a Levenberg-Marquardt Least Squares method to fit a Moffat function to the median
-        # spatial profile and return its parameters.
-        bin_moffat_parameters = common.moffat_least_squares(
-            axes_dict["spatial_axis"],
-            bin_data * data_scaling_factor,
-            header_parameters["seeing"],
-            header_parameters["pixel_resolution"],
-        )
-
-        # Scipy least squares doesn't like really tiny numbers like fluxes in erg/s/cm^2/Angstrom,
-        # so it's necessary to scale the data to a size that least squares can handle. The shape of
-        # the profile fitted to the scaled spatial profile is the same as the unscaled, but to to
-        # get a model profile that matches the original profile, the profile amplitude (A),
-        # background level (B), and background gradient (m) all need to be scaled down again after
-        # the fitting.
-        bin_moffat_parameters[0] /= data_scaling_factor
-        bin_moffat_parameters[1] += axes_dict["data_spatial_floor"]
-        bin_moffat_parameters[4] /= data_scaling_factor
-        bin_moffat_parameters[5] /= data_scaling_factor
-
-        # Define the extraction limits of the current dispersion bin based on the parameters of the
-        # Moffat profile previously fitted to it.
-        bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center = common.set_extraction_limits(
-            bin_moffat_parameters,
-            width_multiplier=motes_parameters["-BG_FWHM_MULTIPLIER"],
-        )
-
-        extraction_limits.append([(each_bin[0] + each_bin[1]) * 0.5, bin_lower_extraction_limit, bin_upper_extraction_limit, moffat_center])
-
-        # Record the Moffat function parameters for each dispersion bin and add the wavstart offset
-        # to the bin locations so they can be saved as metadata along with the extracted spectrum.
-        bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
-        bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
-        moffat_parameters_all_sky_bins.append(bin_moffat_parameters)
-
-        # DIAGNOSTICS - Plot computed moffat profile over data for each bin
-        if motes_parameters["-DIAG_PLOT_MOFFAT"]:
-            common.plot_fitted_spatial_profile(
-                axes_dict["spatial_axis"],
-                bin_data,
-                axes_dict["hi_resolution_spatial_axis"],
-                bin_moffat_parameters,
-                axes_dict["data_spatial_floor"],
-                header_parameters,
-            )
-
-    moffat_parameters_all_sky_bins = np.array(moffat_parameters_all_sky_bins)
-
-    sys.stdout.write("     Fitting complete.\n")
-
-    sys.stdout.write(" >>> Drawing target/sky boundaries. ")
-    sys.stdout.flush()
-    extraction_limits = np.array(extraction_limits).T
-
-    # DIAGNOSTICS - Plot the determined extraction limits over the 2D spectrum.
-    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        draw_lines = [
-            extraction_limits[0] + axes_dict["wavelength_start"],
-            (extraction_limits[1]) + axes_dict["data_spatial_floor"],
-            extraction_limits[0] + axes_dict["wavelength_start"],
-            (extraction_limits[2]) + axes_dict["data_spatial_floor"],
-        ]
-
-        common.show_img(
-            frame_dict["data"],
-            axes_dict,
-            header_parameters,
-            draw_lines,
-            "2D Spectrum Overplotted with Target/Sky Boundaries",
-        )
-
-    # Interpolate the extraction limits calculated for each median bin such that each wavelength
-    # element across the entire unbinned wavelength axis of the entire 2D spectrum has its own
-    # extraction limits.
-    sky_extraction_limits = common.interpolate_extraction_lims(
-        extraction_limits, axes_dict["dispersion_axis_length"]
-    )
-    sys.stdout.write("DONE.\n")
-
-    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
-    # ends of the wavelength axis.
-    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        draw_lines = [
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
-        ]
-
-        common.show_img(
-            frame_dict["data"],
-            axes_dict,
-            header_parameters,
-            draw_lines,
-            "2D Spectrum Overplotted with Full Target/Sky Boundaries",
-        )
-
-    sys.stdout.write(" >>> Subtracting sky.\n")
-    sys.stdout.flush()
-
-    frame_dict = common.subtract_sky(
-        sky_extraction_limits[0],
-        sky_extraction_limits[1],
-        frame_dict,
-        axes_dict,
-        motes_parameters,
-        header_parameters,
-    )
-
-    sys.stdout.write("\n     DONE.\n")
-    sys.stdout.flush()
-
-    # DIAGNOSTICS - Plot the final extraction limits including the extrapolated sections at the
-    # ends of the wavelength axis.
-    if motes_parameters["-DIAG_PLOT_EXTRACTION_LIMITS"]:
-        draw_lines = [
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (sky_extraction_limits[0]) + axes_dict["data_spatial_floor"],
-            np.array(range(axes_dict["dispersion_axis_length"])) + axes_dict["wavelength_start"],
-            (sky_extraction_limits[1]) + axes_dict["data_spatial_floor"],
-        ]
-
-        common.show_img(
-            frame_dict["data"],
-            axes_dict,
-            header_parameters,
-            draw_lines,
-            "Sky Subtracted 2D Spectrum Overplotted with Full Target/Sky Boundaries",
-        )
-    
-    return frame_dict, moffat_parameters_all_sky_bins, sky_extraction_limits
 
 
 if __name__ == "__main__":

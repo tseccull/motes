@@ -10,23 +10,23 @@ def harvest_gmos(input_fits_hdu):
 
     Args:
      -- input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU)
-            The Header Data Unit (HDU) read in from the data file.
+          The Header Data Unit (HDU) read in from the data file.
      -- primary_header (astropy.io.fits.header.Header)
-            The header read in from the data file.
+          The header read in from the data file.
 
     Returns:
      -- data (numpy.ndarray)
-            The 2D data frame
+          The 2D data frame
      -- errs (numpy.ndarray)
-            The 2D error/uncertainty frame (variance_frame^0.5).
+          The 2D error/uncertainty frame (variance_frame^0.5).
      -- qual (numpy.ndarray)
-            The 2D quality frame noting the locations of bad pixels etc.
+          The 2D quality frame noting the locations of bad pixels etc.
      -- original_qual (numpy.ndarray)
-            The original 2D quality frame prior to manipulation by MOTES.
+          The original 2D quality frame prior to manipulation by MOTES.
      -- header_dict (dict)
-            A dictionary containing the header information.
+          A dictionary containing the header information.
      -- wavelength_axis (numpy.ndarray)
-            The 1D wavelength axis of the spectrum.
+          The 1D wavelength axis of the spectrum.
     """
 
     # Retrieve the data frame, error frame, and qual frame. Also
@@ -164,14 +164,14 @@ def save_gmos(hdu_list, original_hdu_list):
     
     Args:
      -- hdu_list (list)
-            List of HDUs for inclusion in the output save file.
+          List of HDUs for inclusion in the output save file.
      -- original_hdu_list (class astropy.io.fits.hdu.hdulist.HDUList)
-            HDUList read in from the original input file.
+          HDUList read in from the original input file.
             
     Return:
      -- hdu_list (list)
-            Same as hdu_list arg, but with relevant original HDUs
-            added from original_hdu_list
+          Same as hdu_list arg, but with relevant original HDUs added
+          from original_hdu_list.
     """
 
     original_hdu_list["MDF"].header["EXTNAME"] = "ORIG_MDF"

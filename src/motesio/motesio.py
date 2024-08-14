@@ -28,27 +28,26 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
     Args:
      -- region_counter (int) 
-            An integer noting which line in region is being called to
-            define the boundaries of the 2D data.
+          An integer noting which line in region is being called to
+          define the boundaries of the 2D data.
      -- input_file_path (str) 
-            The name of the data file.
+          The name of the data file.
      -- data_regions (list)
-            A list of regions read in from reg.txt in
-            startup.read_regions()
+          A list of regions read in from reg.txt in read_regions()
 
     Returns:
      -- header_dict (dict)
-            A dictionary containing parameters and metadata read from
-            the header of the image file.
+          A dictionary containing parameters and metadata read from the
+          header of the image file.
      -- frame_dict (dict)
-            A dictionary containing the 2D data frames read from the
-            image file.
+          A dictionary containing the 2D data frames read from the
+          image file.
      -- axes_dict (dict)
-            A dictionary containing the spatial and spectral axis arrays
-            associated with the data frames, along with metadata used to
-            define the boundaries of the 2D data.
+          A dictionary containing the spatial and spectral axis arrays
+          associated with the data frames, along with metadata used to
+          define the boundaries of the 2D data.
      -- input_file_primary_header (dict)
-            A copy of the image file header; this is also a dictionary.
+          A copy of the image file header; this is also a dictionary.
     """
 
     # Create dictionary to tell data_harvest which instrument specific
@@ -168,18 +167,18 @@ def data_harvest(region_counter, input_file_path, data_regions):
 
 def make_bin_table(bin_data, flux_unit, sky=False):
     """
-    Take data about the Moffat profile fitted in each bin and convert
-    it to FITS Table HDU.
+    Take data about the Moffat profile fitted in each bin and convert it
+    to FITS Table HDU.
     
     Args:
      -- bin_data (numpy.ndarray)
-            array of bin fitting data
+          array of bin fitting data
      -- flux_unit (str)
-            unit (BUNIT) of the data in the science frame
+          unit (BUNIT) of the data in the science frame
     
     Returns:
      -- bin_table_hdu (astropy.io.fits.hdu.table.BinTableDHU)
-            Table HDU containing bin fitting data
+          Table HDU containing bin fitting data
     """
     
     bin_data[:,7] -= 1
@@ -220,13 +219,13 @@ def make_ext_table(extraction_data, wavelength_unit, sky=False):
     
     Args:
      -- bin_data (numpy.ndarray)
-            array of bin fitting data
+          array of bin fitting data
      -- wavelength_unit (str)
-            unit of the wavelength axis
+          unit of the wavelength axis
     
     Returns:
      -- ext_table_hdu (astropy.io.fits.hdu.table.BinTableDHU)
-            Table HDU containing the extraction limit data
+          Table HDU containing the extraction limit data
     """
     
     ext_table = Table(
@@ -259,8 +258,8 @@ def read_motes_parameter_file():
 
     Returns:
      -- parameter_dict (dict) 
-         a dictionary containing the parameters read in from 
-         motesparams.txt.
+          a dictionary containing the parameters read in from 
+          motesparams.txt.
     """
 
     sys.stdout.write(" >>> Reading in parameters from motesparams.txt. ")
@@ -310,9 +309,9 @@ def read_regions():
 
     Returns:
      -- data_region (list)
-         A list for each file contains a list of integers that define
-         the boundaries of the region of the 2D spectum that will be
-         used for the extraction.
+          A list for each file contains a list of integers that define
+          the boundaries of the region of the 2D spectum that will be
+          used for the extraction.
     """
 
     # Search for reg.txt and read in the list that it contains.
@@ -365,42 +364,42 @@ def save_fits(
 
     Args:
      -- original_hdu_list (astropy.io.fits.hdu.hdulist.HDUList)
-            Astropy HDU List read in from the original input file.
+          Astropy HDU List read in from the original input file.
      -- axes_dict (dict)
-            A dictionary containing the axes information.
+          A dictionary containing the axes information.
      -- header_parameters (dict)
-            A dictionary containing the header information.
+          A dictionary containing the header information.
      -- optimal_1d_data (numpy.ndarray)
-            An array containing the flux values of the optimally
-            extracted 1D spectrum.
+          An array containing the flux values of the optimally extracted
+          1D spectrum.
      -- optimal_1d_errs (numpy.ndarray)
-            An array containing the flux errors of the optimally
-            extracted 1D spectrum.
+          An array containing the flux errors of the optimally extracted
+          1D spectrum.
      -- aperture_1d_data (numpy.ndarray)
-            An array containing the flux values of the aperture
-            extracted 1D spectrum.
+          An array containing the flux values of the aperture extracted
+          1D spectrum.
      -- aperture_1d_errs (numpy.ndarray)
-            An array containing the flux errors of the aperture
-            extracted 1D spectrum.
+          An array containing the flux errors of the aperture extracted
+          1D spectrum.
      -- motes_parameters (dict)
-            A dictionary containing the MOTES parameters.
+          A dictionary containing the MOTES parameters.
      -- input_file_path (str)
-            The filename of the 1D spectrum.
+          The filename of the 1D spectrum.
      -- moffat_profile_parameters (list)
-            A list containing the Moffat fit parameters.
+          A list containing the Moffat fit parameters.
      -- frame_dict (dict)
-            A dictionary containing the original 2D spectrum data and
-            error frames.
+          A dictionary containing the original 2D spectrum data and
+          error frames.
      -- moffat_parameters_all_bins (numpy.ndarray)
-            A dictionary containing the binning parameters.
+          A dictionary containing the binning parameters.
      -- extraction_limits (numpy.ndarray)
-            An array containing the extraction limits.
+          An array containing the extraction limits.
      -- moffat_parameters_all_sky_bins (numpy.ndarray)
-            An array containing the binning parameters for the sky
-            extraction.
+          An array containing the binning parameters for the sky
+          extraction.
      -- sky_extraction_limits (list)
-            A list containing the extraction limits for the sky
-            extraction.
+          A list containing the extraction limits for the sky
+          extraction.
 
     Returns:
         None
