@@ -159,6 +159,21 @@ def harvest_gmos(input_fits_hdu):
 
 
 def save_gmos(hdu_list, original_hdu_list):
+    """
+    Prepare the original HDUs for inclusion into the output save file.
+    
+    Args:
+     -- hdu_list (list)
+            List of HDUs for inclusion in the output save file.
+     -- original_hdu_list (class astropy.io.fits.hdu.hdulist.HDUList)
+            HDUList read in from the original input file.
+            
+    Return:
+     -- hdu_list (list)
+            Same as hdu_list arg, but with relevant original HDUs
+            added from original_hdu_list
+    """
+
     original_hdu_list["MDF"].header["EXTNAME"] = "ORIG_MDF"
     hdu_list.append(original_hdu_list["ORIG_MDF"])
     original_hdu_list["SCI"].header["EXTNAME"] = "ORIG_SCI"
