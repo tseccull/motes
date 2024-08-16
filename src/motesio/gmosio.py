@@ -1,5 +1,6 @@
 #!/home/tom/miniforge3/envs/work/bin/python
 
+import motes.notes as notes
 import numpy as np
 import sys
 
@@ -48,6 +49,28 @@ def harvest_gmos(input_fits_hdu):
     new_qual[qual>0] = 0
     qual = new_qual
 
+    # Make the wavelength axis.
+    if science_header["CRPIX1"] > 0.5:
+        reference_pixel = np.ceil(science_header["CRPIX1"])
+        reference_shift = reference_pixel-science_header["CRPIX1"]
+    else:
+        reference_pixel = np.floor(science_header["CRPIX1"])
+        reference_shift = science_header["CRPIX1"] - reference_pixel
+    
+    central_wavelength = science_header["CRVAL1"]
+    delta_wavelength = science_header["CD1_1"]
+    reference_wavelength = (reference_shift * delta_wavelength) + central_wavelength
+    wavelen_pixel_axis = np.arange(-reference_pixel+1, science_header["NAXIS1"]-reference_pixel)
+    wavelength_axis = (wavelen_pixel_axis * science_header["CD1_1"]) + reference_wavelength
+    
+    # If DRAGONS has been used to reduce the data, flip the wavelength
+    # axis and the 2D data.
+    if science_header["CD1_1"] < 0:
+        wavelength_axis = np.flip(wavelength_axis)
+        data = np.flip(data, axis=1)
+        errs = np.flip(errs, axis=1)
+        qual = np.flip(qual, axis=1)
+
     # All this is to get an initial estimate of the IQ. Tables below are
     # based on the condition constraints used by Gemini.
     # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
@@ -62,12 +85,12 @@ def harvest_gmos(input_fits_hdu):
 
     wavelength_table = np.array(
         [
-            [0000.0, 4000.0, 0],
-            [4000.0, 5500.0, 1],
-            [5500.0, 7000.0, 2],
-            [7000.0, 8500.0, 3],
-            [8500.0, 9750.0, 4],
-            [9750.0, 11000.0, 5],
+            [000.0, 400.0, 0],
+            [400.0, 550.0, 1],
+            [550.0, 700.0, 2],
+            [700.0, 850.0, 3],
+            [850.0, 975.0, 4],
+            [975.0, 1100.0, 5],
         ]
     )
 
@@ -83,77 +106,27 @@ def harvest_gmos(input_fits_hdu):
     )
 
     iq = primary_header["RAWIQ"]
-
+    
+    short_wavelength = np.min(wavelength_axis)
     for i in wavelength_table:
-        if science_header["CRVAL1"] > i[0] and science_header["CRVAL1"] < i[1]:
+        if short_wavelength > i[0] and short_wavelength < i[1]:
             seeing = float(iq_table[int(i[2])][int(iq_dict[iq])])
             break
 
     # Put header information into a dictionary
-    sys.stdout.write(" >>> Gathering required information from FITS header. ")
-    sys.stdout.flush()
+    notes.harvest_gathering()
     header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "exptime": primary_header["EXPTIME"],
         "seeing": seeing,
-        "instrument": primary_header["INSTRUME"]
+        "instrument": primary_header["INSTRUME"],
+        "flux_unit": science_header["BUNIT"],
+        "wavelength_unit": science_header["CUNIT1"],
+        "pixel_resolution": float(science_header["PIXSCALE"])
     }
 
-    # BUNIT only appears in the headers of GMOS spectra if they have
-    # been flux calibrated of if they have been reduced with DRAGONS.
-    if "BUNIT" in science_header:
-        header_dict["flux_unit"] = science_header["BUNIT"]
-    else:
-        header_dict["flux_unit"] = "electron"
-        
-    if "CUNIT1" in science_header:
-        header_dict["wavelength_unit"] = science_header["CUNIT1"]
-    else:
-        header_dict["wavelenght_unit"] = (
-            science_header["WAT1_001"].split(" ")[2].split("=")[1]
-        )
-    
-    if "PIXSCALE" in science_header:
-        header_dict["pixel_resolution"] = float(science_header["PIXSCALE"])
-    else:
-        header_dict["pixel_resolution"] = float(primary_header["PIXSCALE"])
-
-    sys.stdout.write("DONE.\n")
-    sys.stdout.write(
-        " >>> Spatial pixel resolution determined: "
-        + str(header_dict["pixel_resolution"])
-        + '"\n'
-    )
-
-    # Make the wavelength axis.
-    if science_header["CRPIX1"] > 0.5:
-        reference_pixel = np.ceil(science_header["CRPIX1"])
-        reference_difference = reference_pixel-science_header["CRPIX1"]
-    else:
-        reference_pixel = np.floor(science_header["CRPIX1"])
-        reference_difference = science_header["CRPIX1"] - reference_pixel
-    
-    reference_wavelength = (
-		(reference_difference * science_header["CD1_1"]) 
-		+ science_header["CRVAL1"]
-	)
-	
-    wavelength_pixel_axis = (
-        np.arange(-reference_pixel+1, science_header["NAXIS1"]-reference_pixel)
-    )
-    
-    wavelength_axis = (
-        (wavelength_pixel_axis * science_header["CD1_1"])
-        + reference_wavelength
-    )
-
-    # If DRAGONS has been used to reduce the data, flip the wavelength
-    # axis and the 2D data.
-    if science_header["CD1_1"] < 0:
-        wavelength_axis = np.flip(wavelength_axis)
-        data = np.flip(data, axis=1)
-        errs = np.flip(errs, axis=1)
-        qual = np.flip(qual, axis=1)
+    notes.done()
+    notes.harvest_pixel_resolution(header_dict["pixel_resolution"])
 
     return data, errs, qual, header_dict, wavelength_axis
 

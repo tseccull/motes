@@ -8,6 +8,7 @@ sky.py - Contains all functions required for the sky subtraction
 
 import sys
 import motes.common as common
+import motes.notes as notes
 import numpy as np
 
 from scipy.optimize import least_squares
@@ -206,9 +207,7 @@ def sky_locator(
           background.
     """
 
-    sys.stdout.write(
-        " >>> Fitting Moffat Functions to each bin to localise 2D spectrum.\n"
-    )
+    notes.sky_locator_1()
 
     moffat_parameters_all_sky_bins = []
     extraction_limits = []
@@ -267,12 +266,8 @@ def sky_locator(
         # Record the Moffat function parameters for each dispersion bin
         # and add the wavstart offset to the bin locations so they can
         # be saved as metadata along with the extracted spectrum.
-        bin_moffat_parameters.append(
-            each_bin[0] + axes_dict["wavelength_start"]
-        )
-        bin_moffat_parameters.append(
-            each_bin[1] + axes_dict["wavelength_start"]
-        )
+        bin_moffat_parameters.append(each_bin[0] + axes_dict["wavelength_start"])
+        bin_moffat_parameters.append(each_bin[1] + axes_dict["wavelength_start"])
         moffat_parameters_all_sky_bins.append(bin_moffat_parameters)
 
         # DIAGNOSTICS - Plot computed moffat profile over data for each
@@ -287,14 +282,8 @@ def sky_locator(
                 header_parameters,
             )
 
-    moffat_parameters_all_sky_bins = (
-        np.array(moffat_parameters_all_sky_bins)
-    )
-
-    sys.stdout.write("     Fitting complete.\n")
-
-    sys.stdout.write(" >>> Drawing target/sky boundaries. ")
-    sys.stdout.flush()
+    moffat_parameters_all_sky_bins = np.array(moffat_parameters_all_sky_bins)
+    notes.sky_locator_2()
     extraction_limits = np.array(extraction_limits).T
 
     # DIAGNOSTICS - Plot the determined extraction limits over the 2D
@@ -322,7 +311,7 @@ def sky_locator(
     sky_extraction_limits = common.interpolate_extraction_lims(
         extraction_limits, axes_dict["dispersion_axis_length"]
     )
-    sys.stdout.write("DONE.\n")
+    notes.done()
 
     # DIAGNOSTICS - Plot the final extraction limits including the
     # extrapolated sections at the ends of the wavelength axis.
@@ -342,8 +331,7 @@ def sky_locator(
             "2D Spectrum Overplotted with Full Target/Sky Boundaries",
         )
 
-    sys.stdout.write(" >>> Subtracting sky.\n")
-    sys.stdout.flush()
+    notes.sky_locator_3()
 
     frame_dict = subtract_sky(
         sky_extraction_limits[0],
@@ -354,8 +342,7 @@ def sky_locator(
         header_parameters,
     )
 
-    sys.stdout.write("\n     DONE.\n")
-    sys.stdout.flush()
+    notes.sky_locator_4()
 
     # DIAGNOSTICS - Plot the final extraction limits including the 
     # extrapolated sections at the ends of the wavelength axis.
@@ -422,14 +409,9 @@ def subtract_sky(
     for ii in range(number_of_columns):
         if background_spatial_lo_limit[ii] < 0:
             background_spatial_lo_limit[ii] = 0
-        if (
-            background_spatial_hi_limit[ii] > 
-            (axes_dict["spatial_axis"] + axes_dict["data_spatial_floor"])[-1]
-        ):
-            background_spatial_hi_limit[ii] = (
-                (axes_dict["spatial_axis"]
-                + axes_dict["data_spatial_floor"])[-1]
-            )
+        data_section_upper_limit = axes_dict["spatial_axis"] + axes_dict["data_spatial_floor"]
+        if background_spatial_hi_limit[ii] > data_section_upper_limit[-1]:
+            background_spatial_hi_limit[ii] = data_section_upper_limit[-1]
 
         data_column = frame_dict["data"][ii]
         column_axis = np.array(range(len(data_column)))
@@ -445,32 +427,8 @@ def subtract_sky(
         # Kill MOTES if there isn't enough background sky to perform sky
         # subtraction. Should probably be made more nuanced later.
         if len(sky_pixels) == 0:
-            sys.stdout.write(" >>> No pixels contained inside sky region.\n")
-            sys.stdout.write(
-                "     -BG_FWHM_MULTIPLIER in motesparams.txt is probably too large.\n"
-            )
-            sys.stdout.write("     Please reduce -BG_FWHM_MULTIPLIER and try again.\n")
-            sys.stdout.write(
-                "     -BG_FWHM_MULTIPLIER < "
-                + str(
-                    round(
-                        np.min(
-                            [
-                                np.shape(frame_dict["data"])[0],
-                                np.shape(frame_dict["data"])[1],
-                            ]
-                        )
-                        / (2 * header_parameters["seeing"]),
-                        1,
-                    )
-                )
-                + " recommended in this case.\n"
-            )
-            sys.stdout.write(
-                "     Enlarging the 2D spectrum region in reg.txt is also a viable solution.\n"
-            )
-            sys.stdout.write("     Terminating MOTES.\n")
-            sys.exit()
+            notes.subtract_sky_1(np.shape(frame_dict["data"]), header_parameters["seeing"])
+            exit()
 
         sky_axis = column_axis[
             np.where(
@@ -635,14 +593,8 @@ def subtract_sky(
         frame_dict["errs"][ii] = (
             ((frame_dict["errs"][ii] ** 2) + (sky_model_err**2)) ** 0.5
         )
-
-        sys.stdout.write(
-            "     " 
-            + str(ii + 1)
-            + "/"
-            + str(number_of_columns)
-            + " columns completed.\r"
-        )
+        
+        notes.subtract_sky_2(ii, number_of_columns)
 
     sky_model = np.array(sky_model)
     if parameters["-SKYSUB_MODE"] == "MEDIAN":
