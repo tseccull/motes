@@ -2,8 +2,7 @@
 
 """
 messages.py - Contains functions to print all stdout messages printed to
-              terminal by MOTES during operation. Messages are presented
-              here in no particular order.
+              terminal by MOTES during operation.
 """
 
 
@@ -82,9 +81,7 @@ def read_regions_2(working_directory):
     sys.stdout.write(" >>> reg.txt file not found in root working directory.\n")
     sys.stdout.write("     Root working directory is:\n")
     sys.stdout.write("     " + working_directory + "\n")
-    sys.stdout.write(
-        "     Please provide a reg.txt file to tell MOTES the spatial extent of the 2D\n"
-    )
+    sys.stdout.write("     Please provide a reg.txt file to tell MOTES the spatial extent of the 2D\n")
     sys.stdout.write("     spectra. See the docs for further information.\n")
     sys.stdout.write("     Terminating MOTES.\n\n")
 
@@ -131,9 +128,7 @@ def subtract_sky_1(data_shape, seeing):
         + str(bg_fwhm_multiplier_limit)
         + " recommended in this case.\n"
     )
-    sys.stdout.write(
-        "     Enlarging the 2D spectrum region in reg.txt is also a viable solution.\n"
-    )
+    sys.stdout.write("     Enlarging the 2D spectrum region in reg.txt is also a viable solution.\n")
     sys.stdout.write("     Terminating MOTES.\n")
     
     

@@ -10,13 +10,13 @@ import astropy.io.fits as fits
 import astropy.table as Table
 import copy
 import datetime
-import os
 import motes.notes as notes
 import motesio.floydsio as floydsio
 import motesio.forsio as forsio
 import motesio.gmosio as gmosio
 import motesio.xshooio as xshooio
 import numpy as np
+import os
 import sys
 
 from astropy.table import Table
@@ -267,9 +267,7 @@ def read_motes_parameter_file():
 
     # Flatten the 2D list of parameters and keywords into a 1D list where each
     # parameter's value follows its associated keyword.
-    lumpy_parameter_list = [
-	    x.split("=") for x in parameter_lines if x[0] == "-"
-	]
+    lumpy_parameter_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
     flat_parameter_list = [y for x in lumpy_parameter_list for y in x]
 
     # Convert all numerical values in the parameter list to floats.
@@ -283,7 +281,6 @@ def read_motes_parameter_file():
 
     # Assign parameters and their associated keywords to a dictionary.
     parameter_dict = dict(zip(parameter_list[::2], parameter_list[1::2]))
-
     notes.done()
 
     return parameter_dict
@@ -315,9 +312,7 @@ def read_regions():
 
         with open("reg.txt", "r", encoding="utf-8") as region_file:
             region_lines = region_file.read().splitlines()
-            data_regions = [
-                [int(limit) for limit in x.split(",")] for x in region_lines
-            ]
+            data_regions = [[int(limit) for limit in x.split(",")] for x in region_lines]
         notes.done()
 
     # Complain and quit MOTES if reg.txt isn't found.
@@ -391,170 +386,107 @@ def save_fits(
     Returns:
         None
     """
-
-    primary_header = original_hdu_list[0].header
-    primary_header["MOTES"] = ("motes.py", "Extraction script")
-    primary_header["MOTESV"] = ("v0.5.0", "MOTES Version")
-    primary_header["MOTESDOI"] = ("UNKNOWN", "MOTES DOI")
-    primary_header["HIERARCH UTC EXT DATE"] = (
-        datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
-        "UT timestamp for extraction"
-    )
-    primary_header["HIERARCH SPATPIXL"] = (
-        axes_dict["data_spatial_floor"],
-        "lower limit of spatial axis, pix"
-    )
-    primary_header["HIERARCH SPATPIXH"] = (
-        axes_dict["data_spatial_ceiling"],
-        "upper limit of spatial axis, pix"
-    )
-    primary_header["HIERARCH DISPPIXL"] = (
-        axes_dict["wavelength_start"],
-        "lower limit of dispersion axis, pix"
-    )
-    primary_header["HIERARCH DISPPIXH"] = (
-        axes_dict["wavelength_end"],
-        "upper limit of dispersion axis, pix"
-    )
-    primary_header["HIERARCH WAVL"] = (
-        np.floor(axes_dict["wavelength_axis"][0]),
-        "lower limit of wav range, " + header_parameters["wavelength_unit"]
-    )
-    primary_header["HIERARCH WAVH"] = (
-        np.ceil(axes_dict["wavelength_axis"][-1]),
-        "upper limit of wav range, " + header_parameters["wavelength_unit"]
-    )
-    primary_header["HIERARCH WAVU"] = (
-        header_parameters["wavelength_unit"],
-        "Wavelength unit"
-    )
-    primary_header["HIERARCH MOFF A"] = (
-        round(moffat_parameters[0], 5),
-        "moffat profile amplitude"
-    )
-    primary_header["HIERARCH MOFF C"] = (
-        round(moffat_parameters[1] + axes_dict["data_spatial_floor"], 5),
-        "moffat profile center"
-    )
-    primary_header["HIERARCH MOFF ALPHA"] = (
-        round(moffat_parameters[2], 5),
-        "moffat profile alpha value"
-    )
-    primary_header["HIERARCH MOFF BETA"] = (
-        round(moffat_parameters[3], 5),
-        "moffat profile beta value"
-    )
-    primary_header["HIERARCH MOFF BACK"] = (
-        round(moffat_parameters[4], 5),
-        "moffat profile background level"
-    )
-    primary_header["HIERARCH MOFF GRAD"] = (
-        round(moffat_parameters[5], 5),
-        "moffat profile background slope"
-    )
-    primary_header["HIERARCH IQ"] = (
-        round(
-            header_parameters["seeing"] * header_parameters["pixel_resolution"],
-            2
-        ),
-        'IQ measured from median profile, "'
-    )
-    primary_header["HIERARCH SNR BIN LIMIT"] = (
-        motes_parameters["-SNR_BIN_LIM"],
-        "maximum SNR per bin"
-    )
-    primary_header.add_blank(
-        "Dispersion Binning and Spectrum Extraction",
-        before="HIERARCH SNR BIN LIMIT"
-    )
-    primary_header["HIERARCH COL BIN LIMIT"] = (
-        int(motes_parameters["-COL_BIN_LIM"]),
-        "minimum number of columns per bin"
-    )
-    primary_header["HIERARCH FWHM MULTIPLIER"] = (
-        motes_parameters["-FWHM_MULTIPLIER"],
-        "FWHM used to define the extraction limits"
-    )
+    
+    ut_now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+    spatial_floor = axes_dict["data_spatial_floor"]
+    spatial_ceiling = axes_dict["data_spatial_ceiling"]
+    wave_pix_lo = axes_dict["wavelength_start"]
+    wave_pix_hi = axes_dict["wavelength_end"]
+    wave_unit = header_parameters["wavelength_unit"]
+    wave_lo = np.floor(axes_dict["wavelength_axis"][0])
+    wave_hi = np.ceil(axes_dict["wavelength_axis"][-1])
+    moffat_amplitude = round(moffat_parameters[0], 5)
+    moffat_center = round(moffat_parameters[1] + axes_dict["data_spatial_floor"], 5)
+    moffat_alpha = round(moffat_parameters[2], 5)
+    moffat_beta = round(moffat_parameters[3], 5)
+    moffat_bg_level = round(moffat_parameters[4], 5)
+    moffat_bg_grad = round(moffat_parameters[5], 5)
+    motes_fwhm = round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2)
+    col_bin_lim = int(motes_parameters["-COL_BIN_LIM"])
+    fwhm_multiplier = motes_parameters["-FWHM_MULTIPLIER"]
+    spectrum_unit = header_parameters["flux_unit"]
+    wave_axis = axes_dict["wavelength_axis"]
+    
+    head_card_input = [
+        ["MOTES", "motes.py", "Extraction script"],
+        ["MOTESV", "v0.5.0", "MOTES Version"],
+        ["MOTESDOI", "UNKNOWN", "MOTES DOI"],
+        ["UTXTIME", ut_now, "UT timestamp for MOES"],
+        ["SPATPIXL", spatial_floor, "lower limit of spatial axis, pix"],
+        ["SPATPIXH", spatial_ceiling, "upper limit of spatial axis, pix"],
+        ["DISPPIXL", wave_pix_lo, "lower limit of dispersion axis, pix"],
+        ["DISPPIXH", wave_pix_hi, "upper limit of dispersion axis, pix"],
+        ["WAVL", wave_pix_lo, "lower limit of wav range, " + wave_unit],
+        ["WAVH", wave_pix_hi, "upper limit of wav range, " + wave_unit],
+        ["WAVU", wave_unit, "wavelength unit"],
+        ["MOFFA", moffat_amplitude, "median Moffat profile amplitude"],
+        ["MOFFC", moffat_center, "median Moffat profile center"],
+        ["MOFFALPH", moffat_alpha, "median Moffat profile alpha value"],
+        ["MOFFBETA", moffat_beta, "median Moffat profile beta value"],
+        ["MOFFBGLV", moffat_bg_level, "median Moffat profile background level"],
+        ["MOFFBGSL", moffat_bg_grad, "median Moffat profile background slope"],
+        ["MOTESIQ", motes_fwhm, "IQ measured from median profile"],
+        ["SNRBNLIM", motes_parameters["-SNR_BIN_LIM"], "maximum SNR per bin"],
+        ["COLBNLIM", col_bin_lim, "minimum number of columns per bin"],
+        ["FWHMMULT", fwhm_multiplier, "FWHM used to define the extraction limits"]
+    ]
 
     if motes_parameters["-SUBTRACT_SKY"]:
-        primary_header["HIERARCH SKYSUB FWHM MULT"] = (
-            motes_parameters["-BG_FWHM_MULTIPLIER"],
-            "FWHM multiplier for defining background"
-        )
-        primary_header["HIERARCH SKYSUB SNR BIN LIM"] = (
-            motes_parameters["-SKY_SNR_BIN_LIM"],
-            "max SNR per bin for sky subtraction"
-        )
+        sky_fwhm_mult = motes_parameters["-BG_FWHM_MULTIPLIER"]
+        sky_snr_bin_lim = motes_parameters["-SKY_SNR_BIN_LIM"]
+        
+        head_card_input.append(["SFWHMMLT", sky_fwhm_mult, "FWHM multiplier to define sky region"])
+        head_card_input.append(["SSNRBNLM", sky_snr_bin_lim, "max SNR per bin for sky subtraction"])
 
-    primary_header["HIERARCH EXTRACTED HDU ROW 0"] = (
-        "Wavelength Axis, " + header_parameters["wavelength_unit"]
-    )
-    primary_header["HIERARCH EXTRACTED HDU ROW 1"] = (
-        "Flux, " + header_parameters["flux_unit"]
-    )
-    primary_header["HIERARCH EXTRACTED HDU ROW 2"] = (
-        "Flux Uncertainty, " + header_parameters["flux_unit"]
-    )
+    head_card_input.append(["HDUROW0", "Wavelength Axis, " + wave_unit, ""])
+    head_card_input.append(["HDUROW1", "Spectrum data, " + spectrum_unit, ""])
+    head_card_input.append(["HDUROW2", "Spectrum uncertainty, " + spectrum_unit, ""])
+    head_card_input.append(["EXTNAME", "OPTI_1D_SPEC", ""])
     
-    primary_header["EXTNAME"] = "OPTI_1D_SPEC"
+    primary_header = original_hdu_list[0].header
+    for card_deets in head_card_input:
+        primary_header[card_deets[0]] = (card_deets[1], card_deets[2])
     
     optimal_1d_datahdu = fits.PrimaryHDU(
-        [axes_dict["wavelength_axis"], optimal_1d_data, optimal_1d_errs],
-        header=primary_header
+        [wave_axis, optimal_1d_data, optimal_1d_errs], header=primary_header
     )
     
     aperture_1d_datahdu = fits.ImageHDU(
-        [axes_dict["wavelength_axis"], aperture_1d_data, aperture_1d_errs],
-        header=primary_header
+        [wave_axis, aperture_1d_data, aperture_1d_errs], header=primary_header
     )
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     
-    ext_bin_pars_tabhdu = make_bin_table(
-        moffat_parameters_all_bins, header_parameters["flux_unit"]
-    )
-    ext_limit_array = (
-        np.vstack([axes_dict["wavelength_axis"], extraction_limits])
-    )
-    ext_limit_table_hdu = (
-        make_ext_table(ext_limit_array.T, header_parameters["wavelength_unit"])
-    )
+    ext_bin_pars_tabhdu = make_bin_table(moffat_parameters_all_bins, spectrum_unit)
+    ext_limit_array = np.vstack([wave_axis, extraction_limits])
+    ext_limit_table_hdu = (make_ext_table(ext_limit_array.T, wave_unit))
     
-    hdu_list = [
-       optimal_1d_datahdu,
-       aperture_1d_datahdu,
-       ext_bin_pars_tabhdu,
-       ext_limit_table_hdu,
-    ]
+    hdu_list = [optimal_1d_datahdu, aperture_1d_datahdu, ext_bin_pars_tabhdu, ext_limit_table_hdu]
     
     if motes_parameters["-SUBTRACT_SKY"]:
+		spatial_datasec = datasec_string(spatial_floor, spatial_ceiling)
+		wavelen_datasec = datasec_string(wave_pix_lo, wave_pix_hi)
+		sky_mode = motes_parameters["-SKYSUB_MODE"]
+		
+        sky_head_card_info = [
+            ["EXTNAME", "2D_SKY", ""],
+            ["DATATYPE", "Model Intensity", "Type of data"],
+            ["DATASECS", spatial_datasec, "Data section; spatial axis, pixels"],
+            ["DATASECW", wavelen_datasec, "Data section; wavelength axis, pixels"],
+            ["BUNIT", spectrum_unit, ""],
+            ["METHOD", sky_mode, "MOTES sky subtraction method."],
+            ["COMMENT", "2D_SKY data has same wavelength orientation as OPTI_1D_SPEC.", ""]
+        ]
+        
         sky_bin_pars_tabhdu = make_bin_table(
-            moffat_parameters_all_sky_bins,
-            header_parameters["flux_unit"],
-            sky=True
+            moffat_parameters_all_sky_bins, spectrum_unit, sky=True
         )
-        sky_limit_array = (np.vstack([axes_dict["wavelength_axis"], sky_extraction_limits]))
-        sky_limit_table_hdu = make_ext_table(
-            sky_limit_array.T, header_parameters["wavelength_unit"], sky=True
-        )
+        
+        sky_limit_array = (np.vstack([wave_axis, sky_extraction_limits]))
+        sky_limit_table_hdu = make_ext_table(sky_limit_array.T, wave_unit, sky=True)
     
         sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
-        sky_model_hdu.header["EXTNAME"] = "2D_SKY"
-        sky_model_hdu.header["DATATYPE"] = ("Model Intensity", "Type of Data")
-        sky_model_hdu.header["DATASECS"] = (
-            datasec_string(axes_dict["data_spatial_floor"], axes_dict["data_spatial_ceiling"]),
-            "Data section; spatial axis, pixels"
-        )
-        sky_model_hdu.header["DATASECW"] = (
-            datasec_string(axes_dict["wavelength_start"], axes_dict["wavelength_end"]),
-            "Data section; wavelength axis, pixels"
-        )
-        sky_model_hdu.header["BUNIT"] = header_parameters["flux_unit"]
-        sky_model_hdu.header["METHOD"] = (
-            motes_parameters["-SKYSUB_MODE"], "MOTES sky subtraction method."
-        )
-        sky_model_hdu.header["COMMENT"] = (
-            "2D_SKY data has same wavelength orientation as OPTI_1D_SPEC."
-        )
+        for card_deets in sky_head_card_info:
+			sky_model_hdu.header[card_deets[0]] = (card_deets[1], card_deets[2])
         
         hdu_list.append(sky_model_hdu)
         hdu_list.append(sky_bin_pars_tabhdu)
