@@ -93,20 +93,20 @@ def data_harvest(region_counter, input_file_path, data_regions):
     hi_resolution_spatial_axis = (
         np.linspace(spatial_axis[0], spatial_axis[-1], num=spat_axis_len * 5)
     )
+    
+    wave_region_too_lo = data_regions[region_counter][2] < wavelength_axis[0]
+    wave_region_too_hi = data_regions[region_counter][3] > wavelength_axis[-1]
 
-    if (data_regions[region_counter][2] < wavelength_axis[0] or 
-            data_regions[region_counter][3] > wavelength_axis[-1]):
+    if wave_region_too_lo or wave_region_too_hi:
         notes.data_harvest_2()
         sys.exit()
-
-    wavelength_slice = (
-        np.where(
-            np.logical_and(
-                wavelength_axis >= data_regions[region_counter][2],
-                wavelength_axis <= data_regions[region_counter][3]
-            )
-        )
+        
+    in_wavelength_region = np.logical_and(
+        wavelength_axis >= data_regions[region_counter][2],
+        wavelength_axis <= data_regions[region_counter][3]
     )
+    wavelength_slice = np.where(in_wavelength_region)
+    
     wavelength_start = wavelength_slice[0][0]
     wavelength_end = wavelength_slice[0][-1]
     wavelength_axis = wavelength_axis[wavelength_slice]
@@ -411,7 +411,7 @@ def save_fits(
         ["MOTES", "motes.py", "Extraction script"],
         ["MOTESV", "v0.5.0", "MOTES Version"],
         ["MOTESDOI", "UNKNOWN", "MOTES DOI"],
-        ["UTXTIME", ut_now, "UT timestamp for MOES"],
+        ["UTXTIME", ut_now, "UT timestamp for MOTES"],
         ["SPATPIXL", spatial_floor, "lower limit of spatial axis, pix"],
         ["SPATPIXH", spatial_ceiling, "upper limit of spatial axis, pix"],
         ["DISPPIXL", wave_pix_lo, "lower limit of dispersion axis, pix"],
@@ -463,9 +463,9 @@ def save_fits(
     hdu_list = [optimal_1d_datahdu, aperture_1d_datahdu, ext_bin_pars_tabhdu, ext_limit_table_hdu]
     
     if motes_parameters["-SUBTRACT_SKY"]:
-		spatial_datasec = datasec_string(spatial_floor, spatial_ceiling)
-		wavelen_datasec = datasec_string(wave_pix_lo, wave_pix_hi)
-		sky_mode = motes_parameters["-SKYSUB_MODE"]
+        spatial_datasec = datasec_string(spatial_floor, spatial_ceiling)
+        wavelen_datasec = datasec_string(wave_pix_lo, wave_pix_hi)
+        sky_mode = motes_parameters["-SKYSUB_MODE"]
 		
         sky_head_card_info = [
             ["EXTNAME", "2D_SKY", ""],
@@ -486,7 +486,7 @@ def save_fits(
     
         sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
         for card_deets in sky_head_card_info:
-			sky_model_hdu.header[card_deets[0]] = (card_deets[1], card_deets[2])
+            sky_model_hdu.header[card_deets[0]] = (card_deets[1], card_deets[2])
         
         hdu_list.append(sky_model_hdu)
         hdu_list.append(sky_bin_pars_tabhdu)
