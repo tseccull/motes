@@ -1,8 +1,11 @@
 #!/home/tom/miniforge3/envs/work/bin/python
 
-import motes.notes as notes
+import logging
 import numpy as np
 import sys
+
+
+logger = logging.getLogger("motes")
 
 
 def harvest_gmos(input_fits_hdu):
@@ -113,8 +116,6 @@ def harvest_gmos(input_fits_hdu):
             seeing = float(iq_table[int(i[2])][int(iq_dict[iq])])
             break
 
-    # Put header information into a dictionary
-    notes.harvest_gathering()
     header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "exptime": primary_header["EXPTIME"],
@@ -124,9 +125,6 @@ def harvest_gmos(input_fits_hdu):
         "wavelength_unit": science_header["CUNIT1"],
         "pixel_resolution": float(science_header["PIXSCALE"])
     }
-
-    notes.done()
-    notes.harvest_pixel_resolution(header_dict["pixel_resolution"])
 
     return data, errs, qual, header_dict, wavelength_axis
 

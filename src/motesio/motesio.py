@@ -10,7 +10,7 @@ import astropy.io.fits as fits
 import astropy.table as Table
 import copy
 import datetime
-import motes.notes as notes
+import logging
 import motesio.floydsio as floydsio
 import motesio.forsio as forsio
 import motesio.gmosio as gmosio
@@ -21,16 +21,14 @@ import sys
 
 from astropy.table import Table
 
+logger = logging.getLogger("motes")
 
-def data_harvest(region_counter, input_file_path, data_regions):
+def data_harvest(input_file_path, data_regions):
     """
     Extract header metadata and data frames, and repackage them into 
     dictionaries for use in the rest of MOTES.
 
     Args:
-     -- region_counter (int) 
-          An integer noting which line in region is being called to
-          define the boundaries of the 2D data.
      -- input_file_path (str) 
           The name of the data file.
      -- data_regions (list)
@@ -72,18 +70,19 @@ def data_harvest(region_counter, input_file_path, data_regions):
         data, errs, qual, header_dict, wavelength_axis = (
             instrument_harvest_dict[instrument](input_fits_hdu)
         )
+    
+    [logger.info("header_dict[%s] = %s", key, val) for key, val in header_dict.items()]
 
     # Slice all dataframes based on the input from reg.txt
     data_shape = np.shape(data)
-    data_spatial_floor = int(0 + data_regions[region_counter][0])
-    data_spatial_ceiling = int(data_shape[0] - data_regions[region_counter][1])
+    data_spatial_floor = int(0 + data_regions[0])
+    data_spatial_ceiling = int(data_shape[0] - data_regions[1])
 
     # Slice off the spatial rows outside the spatial region.
     data_sliced = data[data_spatial_floor : data_spatial_ceiling + 1, :]
     errs_sliced = errs[data_spatial_floor : data_spatial_ceiling + 1, :]
     qual_sliced = qual[data_spatial_floor : data_spatial_ceiling + 1, :]
     data_sliced_shape = np.shape(data_sliced)
-    notes.data_harvest_1(data_spatial_floor, data_spatial_ceiling)
 
     # Create spatial axis for the 2D spectrum and a high resolution
     # version (standard res * 5) for the purposes of plotting
@@ -94,16 +93,19 @@ def data_harvest(region_counter, input_file_path, data_regions):
         np.linspace(spatial_axis[0], spatial_axis[-1], num=spat_axis_len * 5)
     )
     
-    wave_region_too_lo = data_regions[region_counter][2] < wavelength_axis[0]
-    wave_region_too_hi = data_regions[region_counter][3] > wavelength_axis[-1]
+    wave_region_too_lo = data_regions[2] < wavelength_axis[0]
+    wave_region_too_hi = data_regions[3] > wavelength_axis[-1]
 
     if wave_region_too_lo or wave_region_too_hi:
-        notes.data_harvest_2()
-        sys.exit()
+        logger.critical(
+            "Wavelength limit(s) in 'reg.txt' are beyond the wavelength range of the input data."
+        )
+        logger.critical("Raising ValueError")
+        raise ValueError
         
     in_wavelength_region = np.logical_and(
-        wavelength_axis >= data_regions[region_counter][2],
-        wavelength_axis <= data_regions[region_counter][3]
+        wavelength_axis >= data_regions[2],
+        wavelength_axis <= data_regions[3]
     )
     wavelength_slice = np.where(in_wavelength_region)
     
@@ -115,12 +117,18 @@ def data_harvest(region_counter, input_file_path, data_regions):
     errs_sliced = np.squeeze(errs_sliced[:, wavelength_slice])
     qual_sliced = np.squeeze(qual_sliced[:, wavelength_slice])
     
-    notes.data_harvest_3(
-        data_regions, 
-        region_counter, 
-        header_dict["wavelength_unit"], 
-        wavelength_start, 
-        len(wavelength_axis)
+    logger.info(
+        "2D data frame sliceed to [%s:%s,%s:%s]", wavelength_start, 
+        wavelength_end + 1,data_spatial_floor, data_spatial_ceiling+1
+    )
+    
+    logger.info(
+        "Requested wavelength range is %s-%s %s.", 
+        data_regions[2], data_regions[3], header_dict["wavelength_unit"]
+    )
+    logger.info(
+        "Returned wavelength range is %s-%s %s.", wavelength_axis[0], 
+        wavelength_axis[-1], header_dict["wavelength_unit"]
     )
 
     frame_dict = {
@@ -244,49 +252,7 @@ def make_ext_table(extraction_data, wavelength_unit, sky=False):
     return ext_table_hdu
 
 
-def read_motes_parameter_file():
-    """
-    Import parameters from motesparams.txt parameter file into a 
-    dictionary.
-
-    Args:
-     -- None
-
-    Returns:
-     -- parameter_dict (dict) 
-          a dictionary containing the parameters read in from 
-          motesparams.txt.
-    """
-
-    notes.read_motes_param_file_1()
-
-    # Read in MOTES parameter file line by line and filter out the empty lines.
-    with open("motesparams.txt", "r", encoding="utf-8") as parameter_file:
-        parameter_lines = parameter_file.read().splitlines()
-        parameter_lines = filter(None, parameter_lines)
-
-    # Flatten the 2D list of parameters and keywords into a 1D list where each
-    # parameter's value follows its associated keyword.
-    lumpy_parameter_list = [x.split("=") for x in parameter_lines if x[0] == "-"]
-    flat_parameter_list = [y for x in lumpy_parameter_list for y in x]
-
-    # Convert all numerical values in the parameter list to floats.
-    # If digit, convert to float. If not, leave as string.
-    parameter_list = []
-    for i in flat_parameter_list:
-        if i.replace(".", "", 1).isdigit():
-            parameter_list.append(float(i))
-        else:
-            parameter_list.append(i)
-
-    # Assign parameters and their associated keywords to a dictionary.
-    parameter_dict = dict(zip(parameter_list[::2], parameter_list[1::2]))
-    notes.done()
-
-    return parameter_dict
-
-
-def read_regions():
+def read_regions(cwd):
     """
     Search for, and read in, reg.txt file in root working directory. 
     Reads an input line from reg.txt and returns a list of integers 
@@ -297,7 +263,8 @@ def read_regions():
     wavelength bounds of the region on the dispersion axis.
 
     Args:
-     -- None
+     -- cwd (str)
+          The absolute path to the current working directory for MOTES.
 
     Returns:
      -- data_region (list)
@@ -305,20 +272,57 @@ def read_regions():
           the boundaries of the region of the 2D spectum that will be
           used for the extraction.
     """
+    
+    reg_path = "./inputs/reg.txt"
+    if os.path.exists(reg_path) and os.path.isfile(reg_path):
+        logger.info("./inputs/reg.txt file found.")
 
-    # Search for reg.txt and read in the list that it contains.
-    if os.path.exists("reg.txt") and os.path.isfile("reg.txt"):
-        notes.read_regions_1()
-
-        with open("reg.txt", "r", encoding="utf-8") as region_file:
+        with open(reg_path, "r", encoding="utf-8") as region_file:
             region_lines = region_file.read().splitlines()
-            data_regions = [[int(limit) for limit in x.split(",")] for x in region_lines]
-        notes.done()
+            region_lines = [x.strip() for x in region_lines]
+            unique_lines = set()
+            duplicate_lines = [[x, i] for i, x in enumerate(region_lines) if x in unique_lines or unique_lines.add(x)]
+            
+            if len(duplicate_lines) > 0:
+                [logger.warning("Ignoring duplicate region %s on line %s of reg.txt", x[0], x[1]) for x in duplicate_lines]
+            
+            data_regions = []
+            for i, line in enumerate(unique_lines):
+                if line[-5:] != ".fits":
+                    logger.critical("File name string on line %s of reg.txt is not '.fits'.", i+1)
+                    logger.critical(line)
+                    logger.critical("MOTES accepts only .fits files. Perhaps this is a typo?")
+                    logger.critical("Raising RuntimeError.")
+                    raise RuntimeError
+                if len(line.split(",")) != 5:
+                    logger.critical("Number of comma-separated variables on line %s of reg.txt is not five.", i+1)
+                    logger.critical(line)
+                    logger.critical("See the section on reg.txt in the MOTES documentation for the required format.")
+                    logger.critical("Raising RuntimeError.")
+                    raise RuntimeError
+                if not all([len(x) for x in line.split(",")]) > 0:
+                    logger.critical("Variable(s) on line %s of reg.txt have zero length.", i+1)
+                    logger.critical(line)
+                    logger.critical("Raising RuntimeError.")
+                    raise RuntimeError								
+                try:
+                    data_regions.append([int(limit) for limit in line.split(",")[:4]])
+                except ValueError:
+                    logger.critical("Non-numeric character found in numeric region variables on line %s of reg.txt.", i+1)
+                    logger.critical(line)
+                    logger.critical("Raising ValueError.")
+                    raise ValueError					    					
+            
+            [data_regions[x].append(y.split(",")[-1]) for x, y in enumerate(unique_lines)]
+        
+        logger.info("%s regions read from ./inputs/reg.txt. Basic format checks passed.", len(unique_lines))
 
-    # Complain and quit MOTES if reg.txt isn't found.
     else:
-        notes.read_regions_2(os.getcwd())
-        sys.exit()
+        logger.critical("reg.txt region file not found at " + cwd +  "/inputs/")
+        logger.critical("reg.txt is needed to define which part(s) of each input 2D spectrum file MOTES will process.")
+        logger.critical("See documentation for more details.")
+        logger.critical("Raising FileNotFoundError.")
+        raise FileNotFoundError
 
     return data_regions
 
@@ -327,12 +331,9 @@ def save_fits(
     original_hdu_list,
     axes_dict,
     header_parameters,
-    optimal_1d_data,
-    optimal_1d_errs,
-    aperture_1d_data,
-    aperture_1d_errs,
+    extracted,
     motes_parameters,
-    input_file_path,
+    input_file_name,
     moffat_parameters,
     frame_dict,
     moffat_parameters_all_bins,
@@ -351,22 +352,13 @@ def save_fits(
           A dictionary containing the axes information.
      -- header_parameters (dict)
           A dictionary containing the header information.
-     -- optimal_1d_data (numpy.ndarray)
-          An array containing the flux values of the optimally extracted
-          1D spectrum.
-     -- optimal_1d_errs (numpy.ndarray)
-          An array containing the flux errors of the optimally extracted
-          1D spectrum.
-     -- aperture_1d_data (numpy.ndarray)
-          An array containing the flux values of the aperture extracted
-          1D spectrum.
-     -- aperture_1d_errs (numpy.ndarray)
-          An array containing the flux errors of the aperture extracted
-          1D spectrum.
+     -- extracted (list)
+	      List of numpy arrays containing the extracted spectrum data
+	      and the associated uncertainties.
      -- motes_parameters (dict)
           A dictionary containing the MOTES parameters.
-     -- input_file_path (str)
-          The filename of the 1D spectrum.
+     -- input_file_name (str)
+          The file name of the 1D spectrum.
      -- moffat_profile_parameters (list)
           A list containing the Moffat fit parameters.
      -- frame_dict (dict)
@@ -390,34 +382,49 @@ def save_fits(
     ut_now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
     spatial_floor = axes_dict["data_spatial_floor"]
     spatial_ceiling = axes_dict["data_spatial_ceiling"]
+    wave_lo = np.floor(axes_dict["wavelength_axis"][0])
+    wave_hi = np.ceil(axes_dict["wavelength_axis"][-1])
+    
+    save_file_name = (
+        "m" 
+        + input_file_name 
+        + "_" + str(int(wave_lo)) 
+        + ":" + str(int(wave_hi)) 
+        + "_" + str(spatial_floor) 
+        + ":" + str(spatial_ceiling) 
+        + ".fits"
+    )
+    logger.info("Saving extracted spectrum and metadata to %s", save_file_name)
+    
+    
     wave_pix_lo = axes_dict["wavelength_start"]
     wave_pix_hi = axes_dict["wavelength_end"]
     wave_unit = header_parameters["wavelength_unit"]
-    wave_lo = np.floor(axes_dict["wavelength_axis"][0])
-    wave_hi = np.ceil(axes_dict["wavelength_axis"][-1])
     moffat_amplitude = round(moffat_parameters[0], 5)
     moffat_center = round(moffat_parameters[1] + axes_dict["data_spatial_floor"], 5)
     moffat_alpha = round(moffat_parameters[2], 5)
     moffat_beta = round(moffat_parameters[3], 5)
     moffat_bg_level = round(moffat_parameters[4], 5)
     moffat_bg_grad = round(moffat_parameters[5], 5)
+    plate_scale = round(header_parameters["pixel_resolution"], 2)
+    pixel_fwhm = round(header_parameters["seeing"], 2)
     motes_fwhm = round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2)
-    col_bin_lim = int(motes_parameters["-COL_BIN_LIM"])
-    fwhm_multiplier = motes_parameters["-FWHM_MULTIPLIER"]
+    col_bin_lim = int(motes_parameters.minimum_column_limit)
+    fwhm_multiplier = motes_parameters.extraction_fwhm_multiplier
     spectrum_unit = header_parameters["flux_unit"]
     wave_axis = axes_dict["wavelength_axis"]
     
     head_card_input = [
         ["MOTES", "motes.py", "Extraction script"],
-        ["MOTESV", "v0.5.0", "MOTES Version"],
+        ["MOTESV", "v1.0.0", "MOTES Version"],
         ["MOTESDOI", "UNKNOWN", "MOTES DOI"],
         ["UTXTIME", ut_now, "UT timestamp for MOTES"],
         ["SPATPIXL", spatial_floor, "lower limit of spatial axis, pix"],
         ["SPATPIXH", spatial_ceiling, "upper limit of spatial axis, pix"],
         ["DISPPIXL", wave_pix_lo, "lower limit of dispersion axis, pix"],
         ["DISPPIXH", wave_pix_hi, "upper limit of dispersion axis, pix"],
-        ["WAVL", wave_pix_lo, "lower limit of wav range, " + wave_unit],
-        ["WAVH", wave_pix_hi, "upper limit of wav range, " + wave_unit],
+        ["WAVL", wave_lo, "lower limit of wav range, " + wave_unit],
+        ["WAVH", wave_hi, "upper limit of wav range, " + wave_unit],
         ["WAVU", wave_unit, "wavelength unit"],
         ["MOFFA", moffat_amplitude, "median Moffat profile amplitude"],
         ["MOFFC", moffat_center, "median Moffat profile center"],
@@ -425,18 +432,22 @@ def save_fits(
         ["MOFFBETA", moffat_beta, "median Moffat profile beta value"],
         ["MOFFBGLV", moffat_bg_level, "median Moffat profile background level"],
         ["MOFFBGSL", moffat_bg_grad, "median Moffat profile background slope"],
-        ["MOTESIQ", motes_fwhm, "IQ measured from median profile"],
-        ["SNRBNLIM", motes_parameters["-SNR_BIN_LIM"], "maximum SNR per bin"],
+        ["PLATESCL", plate_scale, "spatial pixel plate scale, arcsec/pix"],
+        ["PIXELIQ", pixel_fwhm, "IQ measured from median profile, pix"],
+        ["ARCSECIQ", motes_fwhm, "IQ measured from median profile, arcsec"],
+        ["SNRBNLIM", motes_parameters.extraction_snr_limit, "maximum SNR per bin"],
         ["COLBNLIM", col_bin_lim, "minimum number of columns per bin"],
         ["FWHMMULT", fwhm_multiplier, "FWHM used to define the extraction limits"]
     ]
 
-    if motes_parameters["-SUBTRACT_SKY"]:
-        sky_fwhm_mult = motes_parameters["-BG_FWHM_MULTIPLIER"]
-        sky_snr_bin_lim = motes_parameters["-SKY_SNR_BIN_LIM"]
+    if motes_parameters.subtract_sky:
+        sky_fwhm_mult = motes_parameters.sky_fwhm_multiplier
+        sky_snr_bin_lim = motes_parameters.sky_snr_limit
+        sky_order = motes_parameters.sky_order
         
         head_card_input.append(["SFWHMMLT", sky_fwhm_mult, "FWHM multiplier to define sky region"])
         head_card_input.append(["SSNRBNLM", sky_snr_bin_lim, "max SNR per bin for sky subtraction"])
+        head_card_input.append(["SKYORDER", sky_order, "polynomial order of spatial sky model"])
 
     head_card_input.append(["HDUROW0", "Wavelength Axis, " + wave_unit, ""])
     head_card_input.append(["HDUROW1", "Spectrum data, " + spectrum_unit, ""])
@@ -448,11 +459,11 @@ def save_fits(
         primary_header[card_deets[0]] = (card_deets[1], card_deets[2])
     
     optimal_1d_datahdu = fits.PrimaryHDU(
-        [wave_axis, optimal_1d_data, optimal_1d_errs], header=primary_header
+        [wave_axis, extracted[0], extracted[1]], header=primary_header
     )
     
     aperture_1d_datahdu = fits.ImageHDU(
-        [wave_axis, aperture_1d_data, aperture_1d_errs], header=primary_header
+        [wave_axis, extracted[2], extracted[3]], header=primary_header
     )
     aperture_1d_datahdu.header["EXTNAME"] = "APER_1D_SPEC"
     
@@ -462,18 +473,17 @@ def save_fits(
     
     hdu_list = [optimal_1d_datahdu, aperture_1d_datahdu, ext_bin_pars_tabhdu, ext_limit_table_hdu]
     
-    if motes_parameters["-SUBTRACT_SKY"]:
+    if motes_parameters.subtract_sky:
         spatial_datasec = datasec_string(spatial_floor, spatial_ceiling)
         wavelen_datasec = datasec_string(wave_pix_lo, wave_pix_hi)
-        sky_mode = motes_parameters["-SKYSUB_MODE"]
+        sky_order = motes_parameters.sky_order
 		
         sky_head_card_info = [
-            ["EXTNAME", "2D_SKY", ""],
             ["DATATYPE", "Model Intensity", "Type of data"],
             ["DATASECS", spatial_datasec, "Data section; spatial axis, pixels"],
             ["DATASECW", wavelen_datasec, "Data section; wavelength axis, pixels"],
             ["BUNIT", spectrum_unit, ""],
-            ["METHOD", sky_mode, "MOTES sky subtraction method."],
+            ["SKYORDER", int(sky_order), "MOTES sky characterization order."],
             ["COMMENT", "2D_SKY data has same wavelength orientation as OPTI_1D_SPEC.", ""]
         ]
         
@@ -485,10 +495,16 @@ def save_fits(
         sky_limit_table_hdu = make_ext_table(sky_limit_array.T, wave_unit, sky=True)
     
         sky_model_hdu = fits.ImageHDU(frame_dict["sky_model"])
+        sky_uncertainty_hdu = fits.ImageHDU(frame_dict["sky_uncertainty"])
         for card_deets in sky_head_card_info:
             sky_model_hdu.header[card_deets[0]] = (card_deets[1], card_deets[2])
+            sky_uncertainty_hdu.header[card_deets[0]] = (card_deets[1], card_deets[2])
+        
+        sky_model_hdu.header["EXTNAME"] = ("2D_SKY", "")
+        sky_uncertainty_hdu.header["EXTNAME"] = ("2D_SKY_UNC", "")
         
         hdu_list.append(sky_model_hdu)
+        hdu_list.append(sky_uncertainty_hdu)
         hdu_list.append(sky_bin_pars_tabhdu)
         hdu_list.append(sky_limit_table_hdu)
    
@@ -506,9 +522,9 @@ def save_fits(
     )
 
     fits_hdu_list = fits.HDUList(hdu_list)
-    fits_hdu_list.writeto("m" + input_file_path.split("/")[-1])
+    fits_hdu_list.writeto(save_file_name)
     fits_hdu_list.close()
 
-    notes.save_fits_1(input_file_path)
+    logger.info("Data saved.")
     
     return None
