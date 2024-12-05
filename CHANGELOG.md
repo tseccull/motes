@@ -10,14 +10,15 @@ Updates by T. Seccull
 
 This update makes MOTES v1.0.0 Its core is done, or rather I am done with it. This
 update is also the reason why I will never be hired to a professional software engineering position. 
-The source code has been almost entirely gutted and replaced. I am also temporarily removing CI/CD 
-(sorry Dominik). A new version will be added later for basic linting, tests, and publishing to PyPI. 
-From here, the only major updates should be ones adding/updaing modules for I/O for
-instruments. Docs also need to be added. Various other changes and fixes have been implemented. 
-Most of which I have pulled out of the swamps of my recent memory and outlined below. No doubt, I 
-have forgotten some of the more minor fixes or changes I've made over the past several months. 
-Once documentation and minor testing are completed it will be possible to tentatively release 
-this as v1.0. I live in hope.
+The source code has been almost entirely gutted and replaced. I am also removing CI/CD 
+(sorry Dominik) as frankly this package will never meet the bar for linting and formatting that 
+is required in industry (not without a prohibitively time consuming redesign). It works, and is now
+good enough, even if it isn't the prettiest or easiest codebase to manage. From here, the only 
+major updates should be ones adding/updating modules for I/O for instruments. Docs also need to be 
+added. Various other changes and fixes have been implemented. Most of which I have pulled out of 
+the swamps of my recent memory and outlined below. No doubt, I have forgotten some of the more minor 
+fixes or changes I've made over the past several months. Once documentation and minor testing are 
+completed it will be possible to tentatively release this as v1.0. I live in hope.
 
 ### Added
 - Python's logging module is now used to log all messages both to files and to the terminal.
