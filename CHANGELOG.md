@@ -76,11 +76,9 @@ completed it will be possible to tentatively release this as v1.0. I live in hop
   possible to view the moffat fit while MOTES is running.
 
 ### Removed
-- `.githubworkflows` has been removed from the repo, along with its contents. New CI
-   workflows will be added at a later update to allow automated linting, minor tests,
-   and publication to PyPI. 
+- `.githubworkflows` has been removed from the repo, along with its contents. New workflows for basic
+  linting may be added again at a later date, but right now they are a hindrance to completion of this project.
 - The github site directory has been removed. Standard readthedocs format will be used for documentation.
-
 
 ## 0.4.7 2024-04-XX
 Updates by T. Seccull
