@@ -80,9 +80,6 @@ this as v1.0. I live in hope.
    and publication to PyPI. 
 - The github site directory has been removed. Standard readthedocs format will be used for documentation.
 
-### To Do
--##### SEE MOTES.PY FOR LIST
-
 
 ## 0.4.7 2024-04-XX
 Updates by T. Seccull
