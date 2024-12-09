@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "motes"
+version = "1.0.0"
+description = "Localises, sky-subtracts, and extracts 1D spectra from 2D frames."
+license = "GPL-3.0-or-later"
+authors = [
+    "Tom Seccull <tom.seccull@proton.me>", 
+    "Dominik A. Kiersz <dakiersz.p8df5@passmail.com>"
+]
+readme = "README.md"
+repository = "https://github.com/tseccull/motes"
+keywords = ["spectroscopy", "astronomy", "science", "data", "analysis", "reduction"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Astronomy"
+]
+packages = [
+    { include = "motes/motesio/*.py"}
+]
+[tool.poetry.dependencies]
+python = "^3.12"
+astropy = "^6.1.2"
+matplotlib = "^3.9.1"
+numpy = "^2.0.1"
+scipy = "^1.14.0"
