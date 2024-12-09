@@ -7,7 +7,6 @@ motesio.py - Contains the main I/O functions needed for MOTES to
 """
 
 import astropy.io.fits as fits
-import astropy.table as Table
 import copy
 import datetime
 import logging
@@ -17,7 +16,6 @@ import motesio.gmosio as gmosio
 import motesio.xshooio as xshooio
 import numpy as np
 import os
-import sys
 
 from astropy.table import Table
 

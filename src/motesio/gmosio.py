@@ -2,7 +2,6 @@
 
 import logging
 import numpy as np
-import sys
 
 
 logger = logging.getLogger("motes")

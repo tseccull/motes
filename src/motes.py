@@ -16,24 +16,17 @@ Licence: GNU General Public License v3.0
 
 import argparse
 import copy
-import datetime
-import glob
 import logging
 import logging.config
 import os
-import sys
 
-import astropy.io.fits as fits
-import matplotlib.pyplot as plt
-import numpy as np
-
-import motes.common as common
 import motes.diagnostics as diagnostics
 import motes.extraction as extraction
 import motes.logs as logs
 import motesio.motesio as motesio
 import motes.sky as sky
 import motes.tracing as tracing
+import numpy as np
 
 
 def motes(motes_args):

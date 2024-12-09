@@ -7,8 +7,6 @@ sky.py - Contains all functions required for the sky subtraction
 
 
 import logging
-import matplotlib.pyplot as plt
-import motes.common as common
 import motes.diagnostics as diagnostics
 import motes.tracing as tracing
 import numpy as np
