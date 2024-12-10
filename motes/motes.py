@@ -427,6 +427,7 @@ if __name__ == "__main__":
     motes(args)
     
 ###### TO DO
+# - DOCS
 # - v1.0 Release!
 # - GMOS confirmation, testing and demo data
 # - SpeX integration & demo data v1.1
