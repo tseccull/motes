@@ -5,7 +5,7 @@ This changelog follows the format described
 followed.
 
 
-## 1.0.0 2024-12-05
+## 1.0.0 2024-12-10
 Updates by T. Seccull
 
 This update makes MOTES v1.0.0 Its core is done, or rather I am done with it. This
@@ -30,6 +30,10 @@ completed it will be possible to tentatively release this as v1.0. I live in hop
 - Diagnostic plotting for the sky subtraction has now been implemented. When activated
   a plot of each sky fit in each wavelength column and its uncertainties are plotted to
   a figure that is saved in the working directory.
+- `pyproject.toml` has been added for compatibility with poetry and testing of MOTES
+  as a package.
+- `motes()` can now be called as a function in module `motes.py` with arguments supplied
+  as a `SimpleNamespace()` object created by the `types` module.
 
 ### Changed
 - The source code has overall been cleaned, broken into more functions, and partitioned into
@@ -37,6 +41,7 @@ completed it will be possible to tentatively release this as v1.0. I live in hop
   straightforward. A few instances of repeated code have also been removed, shrinking the codebase
   a little bit. The only instrument module currently fully compatible with this format is `gmosio.py`.
   Modules for other instruments still need to be updated.
+- Big changes have been made to the overall source code structure to allow for use of poetry.
 - MOTES can now be called from the command line. `motesparams.txt` is no longer used as an input
   file. All parameters in `motesparams.txt` are now either called from the command line using
   argparse, or are supplied in a Namespace object to the `motes()` function in `motes.py`. Docs

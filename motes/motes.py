@@ -18,15 +18,14 @@ import argparse
 import copy
 import logging
 import logging.config
-import os
-
 import motes.diagnostics as diagnostics
 import motes.extraction as extraction
 import motes.logs as logs
-import motes.motesio.motesio as motesio
 import motes.sky as sky
 import motes.tracing as tracing
+import motes.motesio.motesio as motesio
 import numpy as np
+import os
 
 
 def motes(motes_args):
@@ -47,7 +46,7 @@ def motes(motes_args):
 
     cwd = os.getcwd()
     
-    logging.config.dictConfig(logs.motes_logs(cwd, args.verbose))
+    logging.config.dictConfig(logs.motes_logs(cwd, motes_args.verbose))
     logger = logging.getLogger("motes")
     
     logger.info("motes() function and 'motes' logger initialised.")

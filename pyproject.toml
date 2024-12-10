@@ -19,11 +19,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy"
 ]
 packages = [
+    { include = "motes/*.py"},
     { include = "motes/motesio/*.py"}
 ]
 [tool.poetry.dependencies]
 python = "^3.12"
-astropy = "^6.1.2"
-matplotlib = "^3.9.1"
-numpy = "^2.0.1"
-scipy = "^1.14.0"
+astropy = "^7.0.0"
+matplotlib = "^3.9.3"
+numpy = "^2.2.0"
+scipy = "^1.14.1"
+

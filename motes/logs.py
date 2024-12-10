@@ -26,7 +26,7 @@ def motes_logs(cwd, verbose):
 	
 	# Logging formatter
     motes_formatter = {
-        "format" : "%(asctime)s | %(levelname)8s | %(module)10s | %(funcName)18s | %(message)s",
+        "format" : "%(asctime)s | %(levelname)8s | %(module)16s | %(funcName)18s | %(message)s",
         "datefmt"   : "%Y-%m-%dT%H:%M:%S"
     }
     
