@@ -427,8 +427,6 @@ if __name__ == "__main__":
     motes(args)
     
 ###### TO DO
-# - Fix import calls for all modules.
-# - Packaging and Test call of motes from within Python using type namespace
 # - v1.0 Release!
 # - GMOS confirmation, testing and demo data
 # - SpeX integration & demo data v1.1
