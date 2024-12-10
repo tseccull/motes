@@ -23,9 +23,9 @@ packages = [
     { include = "motes/motesio/*.py"}
 ]
 [tool.poetry.dependencies]
-python = "^3.12"
-astropy = "^7.0.0"
-matplotlib = "^3.9.3"
-numpy = "^2.2.0"
-scipy = "^1.14.1"
+python = ">=3.11"
+astropy = ">=7.0.0"
+matplotlib = ">=3.9.3"
+numpy = ">=2.2.0"
+scipy = ">=1.14.1"
 
