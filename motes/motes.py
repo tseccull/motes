@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.

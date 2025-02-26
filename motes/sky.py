@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 """
 sky.py - Contains all functions required for the sky subtraction

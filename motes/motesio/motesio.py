@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 """
 motesio.py - Contains the main I/O functions needed for MOTES to

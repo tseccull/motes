@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 import logging
 import motes.common as common
