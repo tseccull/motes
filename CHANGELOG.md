@@ -4,6 +4,87 @@ This changelog follows the format described
 [here](https://keepachangelog.com/en/1.0.0/). [Semantic Versioning](https://semver.org/) is 
 followed.
 
+
+## 1.0.0 2024-12-10
+Updates by T. Seccull
+
+This update makes MOTES v1.0.0 Its core is done, or rather I am done with it. This
+update is also the reason why I will never be hired to a professional software engineering position. 
+The source code has been almost entirely gutted and replaced. I am also removing CI/CD 
+(sorry Dominik) as frankly this package will never meet the bar for linting and formatting that 
+is required in industry (not without a prohibitively time consuming redesign). It works, and is now
+good enough, even if it isn't the prettiest or easiest codebase to manage. From here, the only 
+major updates should be ones adding/updating modules for I/O for instruments. Docs also need to be 
+added. Various other changes and fixes have been implemented. Most of which I have pulled out of 
+the swamps of my recent memory and outlined below. No doubt, I have forgotten some of the more minor 
+fixes or changes I've made over the past several months. Once documentation and minor testing are 
+completed it will be possible to tentatively release this as v1.0. I live in hope.
+
+### Added
+- Python's logging module is now used to log all messages both to files and to the terminal.
+  By default, warnings and critical messages are printed in the terminal, and info level
+  messages are logged to a file. Verbose mode can be called to print all messages above info
+  level to the terminal as well as to the log file. A log file is produced for each new
+  extraction in the chain when MOTES is run. A central `motes.log` file also contains
+  general information about the run.
+- Diagnostic plotting for the sky subtraction has now been implemented. When activated
+  a plot of each sky fit in each wavelength column and its uncertainties are plotted to
+  a figure that is saved in the working directory.
+- `pyproject.toml` has been added for compatibility with poetry and testing of MOTES
+  as a package.
+- `motes()` can now be called as a function in module `motes.py` with arguments supplied
+  as a `SimpleNamespace()` object created by the `types` module.
+
+### Changed
+- The source code has overall been cleaned, broken into more functions, and partitioned into
+  modules roughly by function. Any changes that need to be made in future should be much more
+  straightforward. A few instances of repeated code have also been removed, shrinking the codebase
+  a little bit. The only instrument module currently fully compatible with this format is `gmosio.py`.
+  Modules for other instruments still need to be updated.
+- Big changes have been made to the overall source code structure to allow for use of poetry.
+- MOTES can now be called from the command line. `motesparams.txt` is no longer used as an input
+  file. All parameters in `motesparams.txt` are now either called from the command line using
+  argparse, or are supplied in a Namespace object to the `motes()` function in `motes.py`. Docs
+  will be written to outline these options to users.
+- Changes to `gmosio.py` now mean that MOTES only accepts GMOS data if it has been reduced with
+  DRAGONS. Gemini IRAF is no longer supported by MOTES. As DRAGONS has been the default data
+  reduction method for GMOS longslit data for a few years now, this should not be a massive issue.
+- `reg.txt` has been relocated to `\inputs` alongside the input files. The order in which input
+  files are processed is no longer done in the alphabetised order of files in the inputs directory.
+  Each line of `reg.txt` contains five comma-separated variables: (1) the number of spatial rows to
+  slice of the top of the 2D data frame, (2) the number of spatial rows to slice off the bottom
+  of the 2D data frame, (3) the lower limit of the desired wavelength range, (4) the upper limit
+  of the desired wavelength range (5) the name of the file containing the data to be processed.
+  With this new layout, files can be processed more than once within a single run of MOTES,
+  providing a rudimentary MOS functionality.
+- `motes.py` has had a number of changes performed, primarily to remove repeating sections of code.
+- `motesio.py` now contains all I/O functions that are not directly specific to an instrument. This
+  includes `read_regions()`.
+- `common.py` is greatly reduced and only contains functions that are called by functions in more
+  than one other module.
+- `diagnostics.py` contains all functions related to plotting and printing of diagnostic data that
+  isn't logging.
+- `extraction.py` contains all functions that are directly involved with spectrum extraction.
+- `logs.py` contains a function defining the configuration of the `motes` logger.
+- `sky.py` contains all functions directly involved with sky subtraction.
+- `tracing.py` contains all functions related to localising the spectrum and sky regions of the 
+  2D data.
+- Sky subtraction has been overhauled to use `numpy.polyfit()` to perform the fitting of polynomial
+  functions to the background that can be subtracted to remove the sky contribution. Polynomials of
+  any order can be used, and setting the order to 0 leads to a simple median subtraction being performed.
+  For each spatial column polynomial fits to the background are bootstrapped within the uncertainties of
+  the data to produce an estimate of the median background and uncertainties on the sky subtraction.
+  These uncertainties are propagated into the sky subtracted error frame and is accounted for further
+  down the line during the spectrum extraction.
+- Like the sky subtraction diagnostics plots, diagnostic plots of the Moffat profile fits to each
+  localisation bin are saved as individual figures in the working directory of MOTES. It is no longer
+  possible to view the moffat fit while MOTES is running.
+
+### Removed
+- `.githubworkflows` has been removed from the repo, along with its contents. New workflows for basic
+  linting may be added again at a later date, but right now they are a hindrance to completion of this project.
+- The github site directory has been removed. Standard readthedocs format will be used for documentation.
+
 ## 0.4.7 2024-04-XX
 Updates by T. Seccull
 

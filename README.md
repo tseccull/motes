@@ -1,11 +1,10 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
 
-[![Motes CI](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml/badge.svg)](https://github.com/tseccull/motes/actions/workflows/motes-cicd.yml)
 ![Licence](https://img.shields.io/github/license/tseccull/motes)
 
-Version 0.4.7
+Version 1.0.0
 
-Last Updated: 2024-04-XX - T. Seccull
+Last Updated: 2024-12-05 - T. Seccull
 
 Developers: Tom Seccull & Dominik Kiersz
 
@@ -23,7 +22,7 @@ still to be written, as well as an accompanying article that will likely be
 submitted to one of the AAS journals.
 
 # Installation
-Python 3 is recommended for running MOTES. It is compatible with Python 2.7, but is also noticably slower.
+Python 3 is recommended for running MOTES. We intend to make it installable through pip and/or conda. watch this space.
 
 ## Anaconda
 
@@ -42,7 +41,7 @@ MOTES can then be executed from `motes.py` in the root directory.
 
 # Usage
 
-PDF Manual currently in construction on [Overleaf](https://www.overleaf.com/project/604614a9482e712b1ea2fbbd). 
+readthedocs documentation will be written for MOTES shortly. 
 
 # Contributions
 Procedures for users to supply new functionality, in particular new harvesters 
