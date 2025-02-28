@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 """
 motesio.py - Contains the main I/O functions needed for MOTES to
@@ -10,10 +10,10 @@ import astropy.io.fits as fits
 import copy
 import datetime
 import logging
-import motes.motesio.floydsio as floydsio
-import motes.motesio.forsio as forsio
-import motes.motesio.gmosio as gmosio
-import motes.motesio.xshooio as xshooio
+import motes.io.floydsio as floydsio
+import motes.io.forsio as forsio
+import motes.io.gmosio as gmosio
+import motes.io.xshooio as xshooio
 import numpy as np
 import os
 
@@ -116,7 +116,7 @@ def data_harvest(input_file_path, data_regions):
     qual_sliced = np.squeeze(qual_sliced[:, wavelength_slice])
     
     logger.info(
-        "2D data frame sliceed to [%s:%s,%s:%s]", wavelength_start, 
+        "2D data frame sliced to [%s:%s,%s:%s]", wavelength_start, 
         wavelength_end + 1,data_spatial_floor, data_spatial_ceiling+1
     )
     

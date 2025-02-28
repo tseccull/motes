@@ -18,10 +18,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Astronomy"
 ]
-packages = [
-    { include = "motes/*.py"},
-    { include = "motes/motesio/*.py"}
-]
 [tool.poetry.dependencies]
 python = ">=3.11"
 astropy = ">=7.0.0"

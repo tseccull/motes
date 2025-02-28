@@ -1,4 +1,4 @@
-#!/home/tom/miniforge3/envs/work/bin/python
+#!/usr/bin/env python3
 
 """
 MOTES Modular and Optimal Tracer and Extractor of Spectra.
@@ -23,7 +23,7 @@ import motes.extraction as extraction
 import motes.logs as logs
 import motes.sky as sky
 import motes.tracing as tracing
-import motes.motesio.motesio as motesio
+import motes.io.motesio as motesio
 import numpy as np
 import os
 
@@ -49,7 +49,7 @@ def motes(motes_args):
     logging.config.dictConfig(logs.motes_logs(cwd, motes_args.verbose))
     logger = logging.getLogger("motes")
     
-    logger.info("motes() function and 'motes' logger initialised.")
+    logger.info("MOTES function and logger initialised.")
     logger.info("Current working directory is " + cwd)
     [logger.info("motes_args.%s = %s", key, val) for key, val in vars(motes_args).items()]
     
