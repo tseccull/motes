@@ -5,6 +5,25 @@ This changelog follows the format described
 followed.
 
 
+## 1.0.0 AGAIN! 2024-02-28
+Updates by T. Seccull
+
+This update refactors MOTES some more to ensure that it can be run as
+an executable and a function in Python while having a reasonable 
+package structure. I am still calling this v1.0.0, despite the 
+refactoring. The code is DONE. Any new additions will be mainly
+introduction of compatibility with other instruments.
+
+### Changed
+- MOTES has been refactored to move all source code into a `src`
+directory.
+- The `motes()` function has been separated from the section of script
+that gets run when MOTES is run from the command line. `motes()` now
+lives in `src/motes/core.py`. MOTES can now be run from the command
+line by executing `xmotes.py`.
+- Shebangs have been updated across the codebase to the standard
+`#!/usr/bin/env python3`. This should have been done YEARS ago!
+
 ## 1.0.0 2024-12-10
 Updates by T. Seccull
 
