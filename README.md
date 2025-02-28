@@ -40,15 +40,16 @@ Procedures for users to supply new functionality, in particular new harvesters
 for different instruments, will be instated alongside documentation.
 
 # License
-[GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+MOTES was created by Tom Seccull and Dominik Kiersz. It is licensed under the 
+terms of the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
 
 # References
 MOTES relies on a number of Python packages that deserve recognition. If you
-use MOTES in your work, please also be sure to cite the following:
+use MOTES in your work, please also be sure to cite the following:\
 [Astropy - Astropy Collaboration et al. 2013, A&A, 588, A33](https://doi.org/10.1051/0004-6361/201322068)\
 [Matplotlib - Hunter 2007, CSE, 9, 90](https://doi.org/10.1109/MCSE.2007.55)\
 [NumPy - Harris et al. 2020, Nature, 585, 357](https://doi.org/10.1038/s41586-020-2649-2)\
-[SciPy - Virtanen et al. 2020, NatMe, 17, 261](https://doi.org/10.1038/s41592-019-0686-2)\
+[SciPy - Virtanen et al. 2020, NatMe, 17, 261](https://doi.org/10.1038/s41592-019-0686-2)
 
 The optimal extraction method used by MOTES was first described by [Horne 1986, PASP, 98, 609](https://doi.org/10.1086/131801). 
 Please also cite this article if you use MOTES to process your spectra.
