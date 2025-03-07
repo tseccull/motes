@@ -431,7 +431,7 @@ def save_fits(
     moffat_beta = round(moffat_parameters[3], 5)
     moffat_bg_level = round(moffat_parameters[4], 5)
     moffat_bg_grad = round(moffat_parameters[5], 5)
-    plate_scale = round(header_parameters["pixel_resolution"], 2)
+    plate_scale = header_parameters["pixel_resolution"]
     pixel_fwhm = round(header_parameters["seeing"], 2)
     motes_fwhm = round(header_parameters["seeing"] * header_parameters["pixel_resolution"], 2)
     col_bin_lim = int(motes_parameters.minimum_column_limit)

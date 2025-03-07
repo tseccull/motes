@@ -183,5 +183,19 @@ def save_gmos(hdu_list, original_hdu_list):
     hdu_list.append(original_hdu_list["ORIG_VAR"])
     original_hdu_list["DQ"].header["EXTNAME"] = "ORIG_DQ"
     hdu_list.append(original_hdu_list["ORIG_DQ"])
+    
+    original_sci_keys = ["PIXSCALE", "CCDSUM", "GAIN", "GAINSET", "RDNOISE"]
+    original_sci_comments = [
+        "Pixel scale in Y, ''/pixel",
+        "Detector binning, pixels",
+        "Amplifier gain",
+        "Gain setting (low/high)",
+        "Readout noise"]
+    
+    for i, key in enumerate(original_sci_keys):
+        hdu_list[0].header[key] = (
+            original_hdu_list["ORIG_SCI"].header[key],
+            original_sci_comments[i]
+        )
        
     return hdu_list
