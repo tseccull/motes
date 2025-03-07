@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+xshooio.py - contains functions for reading and writing spectrum data
+             files derived from X-Shooter longslit observations.
+"""
+
 import copy
 import motes.common as common
 import numpy as np

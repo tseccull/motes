@@ -1,21 +1,38 @@
 #!/usr/bin/env python3
 
 """
-MOTES Modular and Optimal Tracer and Extractor of Spectra.
+	xmotes.py
 
-Description: Modular and Optimal Tracer and Extractor of Specrtra 
-(MOTES). A Python package for extracting spectrum from astronomical
-2D spectrograms.
+	Copyright (C) 2025 Tom Seccull & Dominik Kiersz
+	
+	This script is part of the MOTES package hosted at 
+	https://github.com/tseccull/motes
+	https://doi.org/####################################################
+	
+	If used, please cite the MOTES DOI above.
+	
+	This script is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version: 1.0.0
-Date: 2025-02-28
-Authors: Tom Seccull, Dominik Kiersz
-Licence: GNU General Public License v3.0
+	Last updated - 2025-03-07
 
-This file is the MOTES executable that can be called from the command
-line.
+	Description---------------------------------------------------------
+	The Modular and Optimal Tracer and Extractor of Specrtra (MOTES) is 
+	a Python package for extracting 1D spectra from 2D astronomical 
+	spectroscopic data. This file is the MOTES executable that can be 
+	called from the command line. Running `xmotes.py -h` shows the help
+	text.
 """
-
 
 import argparse
 import motes.core as core
@@ -123,7 +140,8 @@ parser.add_argument(
 	"-df", "--diag_plot_skyfit", action="store_true",
 	help="[boolean] When set, the spatial profile of each\
 	background (sky) data column will be plotted against the\
-	polynomial fitted to it. Each plot will be saved as a .png file."
+	polynomial fitted to it. Each plot will be saved as a .png file.\
+	Produces nothing if sky_order=0"
 )
 parser.add_argument(
 	"-dk", "--diag_plot_skysub", action="store_true",

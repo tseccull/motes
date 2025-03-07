@@ -1,14 +1,41 @@
 #!/usr/bin/env python3
 
 """
-motesio.py - Contains the main I/O functions needed for MOTES to
-             function and calls the relevant harvester functions needed
-             for each specific instrument.
+	motesio.py
+
+	Copyright (C) 2025 Tom Seccull & Dominik Kiersz
+	
+	This module is part of the MOTES package hosted at 
+	https://github.com/tseccull/motes
+	https://doi.org/####################################################
+	
+	If used, please cite the MOTES DOI above.
+	
+	This script is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+	Last updated - 2025-03-07
+
+	Description---------------------------------------------------------
+	motesio.py xontains the main I/O functions needed for MOTES to
+    function, calling the relevant harvester and save functions needed
+    for each instrument.
 """
 
 import astropy.io.fits as fits
 import copy
 import datetime
+import importlib.metadata
 import logging
 import motes.io.floydsio as floydsio
 import motes.io.forsio as forsio
@@ -414,7 +441,7 @@ def save_fits(
     
     head_card_input = [
         ["MOTES", "motes.py", "Extraction script"],
-        ["MOTESV", "v1.0.0", "MOTES Version"],
+        ["MOTESV", importlib.metadata.version("motes"), "MOTES Version"],
         ["MOTESDOI", "UNKNOWN", "MOTES DOI"],
         ["UTXTIME", ut_now, "UT timestamp for MOTES"],
         ["SPATPIXL", spatial_floor, "lower limit of spatial axis, pix"],
