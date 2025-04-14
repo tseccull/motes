@@ -27,7 +27,7 @@
 	Last updated - 2025-03-07
 
 	Description---------------------------------------------------------
-	motesio.py xontains the main I/O functions needed for MOTES to
+	motesio.py contains the main I/O functions needed for MOTES to
     function, calling the relevant harvester and save functions needed
     for each instrument.
 """
