@@ -36,7 +36,7 @@ readthedocs documentation will be written for MOTES shortly. We also expect
 to provide demo data and tutorials to help newcomers learn about MOTES. 
 
 # Contributing
-Please read the documentation on [CONTRIBUTING](CONTRIBUTING.md) to MOTES
+Please read the documentation on [CONTRIBUTING](CONTRIBUTING.md) to MOTES.
 
 # License
 MOTES was created by Tom Seccull and Dominik Kiersz. It is licensed under the 
