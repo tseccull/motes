@@ -17,4 +17,4 @@ mostly complete.**     
 In the first instance, any initial interest in contributing to the project 
 should be made by opening an issue in this repo. I am happy to work with you
 to fix bugs, improve the docs for MOTES, and integrate new instrument I/O 
-modules. Contributors will receive attribution as co-authors of the software.  
+modules. Let's talk about making MOTES the best that it can be.  
