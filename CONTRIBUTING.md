@@ -5,13 +5,12 @@ your interest in contributing to MOTES.
 ### The following contributions are welcomed:
 - Bug reports.
 - Improvements to documentation and the overall user/onboarding experience.
-- Instrument I/O modules (i.e the `instrumentio.py` files that allow MOTES to 
+- Instrument I/O modules (i.e. the `instrumentio.py` files that allow MOTES to 
 read and process spectra observed with different instruments).
 
-**In general, if your feature suggestion is unrelated to introducing new 
-instrument I/O modules or improving MOTES from a user's perspective it
-will not be considered. The core functionality of MOTES is considered to be
-mostly complete.**     
+**In general, feature suggestions will only be considered if they introduce a 
+new instrument I/O module or make MOTES easier to use. The core functionality 
+of MOTES is considered to be effectively complete.**     
 
 ### Engaging in jolly cooperation...🌞
 In the first instance, any initial interest in contributing to the project 
