@@ -27,10 +27,10 @@ journals, likely PASP.
 [GMOS-N](https://www.gemini.edu/instrumentation/gmos) longslit spectra reduced with [DRAGONS](https://doi.org/10.3847/2515-5172/ad0044). Spectra reduced with IRAF are no longer supported.\
 [GMOS-S](https://www.gemini.edu/instrumentation/gmos) longslit spectra reduced with [DRAGONS](https://doi.org/10.3847/2515-5172/ad0044). Spectra reduced with IRAF are no longer supported.
 
-Is your favourite instrument absent from this list? Consider contributing an 
-instrument I/O module that will make MOTES compatible with your data! For
-information on [CONTRIBUTING](CONTRIBUTING.md) to MOTES, see the linked 
-documentation.
+### Is your favourite instrument absent from this list? 
+Consider contributing an instrument I/O module that will make MOTES compatible 
+with your data! For information about [CONTRIBUTING](CONTRIBUTING.md) to MOTES,
+see the linked documentation.
 
 # Installation
 Python 3 is recommended for running MOTES. We intend to make it installable 
