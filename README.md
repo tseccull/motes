@@ -36,8 +36,7 @@ readthedocs documentation will be written for MOTES shortly. We also expect
 to provide demo data and tutorials to help newcomers learn about MOTES. 
 
 # Contributing
-Procedures for users to supply new functionality, in particular new harvesters 
-for different instruments, will be instated alongside documentation.
+Please read the documentation on [CONTRIBUTING](CONTRIBUTING.md) to MOTES
 
 # License
 MOTES was created by Tom Seccull and Dominik Kiersz. It is licensed under the 
