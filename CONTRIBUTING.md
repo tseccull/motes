@@ -2,7 +2,7 @@
 First off, skeleton, well done...🌻 Thank you for being here and for 
 your interest in contributing to MOTES.
 
-### The following contributions are welcomed
+### The following contributions are welcomed:
 - Bug reports.
 - Improvements to documentation and the overall user/onboarding experience.
 - Instrument I/O modules (i.e the `instrumentio.py` files that allow MOTES to 
@@ -17,4 +17,4 @@ mostly complete.**     
 In the first instance, any initial interest in contributing to the project 
 should be made by opening an issue in this repo. I am happy to work with you
 to fix bugs, improve the docs for MOTES, and integrate new instrument I/O 
-modules.  
+modules. Contributors will receive attribution as co-authors of the software.  
