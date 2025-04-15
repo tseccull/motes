@@ -1,6 +1,6 @@
-# How to Contribute
-First off, skeleton, well done...🌻 Thank you for being here and for 
-your interest in contributing to MOTES.
+# How to Contribute to MOTES
+...🌻First off, skeleton, well done...🌻
+Thank you for being here and for your interest in contributing to MOTES.
 
 ### The following contributions are welcomed:
 - Bug reports.
