@@ -5,7 +5,7 @@ This changelog follows the format described
 followed.
 
 
-## 1.0.0 AGAIN! 2024-02-28
+## 1.0.0 AGAIN! 2025-02-28
 Updates by T. Seccull
 
 This update refactors MOTES some more to ensure that it can be run as
