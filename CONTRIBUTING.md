@@ -3,7 +3,7 @@
 
 Thank you for being here and for your interest in contributing to MOTES.
 
-## The following contributions are welcomed:
+## Welcome Contributions
 - Bug reports.
 - Improvements to documentation and the overall user/onboarding experience.
 - Instrument I/O modules (i.e. the `instrumentio.py` files that allow MOTES to 
@@ -13,7 +13,7 @@ read and process spectra observed with different instruments).
 new instrument I/O module or make MOTES easier to use. The core functionality 
 of MOTES is considered to be effectively complete.**     
 
-## Engaging in jolly cooperation...🌞
+## Engaging in Jolly Cooperation...🌞
 In the first instance, any interest in contributing to MOTES should be 
 registered by opening an issue in this repo. Keep issues specific and 
 manageable in scope. Many issues, each assigned to an individual **actionable**
