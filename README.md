@@ -15,7 +15,7 @@ sky subtract 2D spectra prior to extraction.
 
 Citation: We will have a Zenodo DOI soon, and eventually a publication.
 
-# Project Status
+## Project Status
 Currently at v1.0.0. Extraction of longslit spectra observed by GMOS-N or 
 GMOS-S and reduced by DRAGONS is fully supported. Other instruments with 
 harvester functions (X-Shooter, FORS2, FLOYDS) still need to be grandfathered
@@ -23,7 +23,7 @@ into this latest version of the codebase. Documentation is being written.
 Watch this space! We aim to submit an accompanying article to one of the AAS 
 journals, likely PASP.
 
-# Supported Instruments/Data
+## Supported Instruments/Data
 [GMOS-N](https://www.gemini.edu/instrumentation/gmos) longslit spectra reduced with [DRAGONS](https://doi.org/10.3847/2515-5172/ad0044). Spectra reduced with IRAF are no longer supported.\
 [GMOS-S](https://www.gemini.edu/instrumentation/gmos) longslit spectra reduced with [DRAGONS](https://doi.org/10.3847/2515-5172/ad0044). Spectra reduced with IRAF are no longer supported.
 
@@ -36,22 +36,22 @@ an instrument module are provided along with a base `instrumentio.py`
 any of your instrument modules to the base MOTES package, see the documentation 
 on [contributing to MOTES](CONTRIBUTING.md).
 
-# Installation
+## Installation
 Python 3 is recommended for running MOTES. We intend to make it installable 
 through pip. Watch this space.
 
-# Usage
+## Usage
 readthedocs documentation will be written for MOTES shortly. We also expect
 to provide demo data and tutorials to help newcomers learn about MOTES. 
 
-# Contributing
+## Contributing
 Please read the documentation on [contributing to MOTES](CONTRIBUTING.md).
 
-# License
+## License
 MOTES was created by Tom Seccull and Dominik Kiersz. It is licensed under the 
 terms of the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
 
-# References
+## References
 MOTES relies on a number of Python packages that deserve recognition. If you
 use MOTES in your work, please also be sure to cite the following:\
 [Astropy - Astropy Collaboration et al. 2013, A&A, 588, A33](https://doi.org/10.1051/0004-6361/201322068)\
