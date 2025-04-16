@@ -6,8 +6,12 @@ Thank you for being here and for your interest in contributing to MOTES.
 ## Welcome Contributions
 - Bug reports.
 - Improvements to documentation and the overall user/onboarding experience.
-- Instrument I/O modules (i.e. the `instrumentio.py` files that allow MOTES to 
-read and process spectra observed with different instruments).
+- Instrument I/O modules (i.e. the `/src/motes/io/instrumentio.py` files that 
+allow MOTES to read and process spectra observed with different instruments). 
+Building your own instrument I/O module and integrating it into MOTES is a 
+straightforward process, and a template is provided to assist you. If you'd 
+like to discuss integration of your module into the base MOTES package, please
+follow the instructions below. 
 
 **In general, feature suggestions will only be considered if they introduce a 
 new instrument I/O module or make MOTES easier to use. The core functionality 
@@ -24,3 +28,5 @@ create a new issue if one does not already exist for a given bug or suggestion.
 I am happy to work with you to fix bugs, improve the docs for MOTES, and 
 integrate new instrument I/O modules. Let's talk about making MOTES the best 
 that it can be.  
+
+
