@@ -17,11 +17,12 @@ of MOTES is considered to be effectively complete.**     
 
 ## Engaging in Jolly Cooperation...🌞
 In the first instance, any interest in contributing to MOTES should be 
-registered by opening an issue in this repo. Keep issues specific and 
-manageable in scope. Many issues, each assigned to an individual **actionable**
-fix or idea, are easier to tackle than one large issue containing a morass of 
-ideas and quasi-related changes that first need to be picked apart. Only 
-create a new issue if one does not already exist for a given bug or suggestion.
+registered by opening an **issue** in this repo (before any pull request). Keep
+issues specific and manageable in scope. Many issues, each assigned to an 
+individual **actionable** fix or idea, are easier to tackle than one large 
+issue containing a morass of ideas and quasi-related changes that first need to
+be picked apart. Only create a new issue if one does not already exist for a 
+given bug or suggestion.
 
 I am happy to work with you to fix bugs, improve the docs for MOTES, and 
 integrate new instrument I/O modules. Let's talk about making MOTES the best 
