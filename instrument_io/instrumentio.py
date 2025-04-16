@@ -202,4 +202,6 @@ def save_instrument(hdu_list, original_hdu_list):
             original_sci_comments[i]
         )
        
+    # If no changes are needed simply return the hdu_list without
+    # changing anything.
     return hdu_list
