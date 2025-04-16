@@ -30,7 +30,7 @@ journals, likely PASP.
 ### Is your favourite instrument absent from this list? 
 Consider writing an instrument I/O module to make MOTES compatible with your 
 data! To assist you with this, 
-[instructions](instrument_io/instrument_io_instructiond.md) on how to develop 
+[instructions](instrument_io/instrument_io_instructions.md) on how to develop 
 an instrument module are provided along with a base `instrumentio.py` 
 [template](instrument_io/instrumentio.py). If you're interested in contributing
 any of your instrument modules to the base MOTES package, see the documentation 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-	gmosio.py
+	[instrumentio].py
 
-	Copyright (C) 2025 Tom Seccull & Dominik Kiersz
+	Copyright (C) [20XX Author Name(s)]
 	
 	This module is part of the MOTES package hosted at 
 	https://github.com/tseccull/motes
@@ -24,11 +24,11 @@
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-	Last updated - 2025-03-07
+	Last updated - [YYYY-MM-DD]
 
 	Description---------------------------------------------------------
-	gmosio.py contains functions for reading 2D spectrum data files
-	derived from GMOS longlist observations and writing 1D spectrum
+	[instrumentio].py contains functions for reading 2D spectrum data files
+	derived from [Instrument Name] longlist observations and writing 1D spectrum
     data files produced by MOTES for the same datasets.
 """
 
@@ -38,9 +38,9 @@ import numpy as np
 logger = logging.getLogger("motes")
 
 
-def harvest_gmos(input_fits_hdu):
+def harvest_instrument(input_fits_hdu):
     """
-    Harvest the header and data from a GMOS spectrum.
+    Harvest the header and data from a[n Instrument Name] spectrum.
 
     Args:
      -- input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU)
@@ -63,93 +63,87 @@ def harvest_gmos(input_fits_hdu):
           The 1D wavelength axis of the spectrum.
     """
 
-    # Retrieve the data frame, error frame, and qual frame. Also
-    # retrieve the header of the science image frame, as some metadata
-    # is stored there instead of the primary header.
-    primary_header = input_fits_hdu[0].header
-    science_header = input_fits_hdu["SCI"].header
-    data = input_fits_hdu["SCI"].data
-    errs = input_fits_hdu["VAR"].data ** 0.5
-    qual = input_fits_hdu["DQ"].data
-
-	# Sets all data and errs within the GMOS chip gaps to 1, so they
-	# don't get flagged as bad pixels or trip up the bin definition
-	# stage.
-	# Convert qual frame to boolean. Good pixels = 1; Bad pixels = 0
+    # Retrieve the required header(s).
+    header_one = input_fits_hdu[0].header
+    optional_header = input_fits_hdu["HDU_EXTNAME"].header
+    
+    # Retrieve the 2D science data frame. MOTES assumes that the 
+    # columns of the data frame align with the spectrum's spatial axis
+    # and that its rows align with the dispersion axis.
+    # If the spectrum does not need to be oriented, then use the
+    # following.
+    data = input_fits_hdu["DATA_EXTNAME"].data
+    # If the data needs to be transposed, 
+    # data = input_fits_hdu["DATA_EXTNAME"].data.T
+    # If the data needs to be transposed, be careful to ensure that
+    # the correct header keys are used for other steps in this
+    # function (e.g. making the wavelength axis.
+    
+    # Retrieve the 2D uncertainty data frame. Is this frame is a 
+    # variance frame, square root it to make sure errs represents the
+    # uncertainty of the science data.
+    errs = input_fits_hdu["UNCERTAINTY_EXTNAME"].data
+    
+    # If the input file has a data quality frame, retrieve it. MOTES
+    # only accepts a boolean quality frame (0=GOOD; 1=BAD). If the
+    # qual frame flags for multiple different pixel statuses with
+    # different values, set those which can be processed to 0 and
+    # those which should be avoided to 1. For example, the pixels
+    # falling within chip gaps in GMOS spectra are flagged with the
+    # value 16 in the associated quality frame. We want to ensure
+    # MOTES skips them when localising the spectrum, so we set them
+    # to a value of 1. 
+    qual = input_fits_hdu["QUALITY_EXTNAME"].data
     data[qual==16] = 1.
     errs[qual==16] = 1.
     new_qual = np.ones(np.shape(qual))
     new_qual[qual>0] = 0
     qual = new_qual
-
-    # Make the wavelength axis.
-    if science_header["CRPIX1"] > 0.5:
-        reference_pixel = np.ceil(science_header["CRPIX1"])
-        reference_shift = reference_pixel-science_header["CRPIX1"]
-    else:
-        reference_pixel = np.floor(science_header["CRPIX1"])
-        reference_shift = science_header["CRPIX1"] - reference_pixel
     
-    central_wavelength = science_header["CRVAL1"]
-    delta_wavelength = science_header["CD1_1"]
-    reference_wavelength = (reference_shift * delta_wavelength) + central_wavelength
-    wavelen_pixel_axis = np.arange(-reference_pixel+1, science_header["NAXIS1"]-reference_pixel)
-    wavelength_axis = (wavelen_pixel_axis * science_header["CD1_1"]) + reference_wavelength
+    # If your input spectrum has no quality frame, make one now by
+    # creating an array of zeros that is the same shape as the data
+    # and uncertainty frames.
+    # qual = np.zeros(np.shape(data))
+
+
+    # Make the wavelength axis based on information contained in the
+    # header(s). Often, the same header cards are used in different
+    # instruments.
+    # Reference (start or central) wavelength = header["CRVAL1"]
+    # Reference (start or central) pixel index = header["CRPIX1"]
+    # Wavelength increment per pixel = header["CD1_1"]
+    # If the reference pixel is at the start of the wavelength axis,
+    # the axis can be created quite simply. Be mindful of the
+    # direction in which the wavelength increases when making the
+    # wavelength axis
+    wavelength_axis = (np.arange(header["NAXIS1"])*header["CD1_1"]) + header["CRVAL1"]
     
-    # If DRAGONS has been used to reduce the data, flip the wavelength
-    # axis and the 2D data.
-    if science_header["CD1_1"] < 0:
-        wavelength_axis = np.flip(wavelength_axis)
-        data = np.flip(data, axis=1)
-        errs = np.flip(errs, axis=1)
-        qual = np.flip(qual, axis=1)
+    # If the reference wavelength is the central wavelength, the
+    # implementation is a little tricker. See the gmosio.py harvester
+    # function as an example.
 
-    # All this is to get an initial estimate of the IQ. Tables below are
-    # based on the condition constraints used by Gemini.
-    # See https://www.gemini.edu/observing/telescopes-and-sites/sites#ImageQuality
-    iq_dict = {
-        "20-percentile": 0,
-        "70-percentile": 1,
-        "85-percentile": 2,
-        "100-percentile": 3,
-        "Any": 3,
-        "UNKNOWN": 3,
-    }
-
-    wavelength_table = np.array(
-        [
-            [000.0, 400.0, 0],
-            [400.0, 550.0, 1],
-            [550.0, 700.0, 2],
-            [700.0, 850.0, 3],
-            [850.0, 975.0, 4],
-            [975.0, 1100.0, 5],
-        ]
-    )
-
-    iq_table = np.array(
-        [
-            [0.6, 0.90, 1.20, 2.00],
-            [0.6, 0.85, 1.10, 1.90],
-            [0.5, 0.75, 1.05, 1.80],
-            [0.5, 0.75, 1.05, 1.70],
-            [0.5, 0.70, 0.95, 1.70],
-            [0.4, 0.70, 0.95, 1.65],
-        ]
-    )
-
-    iq = primary_header["RAWIQ"]
-    
-    short_wavelength = np.min(wavelength_axis)
-    for i in wavelength_table:
-        if short_wavelength > i[0] and short_wavelength < i[1]:
-            seeing = float(iq_table[int(i[2])][int(iq_dict[iq])])
-            break
-
+    # Next a dictionary is created to hold values taken or calculated
+    # from the header(s). MOTES needs a number of specific values:
+    # OBJECT NAME
+    # FRAME EXPOSURE TIME
+    # SEEING/IQ ESTIMATE.
+    #   This might be provided in a keyword from the observatory, or
+    #   it might be calculated based on the values of other keywords
+    #   in the the header(s). See the gmosio.py harvester function for
+    #   an example of something that's a bit more complex.
+    # INSTRUMENT NAME.
+    # BRIGHTNESS UNIT. 
+    #   Unit used to measure brightness in the image (this could be
+    #   electrons, ADUs, or something more elaborate if a flux
+    #   calibration has been done).
+    # WAVELENGTH UNIT.
+    # PIXEL RESOLUTION / PLATE SCALE / PIXEL SCALE.
+    #   This is the scale of the spatial axis of the spectrum in
+    #   arcseconds/pixel.
     header_dict = {
         "object": primary_header["OBJECT"].replace(" ", "_"),
         "exptime": primary_header["EXPTIME"],
-        "seeing": seeing,
+        "seeing": primary_header["FWHM"],
         "instrument": primary_header["INSTRUME"],
         "flux_unit": science_header["BUNIT"],
         "wavelength_unit": science_header["CUNIT1"],
@@ -159,7 +153,7 @@ def harvest_gmos(input_fits_hdu):
     return data, errs, qual, header_dict, wavelength_axis
 
 
-def save_gmos(hdu_list, original_hdu_list):
+def save_instrument(hdu_list, original_hdu_list):
     """
     Prepare the original HDUs for inclusion into the output save file.
     
@@ -175,6 +169,10 @@ def save_gmos(hdu_list, original_hdu_list):
           from original_hdu_list.
     """
 
+    # Add any original unaltered HDUs from the input file to the
+    # HDU list of the output file to store them as meta data frames.
+    # Remember to set appropriate names for each HDU by updating
+    # the EXTNAME card in each header.
     original_hdu_list["MDF"].header["EXTNAME"] = "ORIG_MDF"
     hdu_list.append(original_hdu_list["ORIG_MDF"])
     original_hdu_list["SCI"].header["EXTNAME"] = "ORIG_SCI"
@@ -184,6 +182,11 @@ def save_gmos(hdu_list, original_hdu_list):
     original_hdu_list["DQ"].header["EXTNAME"] = "ORIG_DQ"
     hdu_list.append(original_hdu_list["ORIG_DQ"])
     
+    # Retrieve and store the values of any pertinent header cards
+    # in the primary header of the output file. You may want to do
+    # this to collate all necessary header keywords in the same header
+    # if they were initially spread across the headers of more than
+    # one HDU in the input file.
     original_sci_keys = ["PIXSCALE", "CCDSUM", "GAIN", "GAINSET", "RDNOISE","CUNIT1"]
     original_sci_comments = [
         "Pixel scale in Y, ''/pixel",
