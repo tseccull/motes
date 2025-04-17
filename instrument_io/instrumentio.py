@@ -27,9 +27,10 @@
 	Last updated - [YYYY-MM-DD]
 
 	Description---------------------------------------------------------
-	[instrumentio].py contains functions for reading 2D spectrum data files
-	derived from [Instrument Name] longlist observations and writing 1D spectrum
-    data files produced by MOTES for the same datasets.
+	[instrumentio].py contains functions for reading 2D spectrum data 
+	files derived from [Instrument Name] longlist observations and
+	writing 1D spectrum data files produced by MOTES for the same 
+	datasets.
 """
 
 import logging
