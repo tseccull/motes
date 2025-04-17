@@ -16,6 +16,8 @@ unique source. These instrument-specific functions live in an
 The following instructions will guide you through the process of 
 creating your own instrument I/O module. The `instrumentio.py`
 template also contains comments which will hopefully be useful to you.
+For inspiration, you can also take a look at the instrument I/O 
+modules that are already provided with MOTES in `/src/motes/io/`.
 If you experience difficulties and would like some guidance, feel free
 to open an [issue](https://github.com/tseccull/motes/issues) in the
 MOTES GitHub repo.
