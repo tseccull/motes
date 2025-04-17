@@ -8,7 +8,7 @@ sources do not often share a common data format and metadata
 structure. This means that `motesio.py`, the the primary module
 used by MOTES to read and write data, must call secondary 
 instrument-specific functions designed to handle datasets from each
-unique source. These instrument-specific functions live in the
+unique source. These instrument-specific functions live in an
 `instrumentio.py` module.
 
 ## Creating an Instrument I/O Module.
