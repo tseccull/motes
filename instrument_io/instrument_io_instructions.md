@@ -29,7 +29,8 @@ yourself, but if you intend to share it and request that it be added
 to the base version of MOTES, you will be asked to follow it to ensure
 consistency. Don't forget to alter the docstring at the top of your copied 
 `instrumentio.py` template. Sections of the docstring enclosed in
-square brackets should be adjusted to match
+square brackets should be updated with relevant details about you and
+the module you're creating.
 
 ### MOTES Style Conventions
 A template instrument I/O module, `instrumentio.py`, has been provided
