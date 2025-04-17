@@ -28,4 +28,4 @@ I am happy to work with you to fix bugs, improve the docs for MOTES, and
 integrate new instrument I/O modules. Let's talk about making MOTES the best 
 that it can be.  
 
-
+Thanks, Tom Seccull
