@@ -50,5 +50,10 @@ characters.
 - Keep variable names descriptive. Do not abbreviate them so much
 that a newcomer cannot quickly figure out what they are.
 
+## The Harvester Function
+
+## The Save Function
+
+## Editing motesio.py and Finishing Up
 
   
