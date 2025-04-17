@@ -17,7 +17,7 @@ The following instructions will guide you through the process of
 creating your own instrument I/O module. The `instrumentio.py`
 template also contains comments which will hopefully be useful to you.
 If you experience difficulties and would like some guidance, feel free
-to open an (issue)[https://github.com/tseccull/motes/issues] in the
+to open an [issue](https://github.com/tseccull/motes/issues) in the
 MOTES GitHub repo.
 
 To start with, you should copy the `instrumentio.py` template that's
