@@ -12,7 +12,7 @@ unique source. These instrument-specific functions live in an
 `instrumentio.py` module.
 
 If you're a Python veteran and have some familiarity with astronomical
-data, some of what follows may be familiar to you. It's hoped that
+data, some of what follows may be old news to you. It's hoped that
 starting from the basics, however, will be helpful to anyone approaching
 this kind of data processing/reduction work for the first time.
 
@@ -76,7 +76,7 @@ extra HDUs/frames/headers that are not needed, and in other cases some
 required data will either need to be calculated or generated in the
 harvester function. As you read on you'll see what this means. 
 
-### Accessing the HDU List
+### How to access the HDU List
 Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
 about how it reads/writes both header and image data from/to FITS files.
 Here we'll just cover enough to ensure you can write a harvester
@@ -109,6 +109,37 @@ No.    Name      Ver    Type      Cards   Dimensions   Format
   6  PROVENANCE    1 BinTableHDU     17   4R x 4C   [28A, 128A, 128A, 128A]   
 None
 ```
+Based on this output we can see the index numbers and names of each HDU
+in the list. We can see the the size of each HDU's header by the number
+of header cards. We can also see the dimensions of the data frame in
+each HDU. Note that the Primary HDU in this file contains only a header.
+MOTES only requires header data and image data, so the tables in this
+file, labelled with type BinTableHDU, will not be used. MOTES will hold
+onto extra HDUs, however, so they can be reintegrated into any saved output
+file, ensuring continuity of all the metadata associated with the data
+and how it has been processed.
+
+To access the primary header and both the header and data in the `"SCI"`
+HDU, the harvester function for this file would need the lines...
+
+```python
+primary_header = input_file["PRIMARY"].header
+sci_header = input_file["SCI"].header
+sci_data = input_file["SCI"].data
+```
+
+Alternatively we can also use the indices of the HDUs to access them...
+```python
+primary_header = input_file[0].header
+sci_header = input_file[1].header
+sci_data = input_file[1].data
+```
+
+Where possible, it is usually better to use the names of HDUs when
+accessing them, as when others read the harvester function it will be
+clearer which HDUs are being accessed and why.
+
+### What the harvester function needs to access
 
 The name of an 
 instrument's harvester function generally has the form 
