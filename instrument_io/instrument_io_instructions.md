@@ -11,6 +11,11 @@ instrument-specific functions designed to handle datasets from each
 unique source. These instrument-specific functions live in an
 `instrumentio.py` module.
 
+If you're a Python veteran and have some familiarity with astronomical
+data, some of what follows may be familiar to you. It's hoped that
+starting from the basics, however, will be helpful to anyone approaching
+this kind of data processing/reduction work for the first time.
+
 ## Creating an Instrument I/O Module.
 
 The following instructions will guide you through the process of 
@@ -29,9 +34,10 @@ the I/O module for the GMOS spectrographs is `gmosio.py`. It isn't
 mandatory to follow this convention when building an I/O module for
 yourself, but if you intend to share it and request that it be added
 to the base version of MOTES, you will be asked to follow it to ensure
-consistency. Don't forget to alter the docstring at the top of your copied 
-`instrumentio.py` template. Sections of the docstring enclosed in
-square brackets should be updated with relevant details about you and
+consistency. Don't forget to alter the docstring at the top of your
+copied `instrumentio.py` template and also the docstrings of each 
+function. Sections of the docstring enclosed in square brackets should
+be updated with relevant details about you and
 the module you're creating.
 
 ### MOTES Style Conventions
@@ -54,6 +60,59 @@ characters.
 that a newcomer cannot quickly figure out what they are.
 
 ## The Harvester Function
+Instrument I/O modules contain two functions, the first and more
+important of these is the harvester function. The harvester function's
+job is to take the list of Header Data Units (HDUs) read in from the 
+input .fits file by the `data_harvest()` function in `motesio.py`, 
+retrieve required data frames and metadata from that HDU list, and 
+reformat them into what MOTES expects as input.
+
+### The List of Header Data Units
+The harvester function receives only one argument from `data_harvest()`,
+`input_fits_hdu`. This is the full list of HDUs extracted from the input
+file. In many cases, this HDU List will contain all the required data
+frames and header metadata to run MOTES. In some cases, there will be
+extra HDUs/frames/headers that are not needed, and in other cases some
+required data will either need to be calculated or generated in the
+harvester function. As you read on you'll see what this means. 
+
+### Accessing the HDU List
+Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
+about how it reads/writes both header and image data from/to FITS files.
+Here we'll just cover enough to ensure you can write a harvester
+function capable of accessing the correct data frames and header data 
+needed to run MOTES.
+
+It's possible to get astropy to print much of the information needed to
+access the different parts of an HDU list, including the names and 
+indices of each HDU and the number of cards in each HDU's header. For
+example, running the following commands in python on a file containing
+the partially reduced GMOS spectrum of a star...
+
+```python
+import astropy.io.fits as fits
+with fits.open("N20231106S0163_HD_54351_2D.fits") as input_file:
+	print(input_file.info())
+```
+
+...results in the following output in the terminal...
+
+```
+Filename: N20231106S0163_HD_54351_2D.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU     188   ()      
+  1  SCI           1 ImageHDU        52   (3138, 512)   float32   
+  2  VAR           1 ImageHDU        52   (3138, 512)   float32   
+  3  DQ            1 ImageHDU        54   (3138, 512)   int16 (rescales to uint16)   
+  4  HISTORY       1 BinTableHDU     17   13R x 4C   [128A, 192A, 28A, 28A]   
+  5  MDF           1 BinTableHDU     53   3R x 12C   [J, E, E, 20A, J, E, E, E, E, E, E, E]   
+  6  PROVENANCE    1 BinTableHDU     17   4R x 4C   [28A, 128A, 128A, 128A]   
+None
+```
+
+The name of an 
+instrument's harvester function generally has the form 
+`harvest_instrument()`.
 
 ## The Save Function
 

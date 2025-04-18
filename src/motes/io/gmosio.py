@@ -28,7 +28,7 @@
 
 	Description---------------------------------------------------------
 	gmosio.py contains functions for reading 2D spectrum data files
-	derived from GMOS longlist observations and writing 1D spectrum
+	derived from GMOS longslit observations and writing 1D spectrum
     data files produced by MOTES for the same datasets.
 """
 
@@ -43,10 +43,9 @@ def harvest_gmos(input_fits_hdu):
     Harvest the header and data from a GMOS spectrum.
 
     Args:
-     -- input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU)
-          The Header Data Unit (HDU) read in from the data file.
-     -- primary_header (astropy.io.fits.header.Header)
-          The header read in from the data file.
+     -- input_fits_hdu (astropy.io.fits.hdu.hdulist.HDUList)
+          The list of Header Data Units (HDUs) read in from the data
+          file.
 
     Returns:
      -- data (numpy.ndarray)

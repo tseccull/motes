@@ -28,7 +28,7 @@
 
 	Description---------------------------------------------------------
 	[instrumentio].py contains functions for reading 2D spectrum data 
-	files derived from [Instrument Name] longlist observations and
+	files derived from [Instrument Name] observations and
 	writing 1D spectrum data files produced by MOTES for the same 
 	datasets.
 """
@@ -44,10 +44,9 @@ def harvest_instrument(input_fits_hdu):
     Harvest the header and data from a[n Instrument Name] spectrum.
 
     Args:
-     -- input_fits_hdu (astropy.io.fits.hdu.image.PrimaryHDU)
-          The Header Data Unit (HDU) read in from the data file.
-     -- primary_header (astropy.io.fits.header.Header)
-          The header read in from the data file.
+     -- input_fits_hdu (astropy.io.fits.hdu.hdulist.HDUList)
+          The list of Header Data Units (HDUs) read in from the data
+          file.
 
     Returns:
      -- data (numpy.ndarray)
