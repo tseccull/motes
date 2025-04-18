@@ -76,7 +76,9 @@ extra HDUs/frames/headers that are not needed, and in other cases some
 required data will either need to be calculated or generated in the
 harvester function. As you read on you'll see what this means. 
 
-### How to access the HDU List
+### What the Harvester Function Returns
+
+### How to Access the HDU List
 Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
 about how it reads/writes both header and image data from/to FITS files.
 Here we'll just cover enough to ensure you can write a harvester
@@ -139,7 +141,7 @@ Where possible, it is usually better to use the names of HDUs when
 accessing them, as when others read the harvester function it will be
 clearer which HDUs are being accessed and why.
 
-### What the harvester function needs to access
+### Putting Everything Together
 
 The name of an 
 instrument's harvester function generally has the form 
