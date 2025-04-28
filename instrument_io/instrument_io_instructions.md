@@ -89,6 +89,7 @@ An instrument's harvester function returns five things to
 spectroscopic frame.
 - A dictionary containing metadata parameters related to the spectrum.
 - A 1D array containing the wavelength axis of the spectrum. 
+
 All 2D data frames must have the same shape.
 
 ### How to Access the HDU List
