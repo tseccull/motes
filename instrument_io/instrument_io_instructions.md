@@ -166,10 +166,10 @@ overscan/bias subtraction, flat field correction, and wavelength
 calibration with associated resampling (also known as rectification) of
 the data.
 
-Rejecting cosmic rays from the data, subtracting fringes with a fringe
-frame, and even performing a sky subtraction on the data may improve
-the results achieved with MOTES. These steps are not mandatory for MOTES
-to function, however.
+Although not required for MOTES to function correctly, rejecting cosmic
+rays from the data, subtracting fringes with a fringe frame, and even 
+performing a sky subtraction on the data may improve the results
+achieved with MOTES.
 
 #### Uncertainty Frame
 - A 2D frame containing the uncertainties of the spectroscopic frame.
