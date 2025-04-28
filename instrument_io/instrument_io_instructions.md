@@ -67,16 +67,29 @@ input .fits file by the `data_harvest()` function in `motesio.py`,
 retrieve required data frames and metadata from that HDU list, and 
 reformat them into what MOTES expects as input.
 
+The name of an instrument's harvester function generally has the form 
+`harvest_instrument()`.
+
 ### The List of Header Data Units
 The harvester function receives only one argument from `data_harvest()`,
 `input_fits_hdu`. This is the full list of HDUs extracted from the input
-file. In many cases, this HDU List will contain all the required data
-frames and header metadata to run MOTES. In some cases, there will be
-extra HDUs/frames/headers that are not needed, and in other cases some
-required data will either need to be calculated or generated in the
-harvester function. As you read on you'll see what this means. 
+file (Type: `astropy.io.fits.hdu.hdulist.HDUList`). In many cases, this 
+HDU List will contain all the required data frames and header metadata 
+to run MOTES. In some cases, there will be extra HDUs/frames/headers 
+that are not needed, and in other cases some required data will either 
+need to be calculated or generated in the harvester function. As you 
+read on you'll see what this means. 
 
 ### What the Harvester Function Returns
+An instrument's harvester function returns five things to
+`data_harvest()` in `motesio.py`:
+- A 2D spectroscopic data frame in the form of a numpy array.
+- A 2D frame containing the uncertainties of the spectroscopic frame.
+- A 2D frame containing boolean quality flags associated with the
+spectroscopic frame.
+- A dictionary containing metadata parameters related to the spectrum.
+- A 1D array containing the wavelength axis of the spectrum. 
+All 2D data frames must have the same shape.
 
 ### How to Access the HDU List
 Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
@@ -142,10 +155,6 @@ accessing them, as when others read the harvester function it will be
 clearer which HDUs are being accessed and why.
 
 ### Putting Everything Together
-
-The name of an 
-instrument's harvester function generally has the form 
-`harvest_instrument()`.
 
 ## The Save Function
 
