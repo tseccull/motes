@@ -151,14 +151,14 @@ how it might determined.
 
 #### Data Frame
 The first item returned by the harvester function is a 2D 
-`numpy.ndarray` containing the 2D spectroscopic data frame. This must be
-retrieved as shown above from the correct HDU in the list of HDUs 
-provided to the harvester function. To find the correct data frame check 
-the data with astropy as shown above, or use 
+`numpy.ndarray` containing the 2D spectroscopic data frame. To find the
+correct data frame check the data with astropy as shown above, or use 
 [SAOImageDS9](https://sites.google.com/cfa.harvard.edu/saoimageds9/home) 
 to open all the files image extensions at once by going to 
 `File > Open as > Multiple Extension Frames...` and then select your
-data file in the file browser.
+data file in the file browser. Once you've located the data frame in the
+input file, you can program the harvester function to retrieve it from
+the list of HDUs as shown above.
 
 It is expected that the data provided to MOTES has already been reduced
 to a certain extent. Critically, MOTES cannot extract a reliable 1D 
