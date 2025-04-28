@@ -155,7 +155,7 @@ The first item returned by the harvester function is a 2D
 retrieved as shown above from the correct HDU in the list of HDUs 
 provided to the harvester function. To find the correct data frame check 
 the data with astropy as shown above, or use 
-[SAOImage DS9](https://sites.google.com/cfa.harvard.edu/saoimageds9/home) 
+[SAOImageDS9](https://sites.google.com/cfa.harvard.edu/saoimageds9/home) 
 to open all the files image extensions at once by going to 
 `File > Open as > Multiple Extension Frames...` and then select your
 data file in the file browser.
