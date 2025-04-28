@@ -157,7 +157,12 @@ provided to the harvester function. Depending on the format of the data
 provided by the instrument and/or its data reduction pipeline, the data
 frame may sometimes be found in the Primary HDU of the file. It is often
 better practice to store it in the first Image HDU, however, so it may
-instead be found there. 
+instead be found there. Finding the correct data frame can be done by 
+checking the data with astropy as shown above, or using by 
+[SAOImage DS9](https://sites.google.com/cfa.harvard.edu/saoimageds9/home) 
+to open all the files image extensions at once by going to 
+`File > Open as > Multiple Extension Frames...` and then selecting your
+data file in the file browser.
 
 It is expected that the data provided to MOTES has already been reduced
 to a certain extent. Critically, MOTES cannot extract a reliable 1D 
