@@ -80,18 +80,6 @@ that are not needed, and in other cases some required data will either
 need to be calculated or generated in the harvester function. As you 
 read on you'll see what this means. 
 
-### What the Harvester Function Returns
-An instrument's harvester function returns five things to
-`data_harvest()` in `motesio.py`:
-- A 2D spectroscopic data frame in the form of a numpy array.
-- A 2D frame containing the uncertainties of the spectroscopic frame.
-- A 2D frame containing boolean quality flags associated with the
-spectroscopic frame.
-- A dictionary containing metadata parameters related to the spectrum.
-- A 1D array containing the wavelength axis of the spectrum. 
-
-All 2D data frames must have the same shape.
-
 ### How to Access the HDU List
 Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
 about how it reads/writes both header and image data from/to FITS files.
@@ -155,7 +143,48 @@ Where possible, it is usually better to use the names of HDUs when
 accessing them, as when others read the harvester function it will be
 clearer which HDUs are being accessed and why.
 
-### Putting Everything Together
+### What the Harvester Function Returns
+As demonstrated in the `instrumentio.py` template, an instrument's 
+harvester function must return five items to `data_harvest()` in 
+`motesio.py`. Here is a breakdown of what each of these items is and
+how it might determined.
+
+#### Data Frame
+The first item returned by the harvester function is a 2D 
+`numpy.ndarray` containing the 2D spectroscopic data frame. This must be
+retrieved as shown above from the correct HDU in the list of HDUs 
+provided to the harvester function. Depending on the format of the data
+provided by the instrument and/or its data reduction pipeline, the data
+frame may sometimes be found in the Primary HDU of the file. It is often
+better practice to store it in the first Image HDU, however, so it may
+instead be found there. 
+
+It is expected that the data provided to MOTES has already been reduced
+to a certain extent. Critically, MOTES cannot extract a reliable 1D 
+spectrum from a 2D data frame until it has already undergone standard 
+overscan/bias subtraction, flat field correction, and wavelength
+calibration with associated resampling (also known as rectification) of
+the data.
+
+Rejecting cosmic rays from the data, subtracting fringes with a fringe
+frame, and even performing a sky subtraction on the data may improve
+the results achieved with MOTES. These steps are not mandatory for MOTES
+to function, however.
+
+#### Uncertainty Frame
+- A 2D frame containing the uncertainties of the spectroscopic frame.
+
+#### Quality Frame
+- A 2D frame containing boolean quality flags associated with the
+spectroscopic frame.
+
+#### Header Dictionary
+- A dictionary containing metadata parameters related to the spectrum.
+
+#### Wavelength Axis
+- A 1D array containing the wavelength axis of the spectrum. 
+
+All 2D data frames must have the same shape.
 
 ## The Save Function
 
