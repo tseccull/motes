@@ -94,14 +94,6 @@ def harvest_gmos(input_fits_hdu):
     reference_wavelength = (reference_shift * delta_wavelength) + central_wavelength
     wavelen_pixel_axis = np.arange(-reference_pixel+1, science_header["NAXIS1"]-reference_pixel)
     wavelength_axis = (wavelen_pixel_axis * science_header["CD1_1"]) + reference_wavelength
-    
-    # If DRAGONS has been used to reduce the data, flip the wavelength
-    # axis and the 2D data.
-    #if science_header["CD1_1"] < 0:
-    #    wavelength_axis = np.flip(wavelength_axis)
-    #    data = np.flip(data, axis=1)
-    #    errs = np.flip(errs, axis=1)
-    #    qual = np.flip(qual, axis=1)
 
     # All this is to get an initial estimate of the IQ. Tables below are
     # based on the condition constraints used by Gemini.
