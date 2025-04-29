@@ -16,6 +16,11 @@ data, some of what follows may be old news to you. It's hoped that
 starting from the basics, however, will be helpful to anyone approaching
 this kind of data processing/reduction work for the first time.
 
+Documentation outlining how to run MOTES stipulates and recommends the
+extent to which data should be reduced before it is provided to MOTES.
+Those same stipulations and recommendations also apply here, even if
+they are not explicitly restated.  
+
 ## Creating an Instrument I/O Module.
 
 The following instructions will guide you through the process of 
@@ -81,7 +86,8 @@ need to be calculated or generated in the harvester function. As you
 read on you'll see what this means. 
 
 ### How to Access the HDU List
-Astropy has extensive [documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
+Astropy has extensive 
+[documentation](https://docs.astropy.org/en/stable/io/fits/index.html) 
 about how it reads/writes both header and image data from/to FITS files.
 Here we'll just cover enough to ensure you can write a harvester
 function capable of accessing the correct data frames and header data 
@@ -149,7 +155,7 @@ harvester function must return five items to `data_harvest()` in
 `motesio.py`. Here is a breakdown of what each of these items is and
 how it might determined.
 
-#### Data Frame
+#### Science Data Frame
 The first item returned by the harvester function is a 2D 
 `numpy.ndarray` containing the 2D spectroscopic data frame. To find the
 correct data frame check the data with astropy as shown above, or use 
@@ -160,24 +166,43 @@ data file in the file browser. Once you've located the data frame in the
 input file, you can program the harvester function to retrieve it from
 the list of HDUs as shown above.
 
-It is expected that the data provided to MOTES has already been reduced
-to a certain extent. Critically, MOTES cannot extract a reliable 1D 
-spectrum from a 2D data frame until it has already undergone standard 
-overscan/bias subtraction, flat field correction, and wavelength
-calibration with associated resampling (also known as rectification) of
-the data.
-
-Although not required for MOTES to function correctly, rejecting cosmic
-rays from the data, subtracting fringes with a fringe frame, and even 
-performing a sky subtraction on the data may improve the results
-achieved with MOTES.
-
 #### Uncertainty Frame
-- A 2D frame containing the uncertainties of the spectroscopic frame.
+The second item returned by the harvester function is another 2D 
+`numpy.ndarray`, the same size and shape as the science data frame, that
+contains the uncertainties associated with the values in the science
+frame. Spectrocopic data files should include either a variance or
+uncertainty frame. If an uncertainty frame is provided, it should be 
+identified and retrieved in the same way as the science frame. if a 
+variance frame is provided, it should be retrieved and then 
+square-rooted to produce an uncertainty frame 
+( `variance = uncertainty^2` ).
 
 #### Quality Frame
-- A 2D frame containing boolean quality flags associated with the
-spectroscopic frame.
+The third item returned by the harvester function is another 2D 
+`numpy.ndarray`, the same size and shape as the science data frame, that
+contains integer boolean values (0 or 1) that indicate whether a pixel
+contains good usable data (0) or should, for whatever reason, be ignored
+by MOTES (1). Many spectroscopic data files include a data frame
+indicating the quality status of each pixel in the frame. Sometimes this
+frame may be an integer boolean, with zero flagging good pixels and one
+flagging bad pixels.  At other times a more complicated base two system
+of values is used apply a variety of status flags to different pixels.
+
+MOTES accepts only an integer boolean quality frame with zero flagging 
+good data pixels and one flagging those it should ignore. If a spectrum
+comes with an integer boolean quality frame, make sure that zero flags
+good and one flags bad as MOTES expects. If this isn't the case, create 
+an inverse quality frame to flip zeros to ones and ones to zeros.
+
+For base two quality frames it is up to you to determine which pixels to
+allow as good data and which ones to flag to MOTES as ignorable. Once 
+you've decided, construct an integer boolean quality frame by mapping 
+your chosen base two values to either zero or one.
+
+If no quality frame is provided with the data, simply create a 2D
+quality frame the same shape as the science data and containing only
+zeros values. This will ensure that MOTES will accept the entire data
+frame without flagging anything as ignorable.
 
 #### Header Dictionary
 - A dictionary containing metadata parameters related to the spectrum.
