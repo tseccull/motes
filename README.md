@@ -1,6 +1,6 @@
 # MOTES
 
-![Licence](https://img.shields.io/github/license/tseccull/motes)
+[![License](https://img.shields.io/badge/Licence-GPL 3.0-orange)](./LICENSE)
 
 Version 1.0.0
 
