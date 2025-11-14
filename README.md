@@ -1,6 +1,6 @@
 # MOTES: a Modular, Optimised Tracer and Extractor of Spectra 
 
-![Licence](https://img.shields.io/github/license/tseccull/motes)
+![License](https://img.shields.io/github/license/tseccull/motes)
 
 Version 1.0.0
 
