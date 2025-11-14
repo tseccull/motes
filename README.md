@@ -1,6 +1,6 @@
 # MOTES
 
-[![License](https://img.shields.io/badge/Licence-GPL 3.0-orange)](./LICENSE)
+[![License](https://img.shields.io/badge/Licence-GPL%203.0-orange.svg)](./LICENSE)
 
 Version 1.0.0
 
